@@ -195,3 +195,41 @@ textarea:focus {
     margin-top: 20px;
     margin-bottom: 20px;
 }
+/* ... existing styles ... */
+
+.history-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+    text-align: left;
+}
+
+.history-date {
+    font-weight: bold;
+    color: var(--primary);
+    display: flex;
+    justify-content: space-between;
+}
+
+.history-balance {
+    color: var(--accent);
+}
+
+.history-notes {
+    background: #f9f9f9;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-style: italic;
+    color: #555;
+}
+
+.history-label {
+    font-weight: bold;
+    font-style: normal;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    color: #95a5a6;
+    display: block;
+    margin-top: 5px;
+}
