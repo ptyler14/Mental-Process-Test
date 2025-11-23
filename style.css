@@ -92,3 +92,70 @@ button:disabled {
     background-color: #7f8c8d;
     margin-top: 10px;
 }
+/* ... keep your existing CSS ... */
+
+/* Add these new styles below */
+
+.info-card {
+    background-color: #dff9fb;
+    border: 1px solid #c7ecee;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.event-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.event-row input[type="text"] {
+    flex: 2;
+    margin-bottom: 0;
+}
+
+.event-row input[type="number"] {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.remove-event {
+    background: #e74c3c;
+    width: auto;
+    padding: 10px;
+    flex: 0;
+}
+
+.hint {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    margin-top: -10px;
+    margin-bottom: 15px;
+}
+
+.deduction-box {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.totals-box {
+    background: #f1f2f6;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    text-align: right;
+}
+
+.final-total {
+    font-size: 1.2em;
+    color: var(--accent);
+}
+
+.danger-btn {
+    background-color: #e74c3c;
+    margin-top: 30px;
+    font-size: 0.9em;
+}
