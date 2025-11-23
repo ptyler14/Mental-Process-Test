@@ -58,8 +58,7 @@
                 <h3>Today's Value Events</h3>
                 <p class="hint">List productive actions. (e.g. "Gym", "Read", "Mental Bank Exercise")</p>
                 
-                <div id="events-container">
-                    </div>
+                <div id="events-container"></div>
 
                 <button id="add-event-btn" class="secondary-btn">+ Add Event</button>
 
@@ -73,6 +72,19 @@
                     <p class="final-total"><strong>New MB Balance: <span id="new-mb-balance">$0.00</span></strong></p>
                 </div>
 
+                <div class="notes-section">
+                    <div class="note-box">
+                        <label for="daily-happenings">My Mental Bank Happenings:</label>
+                        <p class="hint">List positive events or achievements from today.</p>
+                        <textarea id="daily-happenings" rows="4" placeholder="1. I handled a tough meeting well...&#10;2. I ate a healthy lunch..."></textarea>
+                    </div>
+
+                    <div class="note-box">
+                        <label for="daily-affirmations">My Mental Bank Affirmations (Optional):</label>
+                        <p class="hint">Write 2-3 positive statements in the present tense. (e.g., "I am confident and calm.")</p>
+                        <textarea id="daily-affirmations" rows="3" placeholder="I am..."></textarea>
+                    </div>
+                </div>
                 <div class="signature-box">
                     <label for="daily-signature">Sign to Validate (Type Name):</label>
                     <input type="text" id="daily-signature" placeholder="Sign here...">
