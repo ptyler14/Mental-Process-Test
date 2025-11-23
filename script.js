@@ -17,7 +17,7 @@ const resetBtn = document.getElementById('reset-btn');
 // Ledger Elements
 const balanceForwardDisplay = document.getElementById('balance-forward');
 const currentHourlyRateDisplay = document.getElementById('current-hourly-rate');
-const todayDateDisplay = document.getElementById('today-date'); // Make sure this ID exists in HTML
+const todayDateDisplay = document.getElementById('today-date');
 const eventsContainer = document.getElementById('events-container');
 const addEventBtn = document.getElementById('add-event-btn');
 const dailyRealityInput = document.getElementById('daily-reality-income');
@@ -41,17 +41,15 @@ let user = {
 let chartInstance = null;
 
 // --- INITIALIZATION ---
-// This runs when the page loads
 init();
 
 function init() {
     const savedData = localStorage.getItem('mb_user_data');
     if (savedData) {
         user = JSON.parse(savedData);
-        // Ensure history array exists for old users
         if (!user.history) user.history = [];
         
-        // Check if setup is complete
+        // If user has completed setup, show ledger
         if (user.userName && user.hourlyRate > 0) {
             showLedger();
         }
@@ -70,20 +68,14 @@ if (calculateBtn) {
         }
 
         user.realityIncome = income;
-        
-        // Rule 2: MB Goal is 2x Reality Income
         user.mentalBankGoal = income * 2;
-
-        // Rule 3: Hourly Rate is decimal moved 3 places left (divide by 1000)
         user.hourlyRate = user.mentalBankGoal / 1000;
 
-        // Update UI
         mbGoalDisplay.textContent = formatCurrency(user.mentalBankGoal);
         hourlyRateDisplay.textContent = formatCurrency(user.hourlyRate);
         contractGoal.textContent = formatCurrency(user.mentalBankGoal);
         contractRate.textContent = formatCurrency(user.hourlyRate);
 
-        // Show the contract section
         setupResults.classList.remove('hidden');
     });
 }
@@ -103,8 +95,8 @@ if (saveSetupBtn) {
         }
 
         user.userName = userName;
-        user.currentBalance = 0; // Start at 0
-        user.history = []; // Start fresh history
+        user.currentBalance = 0; 
+        user.history = [];
         
         saveUser();
         showLedger();
@@ -117,13 +109,11 @@ function showLedger() {
     setupSection.classList.add('hidden');
     ledgerSection.classList.remove('hidden');
     
-    // Update Header Info
     balanceForwardDisplay.textContent = formatCurrency(user.currentBalance);
     currentHourlyRateDisplay.textContent = formatCurrency(user.hourlyRate) + "/hr";
     if (todayDateDisplay) todayDateDisplay.textContent = new Date().toLocaleDateString();
 
-    // Initialize Ledger View
-    eventsContainer.innerHTML = ''; // Clear old rows
+    eventsContainer.innerHTML = '';
     addEventRow(); 
     renderHistory();
     renderChart(); 
@@ -137,12 +127,11 @@ function addEventRow() {
     const row = document.createElement('div');
     row.className = 'event-row';
     row.innerHTML = `
-        <input type="text" placeholder="Activity (e.g. Gym)" class="event-name">
+        <input type="text" placeholder="Activity" class="event-name">
         <input type="number" placeholder="Hours" class="event-hours" step="0.5">
         <button class="remove-event">X</button>
     `;
     
-    // Add listeners to inputs to update totals immediately
     row.querySelector('.event-hours').addEventListener('input', calculateTotals);
     row.querySelector('.remove-event').addEventListener('click', () => {
         row.remove();
@@ -165,19 +154,11 @@ function calculateTotals() {
         if (val > 0) totalHours += val;
     });
 
-    // 1. Calculate Value of Events (Hours * Rate)
     const grossDeposit = totalHours * user.hourlyRate;
-
-    // 2. Subtract Reality Income
     const realityDeduction = parseFloat(dailyRealityInput.value) || 0;
-    
-    // 3. Net Deposit
     const netDeposit = grossDeposit - realityDeduction;
-
-    // 4. New Balance (Display only, not saved yet)
     const newBalance = user.currentBalance + netDeposit;
 
-    // Update Screen
     if (todaysDepositDisplay) todaysDepositDisplay.textContent = formatCurrency(netDeposit);
     if (newMbBalanceDisplay) newMbBalanceDisplay.textContent = formatCurrency(newBalance);
 }
@@ -186,30 +167,24 @@ if (submitLedgerBtn) {
     submitLedgerBtn.addEventListener('click', () => {
         if (!dailySignature.value) return alert("Please sign your entry.");
         
-        // Calculate final numbers one last time
         let totalHours = 0;
         document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
         const gross = totalHours * user.hourlyRate;
         const deduction = parseFloat(dailyRealityInput.value) || 0;
         const net = gross - deduction;
 
-        // Update User Balance
         user.currentBalance += net;
 
-        // Add History Entry
         const newEntry = {
             date: new Date().toLocaleDateString(),
             balance: user.currentBalance,
             happenings: dailyHappenings ? dailyHappenings.value : '',
             affirmations: dailyAffirmations ? dailyAffirmations.value : ''
         };
-        user.history.unshift(newEntry); // Add to top of list
+        user.history.unshift(newEntry);
 
         saveUser();
-
         alert(`Entry Saved! New Balance: ${formatCurrency(user.currentBalance)}`);
-        
-        // Refresh page to reset inputs
         location.reload(); 
     });
 }
@@ -250,3 +225,71 @@ function renderHistory() {
         `;
         historyList.appendChild(div);
     });
+}
+
+function renderChart() {
+    const ctx = document.getElementById('balanceChart');
+    if (!ctx) return;
+
+    const chronologicalHistory = [...user.history].reverse();
+    let labels = chronologicalHistory.map(e => e.date);
+    let dataPoints = chronologicalHistory.map(e => e.balance);
+
+    if (labels.length === 0) {
+        labels = ['Start'];
+        dataPoints = [0];
+    } else {
+        labels.unshift('Start');
+        dataPoints.unshift(0);
+    }
+
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Mental Bank Balance',
+                data: dataPoints,
+                borderColor: '#27ae60',
+                backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { callback: function(value) { return '$' + value; } }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Balance: ' + formatCurrency(context.raw);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// --- HELPERS ---
+
+function saveUser() {
+    localStorage.setItem('mb_user_data', JSON.stringify(user));
+}
+
+function formatCurrency(num) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+    }).format(num);
+}
