@@ -14,91 +14,163 @@ const setupSection = document.getElementById('setup-section');
 const ledgerSection = document.getElementById('ledger-section');
 const resetBtn = document.getElementById('reset-btn');
 
+// Ledger Elements
+const balanceForwardDisplay = document.getElementById('balance-forward');
+const currentHourlyRateDisplay = document.getElementById('current-hourly-rate');
+const todayDateDisplay = document.getElementById('today-date');
+const eventsContainer = document.getElementById('events-container');
+const addEventBtn = document.getElementById('add-event-btn');
+const dailyRealityInput = document.getElementById('daily-reality-income');
+const todaysDepositDisplay = document.getElementById('todays-deposit');
+const newMbBalanceDisplay = document.getElementById('new-mb-balance');
+const dailySignature = document.getElementById('daily-signature');
+const submitLedgerBtn = document.getElementById('submit-ledger-btn');
+
 // --- STATE VARIABLES ---
-let realityIncome = 0;
-let mentalBankGoal = 0;
-let hourlyRate = 0;
+let user = {
+    realityIncome: 0,
+    mentalBankGoal: 0,
+    hourlyRate: 0,
+    currentBalance: 0,
+    userName: ""
+};
 
 // --- INITIALIZATION ---
-// Check if user has already done setup
-if (localStorage.getItem('mb_setup_complete')) {
-    showLedger();
+init();
+
+function init() {
+    const savedData = localStorage.getItem('mb_user_data');
+    if (savedData) {
+        user = JSON.parse(savedData);
+        showLedger();
+    }
 }
 
-// --- EVENT LISTENERS ---
+// --- SETUP EVENTS ---
 
-// 1. Calculate Rates based on Reality Income
 calculateBtn.addEventListener('click', () => {
     const income = parseFloat(realityInput.value);
+    if (!income || income <= 0) return alert("Enter valid income.");
     
-    if (!income || income <= 0) {
-        alert("Please enter a valid income.");
-        return;
-    }
+    user.realityIncome = income;
+    user.mentalBankGoal = income * 2;
+    user.hourlyRate = user.mentalBankGoal / 1000; // Symbolic rate rule
 
-    realityIncome = income;
-    
-    // Rule 2: MB Goal is 2x Reality Income
-    mentalBankGoal = realityIncome * 2;
+    mbGoalDisplay.textContent = formatCurrency(user.mentalBankGoal);
+    hourlyRateDisplay.textContent = formatCurrency(user.hourlyRate);
+    contractGoal.textContent = formatCurrency(user.mentalBankGoal);
+    contractRate.textContent = formatCurrency(user.hourlyRate);
 
-    // Rule 3: Hourly Rate is decimal moved 3 places left (divide by 1000)
-    hourlyRate = mentalBankGoal / 1000;
-
-    // Update UI
-    mbGoalDisplay.textContent = formatCurrency(mentalBankGoal);
-    hourlyRateDisplay.textContent = formatCurrency(hourlyRate);
-    contractGoal.textContent = formatCurrency(mentalBankGoal);
-    contractRate.textContent = formatCurrency(hourlyRate);
-
-    // Show the contract section
     setupResults.classList.remove('hidden');
 });
 
-// 2. Enable "Save" button only when contract is checked
-contractSigned.addEventListener('change', (e) => {
-    saveSetupBtn.disabled = !e.target.checked;
-});
+contractSigned.addEventListener('change', (e) => saveSetupBtn.disabled = !e.target.checked);
 
-// 3. Save Setup and Move to Ledger
 saveSetupBtn.addEventListener('click', () => {
-    const userName = document.getElementById('user-name').value;
-    if (!userName) {
-        alert("Please sign the contract with your name.");
-        return;
-    }
-
-    // Save everything to browser memory
-    const userData = {
-        userName: userName,
-        realityIncome: realityIncome,
-        mentalBankGoal: mentalBankGoal,
-        hourlyRate: hourlyRate,
-        setupDate: new Date().toISOString()
-    };
-
-    localStorage.setItem('mb_user_data', JSON.stringify(userData));
-    localStorage.setItem('mb_setup_complete', 'true');
-
+    const name = document.getElementById('user-name').value;
+    if (!name) return alert("Please sign the contract.");
+    
+    user.userName = name;
+    user.currentBalance = 0; // Start at 0
+    saveUser();
     showLedger();
 });
 
-// 4. Reset Data (for testing)
 resetBtn.addEventListener('click', () => {
-    if(confirm("Are you sure? This will erase your contract and rates.")) {
+    if(confirm("Delete all data and start over?")) {
         localStorage.clear();
         location.reload();
     }
 });
 
-// --- HELPER FUNCTIONS ---
+// --- LEDGER EVENTS ---
 
 function showLedger() {
     setupSection.classList.add('hidden');
     ledgerSection.classList.remove('hidden');
     
-    // Load data if needed (we will use this in the next step)
-    const data = JSON.parse(localStorage.getItem('mb_user_data'));
-    console.log("Loaded User:", data);
+    // Update Header Info
+    balanceForwardDisplay.textContent = formatCurrency(user.currentBalance);
+    currentHourlyRateDisplay.textContent = formatCurrency(user.hourlyRate) + "/hr";
+    todayDateDisplay.textContent = new Date().toLocaleDateString();
+
+    // Add first empty row
+    addEventRow(); 
+}
+
+// Add a new row for an event
+addEventBtn.addEventListener('click', addEventRow);
+
+function addEventRow() {
+    const row = document.createElement('div');
+    row.className = 'event-row';
+    row.innerHTML = `
+        <input type="text" placeholder="Activity (e.g. Gym)" class="event-name">
+        <input type="number" placeholder="Hours" class="event-hours" step="0.5">
+        <button class="remove-event">X</button>
+    `;
+    
+    // Add listeners to inputs to update totals immediately
+    row.querySelector('.event-hours').addEventListener('input', calculateTotals);
+    row.querySelector('.remove-event').addEventListener('click', () => {
+        row.remove();
+        calculateTotals();
+    });
+
+    eventsContainer.appendChild(row);
+}
+
+dailyRealityInput.addEventListener('input', calculateTotals);
+
+function calculateTotals() {
+    let totalHours = 0;
+    const hourInputs = document.querySelectorAll('.event-hours');
+    
+    hourInputs.forEach(input => {
+        const val = parseFloat(input.value);
+        if (val > 0) totalHours += val;
+    });
+
+    // 1. Calculate Value of Events (Hours * Rate)
+    const grossDeposit = totalHours * user.hourlyRate;
+
+    // 2. Subtract Reality Income
+    const realityDeduction = parseFloat(dailyRealityInput.value) || 0;
+    
+    // 3. Net Deposit
+    const netDeposit = grossDeposit - realityDeduction;
+
+    // 4. New Balance
+    const newBalance = user.currentBalance + netDeposit;
+
+    // Update Screen
+    todaysDepositDisplay.textContent = formatCurrency(netDeposit);
+    newMbBalanceDisplay.textContent = formatCurrency(newBalance);
+}
+
+submitLedgerBtn.addEventListener('click', () => {
+    if (!dailySignature.value) return alert("Please sign your entry.");
+    
+    // Calculate final numbers one last time
+    let totalHours = 0;
+    document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
+    const gross = totalHours * user.hourlyRate;
+    const deduction = parseFloat(dailyRealityInput.value) || 0;
+    const net = gross - deduction;
+
+    // Update User Balance
+    user.currentBalance += net;
+    saveUser();
+
+    alert(`Entry Saved! New Balance: ${formatCurrency(user.currentBalance)}`);
+    
+    // Refresh page to reset inputs for next day (or clear inputs manually)
+    location.reload(); 
+});
+
+// --- HELPERS ---
+function saveUser() {
+    localStorage.setItem('mb_user_data', JSON.stringify(user));
 }
 
 function formatCurrency(num) {
