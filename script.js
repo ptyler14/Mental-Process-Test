@@ -109,7 +109,7 @@ function showLedger() {
     ledgerSection.classList.remove('hidden');
     
     balanceForwardDisplay.textContent = formatCurrency(user.currentBalance);
-    currentHourlyRateDisplay.textContent = formatCurrency(user.hourlyRate) + "/hr";
+    currentHourlyRateDisplay.textContent = formatCurrency(user.hourlyRate);
     if (todayDateDisplay) todayDateDisplay.textContent = new Date().toLocaleDateString();
 
     eventsContainer.innerHTML = '';
