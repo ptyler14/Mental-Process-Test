@@ -26,13 +26,18 @@ const newMbBalanceDisplay = document.getElementById('new-mb-balance');
 const dailySignature = document.getElementById('daily-signature');
 const submitLedgerBtn = document.getElementById('submit-ledger-btn');
 
+// New Notes Elements
+const dailyHappenings = document.getElementById('daily-happenings');
+const dailyAffirmations = document.getElementById('daily-affirmations');
+
 // --- STATE VARIABLES ---
 let user = {
     realityIncome: 0,
     mentalBankGoal: 0,
     hourlyRate: 0,
     currentBalance: 0,
-    userName: ""
+    userName: "",
+    history: [] // Store past entries here
 };
 
 // --- INITIALIZATION ---
@@ -42,19 +47,20 @@ function init() {
     const savedData = localStorage.getItem('mb_user_data');
     if (savedData) {
         user = JSON.parse(savedData);
+        // Ensure history array exists for old users
+        if (!user.history) user.history = [];
         showLedger();
     }
 }
 
 // --- SETUP EVENTS ---
-
 calculateBtn.addEventListener('click', () => {
     const income = parseFloat(realityInput.value);
     if (!income || income <= 0) return alert("Enter valid income.");
     
     user.realityIncome = income;
     user.mentalBankGoal = income * 2;
-    user.hourlyRate = user.mentalBankGoal / 1000; // Symbolic rate rule
+    user.hourlyRate = user.mentalBankGoal / 1000;
 
     mbGoalDisplay.textContent = formatCurrency(user.mentalBankGoal);
     hourlyRateDisplay.textContent = formatCurrency(user.hourlyRate);
@@ -71,7 +77,8 @@ saveSetupBtn.addEventListener('click', () => {
     if (!name) return alert("Please sign the contract.");
     
     user.userName = name;
-    user.currentBalance = 0; // Start at 0
+    user.currentBalance = 0;
+    user.history = [];
     saveUser();
     showLedger();
 });
@@ -84,21 +91,18 @@ resetBtn.addEventListener('click', () => {
 });
 
 // --- LEDGER EVENTS ---
-
 function showLedger() {
     setupSection.classList.add('hidden');
     ledgerSection.classList.remove('hidden');
     
-    // Update Header Info
     balanceForwardDisplay.textContent = formatCurrency(user.currentBalance);
     currentHourlyRateDisplay.textContent = formatCurrency(user.hourlyRate) + "/hr";
     todayDateDisplay.textContent = new Date().toLocaleDateString();
 
-    // Add first empty row
+    eventsContainer.innerHTML = ''; // Clear old rows
     addEventRow(); 
 }
 
-// Add a new row for an event
 addEventBtn.addEventListener('click', addEventRow);
 
 function addEventRow() {
@@ -110,7 +114,6 @@ function addEventRow() {
         <button class="remove-event">X</button>
     `;
     
-    // Add listeners to inputs to update totals immediately
     row.querySelector('.event-hours').addEventListener('input', calculateTotals);
     row.querySelector('.remove-event').addEventListener('click', () => {
         row.remove();
@@ -131,19 +134,11 @@ function calculateTotals() {
         if (val > 0) totalHours += val;
     });
 
-    // 1. Calculate Value of Events (Hours * Rate)
     const grossDeposit = totalHours * user.hourlyRate;
-
-    // 2. Subtract Reality Income
     const realityDeduction = parseFloat(dailyRealityInput.value) || 0;
-    
-    // 3. Net Deposit
     const netDeposit = grossDeposit - realityDeduction;
-
-    // 4. New Balance
     const newBalance = user.currentBalance + netDeposit;
 
-    // Update Screen
     todaysDepositDisplay.textContent = formatCurrency(netDeposit);
     newMbBalanceDisplay.textContent = formatCurrency(newBalance);
 }
@@ -151,24 +146,32 @@ function calculateTotals() {
 submitLedgerBtn.addEventListener('click', () => {
     if (!dailySignature.value) return alert("Please sign your entry.");
     
-    // Calculate final numbers one last time
+    // Calculate final numbers
     let totalHours = 0;
     document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
     const gross = totalHours * user.hourlyRate;
     const deduction = parseFloat(dailyRealityInput.value) || 0;
     const net = gross - deduction;
 
-    // Update User Balance
+    // Create History Entry Object
+    const entry = {
+        date: new Date().toISOString(),
+        balanceForward: user.currentBalance,
+        netDeposit: net,
+        newBalance: user.currentBalance + net,
+        happenings: dailyHappenings.value,
+        affirmations: dailyAffirmations.value
+    };
+
+    // Update User State
     user.currentBalance += net;
+    user.history.push(entry); // Save to history array
     saveUser();
 
     alert(`Entry Saved! New Balance: ${formatCurrency(user.currentBalance)}`);
-    
-    // Refresh page to reset inputs for next day (or clear inputs manually)
     location.reload(); 
 });
 
-// --- HELPERS ---
 function saveUser() {
     localStorage.setItem('mb_user_data', JSON.stringify(user));
 }
