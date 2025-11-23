@@ -1,30 +1,94 @@
+:root {
+    --primary: #2c3e50;
+    --accent: #27ae60;
+    --bg: #ecf0f1;
+    --card-bg: #ffffff;
+}
+
 body {
-    font-family: sans-serif;
+    font-family: 'Georgia', serif; /* Serif font feels more like a ledger/book */
+    background-color: var(--bg);
+    color: var(--primary);
     display: flex;
     justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f4f4f9;
+    padding: 20px;
     margin: 0;
 }
+
 .container {
-    background: white;
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    text-align: center;
-    width: 300px;
+    width: 100%;
+    max-width: 600px;
 }
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input[type="number"], input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box; /* Fixes width issues */
+}
+
 button {
-    padding: 10px 20px;
+    background-color: var(--accent);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    margin-top: 20px;
+    width: 100%;
+    transition: background 0.3s;
 }
+
 button:hover {
-    background-color: #218838;
+    background-color: #219150;
+}
+
+button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+.result-box {
+    background: #f9f9f9;
+    padding: 15px;
+    border-left: 5px solid var(--accent);
+    margin: 20px 0;
+}
+
+.contract-box {
+    border: 2px dashed #bdc3c7;
+    padding: 20px;
+    background: #fff;
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.secondary-btn {
+    background-color: #7f8c8d;
+    margin-top: 10px;
 }
