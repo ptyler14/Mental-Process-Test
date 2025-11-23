@@ -48,9 +48,40 @@
         </div>
 
         <div id="ledger-section" class="hidden">
-            <h2>Daily Ledger</h2>
-            <p>Your setup is complete! The daily ledger functionality will go here.</p>
-            <button id="reset-btn" class="secondary-btn">Reset All Data</button>
+            <div class="card info-card">
+                <p><strong>Balance Forward:</strong> <span id="balance-forward">$0.00</span></p>
+                <p><strong>Hourly Rate:</strong> <span id="current-hourly-rate">$0.00</span></p>
+                <p><strong>Today's Date:</strong> <span id="today-date"></span></p>
+            </div>
+
+            <div class="card">
+                <h3>Today's Value Events</h3>
+                <p class="hint">List productive actions. (e.g. "Gym", "Read", "Mental Bank Exercise")</p>
+                
+                <div id="events-container">
+                    </div>
+
+                <button id="add-event-btn" class="secondary-btn">+ Add Event</button>
+
+                <div class="deduction-box">
+                    <label for="daily-reality-income">Minus Daily Reality Income (Real money earned today):</label>
+                    <input type="number" id="daily-reality-income" placeholder="0.00">
+                </div>
+
+                <div class="totals-box">
+                    <p>Today's Deposit: <span id="todays-deposit">$0.00</span></p>
+                    <p class="final-total"><strong>New MB Balance: <span id="new-mb-balance">$0.00</span></strong></p>
+                </div>
+
+                <div class="signature-box">
+                    <label for="daily-signature">Sign to Validate (Type Name):</label>
+                    <input type="text" id="daily-signature" placeholder="Sign here...">
+                </div>
+
+                <button id="submit-ledger-btn">Submit Daily Entry</button>
+            </div>
+
+            <button id="reset-btn" class="danger-btn">Reset All Data (Start Over)</button>
         </div>
 
     </div>
