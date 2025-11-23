@@ -49,7 +49,6 @@ function init() {
         user = JSON.parse(savedData);
         if (!user.history) user.history = [];
         
-        // If user has completed setup, show ledger
         if (user.userName && user.hourlyRate > 0) {
             showLedger();
         }
@@ -162,7 +161,6 @@ function calculateTotals() {
     if (todaysDepositDisplay) todaysDepositDisplay.textContent = formatCurrency(netDeposit);
     if (newMbBalanceDisplay) newMbBalanceDisplay.textContent = formatCurrency(newBalance);
 }
-
 if (submitLedgerBtn) {
     submitLedgerBtn.addEventListener('click', () => {
         if (!dailySignature.value) return alert("Please sign your entry.");
