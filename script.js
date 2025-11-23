@@ -17,6 +17,7 @@ const currentHourlyRateDisplay = document.getElementById('current-hourly-rate');
 const eventsContainer = document.getElementById('events-container');
 const addEventBtn = document.getElementById('add-event-btn');
 const dailyRealityInput = document.getElementById('daily-reality-income');
+const todaysDepositDisplay = document.getElementById('todays-deposit'); // Fixed selector if missing
 const newMbBalanceDisplay = document.getElementById('new-mb-balance');
 const dailySignature = document.getElementById('daily-signature');
 const submitLedgerBtn = document.getElementById('submit-ledger-btn');
@@ -33,7 +34,7 @@ let user = {
     userName: "",
     history: [] 
 };
-let chartInstance = null; // To hold our chart
+let chartInstance = null;
 
 // --- INIT ---
 init();
@@ -88,11 +89,12 @@ function showLedger() {
     
     balanceForwardDisplay.textContent = formatCurrency(user.currentBalance);
     currentHourlyRateDisplay.textContent = formatCurrency(user.hourlyRate) + "/hr";
+    todayDateDisplay.textContent = new Date().toLocaleDateString(); // Ensure date is shown
     
     eventsContainer.innerHTML = '';
     addEventRow();
     renderHistory();
-    renderChart();
+    renderChart(); // Draw the chart immediately
 }
 
 addEventBtn.addEventListener('click', addEventRow);
@@ -120,8 +122,13 @@ function calculateTotals() {
     document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
     const gross = totalHours * user.hourlyRate;
     const deduction = parseFloat(dailyRealityInput.value) || 0;
-    const newBalance = user.currentBalance + (gross - deduction);
-    newMbBalanceDisplay.textContent = formatCurrency(newBalance);
+    const net = gross - deduction;
+    
+    // Calculate potential new balance for display only
+    const potentialBalance = user.currentBalance + net;
+    
+    if (todaysDepositDisplay) todaysDepositDisplay.textContent = formatCurrency(net);
+    newMbBalanceDisplay.textContent = formatCurrency(potentialBalance);
 }
 
 submitLedgerBtn.addEventListener('click', () => {
@@ -129,27 +136,36 @@ submitLedgerBtn.addEventListener('click', () => {
     
     let totalHours = 0;
     document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
+    
+    // Calc Net
     const net = (totalHours * user.hourlyRate) - (parseFloat(dailyRealityInput.value) || 0);
 
+    // Update Balance
     user.currentBalance += net;
     
-    // Add to history
-    user.history.unshift({ // Add to TOP of array
-        date: new Date().toLocaleDateString(),
+    // Add to history (Newest first)
+    user.history.unshift({
+        date: new Date().toLocaleDateString(), // Store simpler date format
         balance: user.currentBalance,
         happenings: dailyHappenings.value,
         affirmations: dailyAffirmations.value
     });
 
     saveUser();
-    alert("Saved!");
-    location.reload();
+    alert("Entry Saved!");
+    
+    // Instead of full reload, just re-render to keep it smooth
+    location.reload(); 
 });
 
 // --- VISUALIZATION ---
 
 function renderHistory() {
-    if (user.history.length === 0) return;
+    if (!historyList) return;
+    if (user.history.length === 0) {
+        historyList.innerHTML = '<p class="hint">No entries yet.</p>';
+        return;
+    }
     historyList.innerHTML = '';
     
     user.history.forEach(entry => {
@@ -170,21 +186,34 @@ function renderHistory() {
 }
 
 function renderChart() {
-    const ctx = document.getElementById('balanceChart').getContext('2d');
-    
-    // Prepare data (reverse so oldest is first for chart)
-    const chartData = [...user.history].reverse();
-    const labels = chartData.map(e => e.date);
-    const dataPoints = chartData.map(e => e.balance);
+    const ctx = document.getElementById('balanceChart');
+    if(!ctx) return; // Safety check
 
-    // Add current (start) point if empty
-    if(labels.length === 0) {
-        labels.push('Start');
-        dataPoints.push(0);
+    // 1. Prepare Data
+    // We reverse the history because the array has newest first,
+    // but the chart needs oldest first (left to right).
+    const chronologicalHistory = [...user.history].reverse();
+    
+    let labels = chronologicalHistory.map(e => e.date);
+    let dataPoints = chronologicalHistory.map(e => e.balance);
+
+    // 2. Add a "Start" point at $0 if the chart is sparse
+    // This ensures you see a line going up from 0 even on your first day.
+    if (labels.length === 0) {
+        labels = ['Start'];
+        dataPoints = [0];
+    } else {
+        // Optional: Always show the "Start" point at the beginning
+        labels.unshift('Start');
+        dataPoints.unshift(0);
     }
 
-    if (chartInstance) chartInstance.destroy(); // Destroy old chart to prevent overlap
+    // 3. Destroy old chart to prevent "glitchy" overlays
+    if (chartInstance) {
+        chartInstance.destroy();
+    }
 
+    // 4. Create New Chart
     chartInstance = new Chart(ctx, {
         type: 'line',
         data: {
@@ -192,20 +221,27 @@ function renderChart() {
             datasets: [{
                 label: 'Mental Bank Balance',
                 data: dataPoints,
-                borderColor: '#27ae60',
-                backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                borderColor: '#27ae60', // Green line
+                backgroundColor: 'rgba(39, 174, 96, 0.2)', // Light green fill
                 fill: true,
-                tension: 0.4
+                tension: 0.3, // Makes the line slightly curvy
+                pointRadius: 5,
+                pointHoverRadius: 7
             }]
         },
         options: {
             responsive: true,
             scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-}
-
-function saveUser() { localStorage.setItem('mb_user_data', JSON.stringify(user)); }
-function formatCurrency(num) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num); }
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        // This puts the '$' sign on the chart axis!
+                        callback: function(value) {
+                            return '$' + value;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks
