@@ -2,18 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Mental Bank</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mental Bank</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>The Mental Bank</h1>
-        <p>Welcome to your daily ledger.</p>
 
-        <div id="app-content">
-            <p>Current Balance: <span id="balance">$0</span></p>
-            <button id="entry-btn">Add Daily Entry</button>
+    <div class="container">
+        <header>
+            <h1>The Mental Bank</h1>
+            <p class="subtitle">Rewriting your subconscious script.</p>
+        </header>
+
+        <div id="setup-section">
+            <div class="card">
+                <h2>Initial Setup: The Mental Script</h2>
+                <p>To begin, we must establish your financial framework. Please enter your current annual income.</p>
+                
+                <label for="reality-income">Current Annual Reality Income ($):</label>
+                <input type="number" id="reality-income" placeholder="e.g. 50000">
+                
+                <button id="calculate-btn">Calculate My Rates</button>
+            </div>
+
+            <div id="setup-results" class="hidden">
+                <div class="result-box">
+                    <p><strong>Mental Bank Goal (2x Income):</strong> <span id="mb-goal-display">$0</span></p>
+                    <p><strong>Your Hourly Value Rate:</strong> <span id="hourly-rate-display">$0</span>/hr</p>
+                </div>
+
+                <div class="contract-box">
+                    <h3>My New Mental Script Contract</h3>
+                    <p>I, <input type="text" id="user-name" placeholder="Your Name">, commit to the goal of earning <strong><span id="contract-goal">$0</span></strong> per year.</p>
+                    <p>I understand that my time is valuable. My subconscious mind accepts my value at a rate of <strong><span id="contract-rate">$0</span></strong> per hour.</p>
+                    <p>I will be compensated for every <strong>Value Event</strong> I perform that moves me toward this goal.</p>
+                    
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="contract-signed">
+                        I accept this contract.
+                    </label>
+                </div>
+
+                <button id="save-setup-btn" disabled>Save & Continue to Ledger</button>
+            </div>
         </div>
+
+        <div id="ledger-section" class="hidden">
+            <h2>Daily Ledger</h2>
+            <p>Your setup is complete! The daily ledger functionality will go here.</p>
+            <button id="reset-btn" class="secondary-btn">Reset All Data</button>
+        </div>
+
     </div>
 
     <script src="script.js"></script>
