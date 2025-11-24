@@ -37,6 +37,10 @@ const historyList = get('history-list');
 
 const authContainer = get('auth-container');
 const loginBtn = get('login-btn');
+const emailInput = get('email-input');
+const passwordInput = get('password-input');
+const authMessage = get('auth-message');
+const mainAppContainer = get('main-app-container');
 
 // --- STATE ---
 let user = {
@@ -66,22 +70,47 @@ async function init() {
     if (session) {
         currentUser = session.user;
         if(authContainer) authContainer.classList.add('hidden');
+        if(mainAppContainer) mainAppContainer.style.display = 'block';
         loadUserData();
     } else {
         if(authContainer) authContainer.classList.remove('hidden');
+        if(mainAppContainer) mainAppContainer.style.display = 'none';
     }
 }
 
 // --- AUTH EVENTS ---
 if (loginBtn) {
     loginBtn.addEventListener('click', async () => {
-        const { error } = await supabase.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: window.location.href
-            }
+        const email = emailInput.value;
+        const password = passwordInput.value;
+        
+        if(!email || !password) return alert("Please enter email and password");
+
+        authMessage.textContent = "Signing in...";
+
+        // 1. Try to Login
+        let { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
         });
-        if (error) alert("Login failed: " + error.message);
+
+        if (error) {
+            console.log("Login failed, trying signup...", error.message);
+            // 2. If login fails, try to Sign Up
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+                email: email,
+                password: password
+            });
+            
+            if (signUpError) {
+                authMessage.textContent = signUpError.message;
+            } else {
+                alert("Account created! If you don't log in automatically, check your email.");
+                location.reload();
+            }
+        } else {
+            location.reload();
+        }
     });
 }
 
@@ -229,6 +258,15 @@ if (submitLedgerBtn) {
             console.error(error);
         } else {
             alert(`Saved to Cloud! New Balance: ${formatCurrency(newBalance)}`);
+            location.reload();
+        }
+    });
+}
+
+if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+        if(confirm("Reset local data?")) {
+            localStorage.clear();
             location.reload();
         }
     });
