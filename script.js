@@ -1,62 +1,129 @@
-// --- SELECT DOM ELEMENTS ---
-const realityInput = document.getElementById('reality-income');
-const calculateBtn = document.getElementById('calculate-btn');
-const setupResults = document.getElementById('setup-results');
-const mbGoalDisplay = document.getElementById('mb-goal-display');
-const hourlyRateDisplay = document.getElementById('hourly-rate-display');
+// --- SUPABASE CONFIGURATION ---
+const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_zne-fHITlqAxNWyy4ndF7Q_8qWFn3LH'; // (Note: I masked part of your key for safety in this chat, but used the one you provided)
 
-const contractGoal = document.getElementById('contract-goal');
-const contractRate = document.getElementById('contract-rate');
-const contractSigned = document.getElementById('contract-signed');
-const saveSetupBtn = document.getElementById('save-setup-btn');
+// Initialize the client
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const setupSection = document.getElementById('setup-section');
-const ledgerSection = document.getElementById('ledger-section');
-const resetBtn = document.getElementById('reset-btn');
+// --- ELEMENTS (Using our helper) ---
+const get = (id) => document.getElementById(id);
 
-// Ledger Elements
-const balanceForwardDisplay = document.getElementById('balance-forward');
-const currentHourlyRateDisplay = document.getElementById('current-hourly-rate');
-const todayDateDisplay = document.getElementById('today-date');
-const eventsContainer = document.getElementById('events-container');
-const addEventBtn = document.getElementById('add-event-btn');
-const dailyRealityInput = document.getElementById('daily-reality-income');
-const todaysDepositDisplay = document.getElementById('todays-deposit');
-const newMbBalanceDisplay = document.getElementById('new-mb-balance');
-const dailySignature = document.getElementById('daily-signature');
-const submitLedgerBtn = document.getElementById('submit-ledger-btn');
-const dailyHappenings = document.getElementById('daily-happenings');
-const dailyAffirmations = document.getElementById('daily-affirmations');
-const historyList = document.getElementById('history-list');
+const realityInput = get('reality-income');
+const calculateBtn = get('calculate-btn');
+const setupResults = get('setup-results');
+const mbGoalDisplay = get('mb-goal-display');
+const hourlyRateDisplay = get('hourly-rate-display');
+const contractGoal = get('contract-goal');
+const contractRate = get('contract-rate');
+const contractSigned = get('contract-signed');
+const saveSetupBtn = get('save-setup-btn');
 
-// --- STATE VARIABLES ---
+const setupSection = get('setup-section');
+const ledgerSection = get('ledger-section');
+const resetBtn = get('reset-btn');
+
+const balanceForwardDisplay = get('balance-forward');
+const currentHourlyRateDisplay = get('current-hourly-rate');
+const todayDateDisplay = get('today-date');
+const eventsContainer = get('events-container');
+const addEventBtn = get('add-event-btn');
+const dailyRealityInput = get('daily-reality-income');
+const todaysDepositDisplay = get('todays-deposit');
+const newMbBalanceDisplay = get('new-mb-balance');
+const dailySignature = get('daily-signature');
+const submitLedgerBtn = get('submit-ledger-btn');
+const dailyHappenings = get('daily-happenings');
+const dailyAffirmations = get('daily-affirmations');
+const historyList = get('history-list');
+
+// Auth Elements
+const authContainer = get('auth-container');
+const loginBtn = get('login-btn');
+
+// --- STATE ---
 let user = {
     realityIncome: 0,
     mentalBankGoal: 0,
     hourlyRate: 0,
     currentBalance: 0,
     userName: "",
-    history: [] 
+    history: []
 };
 let chartInstance = null;
+let currentUser = null;
 
 // --- INITIALIZATION ---
 init();
 
-function init() {
-    const savedData = localStorage.getItem('mb_user_data');
-    if (savedData) {
-        try {
-            user = JSON.parse(savedData);
-            if (!user.history) user.history = [];
-            
-            if (user.userName && user.hourlyRate > 0) {
-                showLedger();
+async function init() {
+    // Check Supabase session
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (session) {
+        currentUser = session.user;
+        if(authContainer) authContainer.classList.add('hidden');
+        loadUserData();
+    } else {
+        // Show login
+        if(authContainer) authContainer.classList.remove('hidden');
+    }
+}
+
+// --- AUTH EVENTS ---
+if (loginBtn) {
+    loginBtn.addEventListener('click', async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.href // Redirect back to this page
             }
-        } catch (e) {
-            console.error("Error loading data", e);
-            localStorage.clear(); // Clear corrupted data
+        });
+        if (error) alert("Login failed: " + error.message);
+    });
+}
+
+// --- DATABASE LOADING ---
+
+async function loadUserData() {
+    // 1. Load Balance & History from DB
+    const { data: entries, error } = await supabase
+        .from('entries')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('DB Error:', error);
+        // Fallback to local storage if DB fails (or is empty and we want to migrate)
+    }
+
+    // 2. Load Setup Constants (Income/Rate) from LocalStorage
+    const localData = JSON.parse(localStorage.getItem('mb_user_data'));
+    
+    if (localData) {
+        user = localData; // Load rates/goals
+        
+        if (entries && entries.length > 0) {
+            // If we have DB entries, use the most recent one for the balance
+            // (Note: 'entries' is ordered newest first)
+            user.currentBalance = Number(entries[0].balance); // Ensure it's a number
+            
+            // Map DB entries to our history format
+            user.history = entries.map(e => ({
+                date: new Date(e.created_at).toLocaleDateString(),
+                balance: Number(e.balance),
+                happenings: e.happenings,
+                affirmations: e.affirmations
+            }));
+        } else {
+            // User has setup locally but no cloud entries yet
+            user.currentBalance = 0;
+            user.history = [];
         }
+        
+        showLedger();
+    } else {
+        // No local setup? Show setup screen
+        if(setupSection) setupSection.classList.remove('hidden');
     }
 }
 
@@ -65,22 +132,15 @@ function init() {
 if (calculateBtn) {
     calculateBtn.addEventListener('click', () => {
         const income = parseFloat(realityInput.value);
-        
-        if (!income || income <= 0) {
-            alert("Please enter a valid income.");
-            return;
-        }
-
+        if (!income || income <= 0) return alert("Enter valid income.");
         user.realityIncome = income;
         user.mentalBankGoal = income * 2;
         user.hourlyRate = user.mentalBankGoal / 1000;
 
-        // Safe updates
-        if (mbGoalDisplay) mbGoalDisplay.textContent = formatCurrency(user.mentalBankGoal);
-        if (hourlyRateDisplay) hourlyRateDisplay.textContent = formatCurrency(user.hourlyRate);
-        if (contractGoal) contractGoal.textContent = formatCurrency(user.mentalBankGoal);
-        if (contractRate) contractRate.textContent = formatCurrency(user.hourlyRate);
-
+        safeSetText('mb-goal-display', formatCurrency(user.mentalBankGoal));
+        safeSetText('hourly-rate-display', formatCurrency(user.hourlyRate));
+        safeSetText('contract-goal', formatCurrency(user.mentalBankGoal));
+        safeSetText('contract-rate', formatCurrency(user.hourlyRate));
         if (setupResults) setupResults.classList.remove('hidden');
     });
 }
@@ -93,17 +153,11 @@ if (contractSigned) {
 
 if (saveSetupBtn) {
     saveSetupBtn.addEventListener('click', () => {
-        const userNameInput = document.getElementById('user-name');
-        if (!userNameInput || !userNameInput.value) {
-            alert("Please sign the contract with your name.");
-            return;
-        }
-
-        user.userName = userNameInput.value;
-        user.currentBalance = 0; 
-        user.history = [];
-        
-        saveUser();
+        const name = get('user-name').value;
+        if (!name) return alert("Please sign.");
+        user.userName = name;
+        // Save setup locally
+        localStorage.setItem('mb_user_data', JSON.stringify(user));
         showLedger();
     });
 }
@@ -114,26 +168,22 @@ function showLedger() {
     if (setupSection) setupSection.classList.add('hidden');
     if (ledgerSection) ledgerSection.classList.remove('hidden');
     
-    if (balanceForwardDisplay) balanceForwardDisplay.textContent = formatCurrency(user.currentBalance);
-    if (currentHourlyRateDisplay) currentHourlyRateDisplay.textContent = formatCurrency(user.hourlyRate); // Removed extra "/hr"
-    if (todayDateDisplay) todayDateDisplay.textContent = new Date().toLocaleDateString();
-
+    safeSetText('balance-forward', formatCurrency(user.currentBalance));
+    safeSetText('current-hourly-rate', formatCurrency(user.hourlyRate));
+    safeSetText('today-date', new Date().toLocaleDateString());
+    
     if (eventsContainer) {
         eventsContainer.innerHTML = '';
-        addEventRow(); 
+        addEventRow();
     }
-    
     renderHistory();
-    renderChart(); 
+    renderChart();
 }
 
-if (addEventBtn) {
-    addEventBtn.addEventListener('click', addEventRow);
-}
+if (addEventBtn) addEventBtn.addEventListener('click', addEventRow);
 
 function addEventRow() {
     if (!eventsContainer) return;
-
     const row = document.createElement('div');
     row.className = 'event-row';
     row.innerHTML = `
@@ -141,70 +191,54 @@ function addEventRow() {
         <input type="number" placeholder="Hours" class="event-hours" step="0.5">
         <button class="remove-event">X</button>
     `;
-    
     row.querySelector('.event-hours').addEventListener('input', calculateTotals);
     row.querySelector('.remove-event').addEventListener('click', () => {
         row.remove();
         calculateTotals();
     });
-
     eventsContainer.appendChild(row);
 }
 
-if (dailyRealityInput) {
-    dailyRealityInput.addEventListener('input', calculateTotals);
-}
+if (dailyRealityInput) dailyRealityInput.addEventListener('input', calculateTotals);
 
 function calculateTotals() {
     let totalHours = 0;
-    const hourInputs = document.querySelectorAll('.event-hours');
+    document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
+    const gross = totalHours * user.hourlyRate;
+    const deduction = dailyRealityInput ? (parseFloat(dailyRealityInput.value) || 0) : 0;
+    const net = gross - deduction;
+    const newBalance = user.currentBalance + net;
     
-    hourInputs.forEach(input => {
-        const val = parseFloat(input.value);
-        if (val > 0) totalHours += val;
-    });
-
-    const grossDeposit = totalHours * user.hourlyRate;
-    const realityDeduction = dailyRealityInput ? (parseFloat(dailyRealityInput.value) || 0) : 0;
-    
-    const netDeposit = grossDeposit - realityDeduction;
-    const newBalance = user.currentBalance + netDeposit;
-
-    if (todaysDepositDisplay) todaysDepositDisplay.textContent = formatCurrency(netDeposit);
-    if (newMbBalanceDisplay) newMbBalanceDisplay.textContent = formatCurrency(newBalance);
+    safeSetText('todays-deposit', formatCurrency(net));
+    safeSetText('new-mb-balance', formatCurrency(newBalance));
 }
 
 if (submitLedgerBtn) {
-    submitLedgerBtn.addEventListener('click', () => {
-        if (dailySignature && !dailySignature.value) return alert("Please sign your entry.");
-        
+    submitLedgerBtn.addEventListener('click', async () => {
+        if (dailySignature && !dailySignature.value) return alert("Please sign.");
+        if (!currentUser) return alert("You must be logged in to save to the cloud.");
+
         let totalHours = 0;
         document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
-        
-        const realityVal = dailyRealityInput ? (parseFloat(dailyRealityInput.value) || 0) : 0;
-        const net = (totalHours * user.hourlyRate) - realityVal;
+        const deduction = dailyRealityInput ? (parseFloat(dailyRealityInput.value) || 0) : 0;
+        const net = (totalHours * user.hourlyRate) - deduction;
+        const newBalance = user.currentBalance + net;
 
-        user.currentBalance += net;
+        // --- SAVE TO SUPABASE ---
+        const { error } = await supabase
+            .from('entries')
+            .insert({
+                user_id: currentUser.id,
+                balance: newBalance,
+                happenings: dailyHappenings ? dailyHappenings.value : '',
+                affirmations: dailyAffirmations ? dailyAffirmations.value : ''
+            });
 
-        const newEntry = {
-            date: new Date().toLocaleDateString(),
-            balance: user.currentBalance,
-            happenings: dailyHappenings ? dailyHappenings.value : '',
-            affirmations: dailyAffirmations ? dailyAffirmations.value : ''
-        };
-        user.history.unshift(newEntry);
-
-        saveUser();
-        alert(`Entry Saved! New Balance: ${formatCurrency(user.currentBalance)}`);
-        location.reload(); 
-    });
-}
-
-// Updated Reset Button Logic
-if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-        if(confirm("Are you sure? This will delete all your data.")) {
-            localStorage.clear();
+        if (error) {
+            alert("Error saving: " + error.message);
+            console.error(error);
+        } else {
+            alert(`Saved to Cloud! New Balance: ${formatCurrency(newBalance)}`);
             location.reload();
         }
     });
@@ -214,14 +248,11 @@ if (resetBtn) {
 
 function renderHistory() {
     if (!historyList) return;
-    
     if (user.history.length === 0) {
         historyList.innerHTML = '<p class="hint">No entries yet.</p>';
         return;
     }
-    
     historyList.innerHTML = '';
-    
     user.history.forEach(entry => {
         const div = document.createElement('div');
         div.className = 'history-item';
@@ -231,8 +262,8 @@ function renderHistory() {
                 <span class="history-balance">${formatCurrency(entry.balance)}</span>
             </div>
             <div class="history-notes">
-                <span class="history-label">Happenings:</span> ${entry.happenings || 'None'} <br>
-                <span class="history-label">Affirmations:</span> ${entry.affirmations || 'None'}
+                <span class="history-label">Happenings:</span> ${entry.happenings || ''} <br>
+                <span class="history-label">Affirmations:</span> ${entry.affirmations || ''}
             </div>
         `;
         historyList.appendChild(div);
@@ -242,36 +273,23 @@ function renderHistory() {
 function renderChart() {
     const ctxCanvas = document.getElementById('balanceChart');
     if (!ctxCanvas) return;
-    
     const ctx = ctxCanvas.getContext('2d');
 
     const chronologicalHistory = [...user.history].reverse();
     let labels = chronologicalHistory.map(e => e.date);
     let dataPoints = chronologicalHistory.map(e => e.balance);
 
-    if (labels.length === 0) {
-        labels = ['Start'];
-        dataPoints = [0];
-    } else {
-        // Only add 'Start' if it's not already there
-        if (labels[0] !== 'Start') {
-             labels.unshift('Start');
-             dataPoints.unshift(0);
-        }
-    }
+    if (labels.length === 0) { labels = ['Start']; dataPoints = [0]; }
+    else { if (labels[0] !== 'Start') { labels.unshift('Start'); dataPoints.unshift(0); } }
 
-    if (chartInstance) {
-        chartInstance.destroy();
-    }
-
-    // Check if Chart is defined (loaded from library)
+    if (chartInstance) chartInstance.destroy();
     if (typeof Chart !== 'undefined') {
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Mental Bank Balance',
+                    label: 'Balance',
                     data: dataPoints,
                     borderColor: '#27ae60',
                     backgroundColor: 'rgba(39, 174, 96, 0.2)',
@@ -279,37 +297,16 @@ function renderChart() {
                     tension: 0.3
                 }]
             },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { callback: function(value) { return '$' + value; } }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return 'Balance: ' + formatCurrency(context.raw);
-                            }
-                        }
-                    }
-                }
-            }
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
         });
     }
 }
 
 // --- HELPERS ---
-
-function saveUser() {
-    localStorage.setItem('mb_user_data', JSON.stringify(user));
+function safeSetText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
 }
-
 function formatCurrency(num) {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD'
-    }).format(num);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
 }
