@@ -7,9 +7,6 @@ let supabase;
 // --- ELEMENTS ---
 const get = (id) => document.getElementById(id);
 
-// We select these later to be safe
-let emailInput, passwordInput, authMessage;
-
 const realityInput = get('reality-income');
 const calculateBtn = get('calculate-btn');
 const setupResults = get('setup-results');
@@ -19,6 +16,7 @@ const contractGoal = get('contract-goal');
 const contractRate = get('contract-rate');
 const contractSigned = get('contract-signed');
 const saveSetupBtn = get('save-setup-btn');
+const cancelSetupBtn = get('cancel-setup-btn');
 
 const setupSection = get('setup-section');
 const ledgerSection = get('ledger-section');
@@ -27,6 +25,8 @@ const resetBtn = get('reset-btn');
 const balanceForwardDisplay = get('balance-forward');
 const currentHourlyRateDisplay = get('current-hourly-rate');
 const todayDateDisplay = get('today-date');
+const editSetupBtn = get('edit-setup-btn');
+
 const eventsContainer = get('events-container');
 const addEventBtn = get('add-event-btn');
 const dailyRealityInput = get('daily-reality-income');
@@ -40,7 +40,14 @@ const historyList = get('history-list');
 
 const authContainer = get('auth-container');
 const loginBtn = get('login-btn');
+const emailInput = get('email-input');
+const passwordInput = get('password-input');
+const authMessage = get('auth-message');
 const mainAppContainer = get('main-app-container');
+const logoutBtn = get('logout-btn');
+
+const toggleChartBtn = get('toggle-chart-btn');
+const chartContainer = get('chart-container');
 
 // --- STATE ---
 let user = {
@@ -53,6 +60,7 @@ let user = {
 };
 let chartInstance = null;
 let currentUser = null;
+let settingsId = null; // To store the ID of the settings row in DB
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -81,59 +89,58 @@ async function init() {
 // --- AUTH EVENTS ---
 if (loginBtn) {
     loginBtn.addEventListener('click', async () => {
-        // Get elements freshly here to avoid null errors
-        const emailVal = get('email-input').value;
-        const passVal = get('password-input').value;
+        const emailVal = emailInput.value;
+        const passVal = passwordInput.value;
         const msgEl = get('auth-message');
         
-        if(!emailVal || !passVal) {
-            alert("Please enter email and password");
-            return;
-        }
-
+        if(!emailVal || !passVal) return alert("Enter email and password");
         if(msgEl) msgEl.textContent = "Signing in...";
 
-        // 1. Try to Login
-        let { data, error } = await supabase.auth.signInWithPassword({
-            email: emailVal,
-            password: passVal
-        });
+        let { data, error } = await supabase.auth.signInWithPassword({ email: emailVal, password: passVal });
 
         if (error) {
-            console.log("Login failed, trying signup...", error.message);
-            // 2. If login fails, try to Sign Up
-            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-                email: emailVal,
-                password: passVal
-            });
-            
-            if (signUpError) {
-                if(msgEl) msgEl.textContent = signUpError.message;
-            } else {
-                alert("Account created! If you don't log in automatically, check your email.");
-                location.reload();
-            }
+            const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email: emailVal, password: passVal });
+            if (signUpError && msgEl) msgEl.textContent = signUpError.message;
+            else { alert("Account created! Login to continue."); location.reload(); }
         } else {
             location.reload();
         }
     });
 }
 
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        location.reload();
+    });
+}
+
 // --- DATABASE LOADING ---
 
 async function loadUserData() {
-    const { data: entries, error } = await supabase
+    // 1. Load Settings (Income/Goal) from Cloud
+    const { data: settings, error: settingsError } = await supabase
+        .from('user_settings')
+        .select('*')
+        .limit(1);
+
+    // 2. Load Entries from Cloud
+    const { data: entries, error: entriesError } = await supabase
         .from('entries')
         .select('*')
         .order('created_at', { ascending: false });
 
-    if (error) console.error('DB Error:', error);
-
-    const localData = JSON.parse(localStorage.getItem('mb_user_data'));
-    
-    if (localData) {
-        user = localData;
+    if (settings && settings.length > 0) {
+        // User has set up before
+        const set = settings[0];
+        settingsId = set.id; // Save ID for updates
         
+        user.realityIncome = set.reality_income;
+        user.mentalBankGoal = set.mental_bank_goal;
+        user.hourlyRate = set.hourly_rate;
+        user.userName = set.user_name;
+
+        // Calculate Balance from latest entry
         if (entries && entries.length > 0) {
             user.currentBalance = Number(entries[0].balance);
             user.history = entries.map(e => ({
@@ -146,10 +153,12 @@ async function loadUserData() {
             user.currentBalance = 0;
             user.history = [];
         }
-        
         showLedger();
     } else {
+        // New user, show setup
         if(setupSection) setupSection.classList.remove('hidden');
+        // Hide cancel button for first-time setup
+        if(cancelSetupBtn) cancelSetupBtn.classList.add('hidden');
     }
 }
 
@@ -178,12 +187,36 @@ if (contractSigned) {
 }
 
 if (saveSetupBtn) {
-    saveSetupBtn.addEventListener('click', () => {
+    saveSetupBtn.addEventListener('click', async () => {
         const name = get('user-name').value;
         if (!name) return alert("Please sign.");
         user.userName = name;
-        localStorage.setItem('mb_user_data', JSON.stringify(user));
-        showLedger();
+
+        // Save/Update Settings in Cloud
+        const settingsPayload = {
+            user_id: currentUser.id,
+            reality_income: user.realityIncome,
+            mental_bank_goal: user.mentalBankGoal,
+            hourly_rate: user.hourlyRate,
+            user_name: user.userName
+        };
+
+        let error;
+        if (settingsId) {
+            // Update existing
+            const res = await supabase.from('user_settings').update(settingsPayload).eq('id', settingsId);
+            error = res.error;
+        } else {
+            // Insert new
+            const res = await supabase.from('user_settings').insert(settingsPayload);
+            error = res.error;
+        }
+
+        if (error) {
+            alert("Error saving settings: " + error.message);
+        } else {
+            showLedger();
+        }
     });
 }
 
@@ -194,7 +227,7 @@ function showLedger() {
     if (ledgerSection) ledgerSection.classList.remove('hidden');
     
     safeSetText('balance-forward', formatCurrency(user.currentBalance));
-    safeSetText('current-hourly-rate', formatCurrency(user.hourlyRate));
+    safeSetText('current-hourly-rate', formatCurrency(user.hourlyRate)); 
     safeSetText('today-date', new Date().toLocaleDateString());
     
     if (eventsContainer) {
@@ -202,7 +235,43 @@ function showLedger() {
         addEventRow();
     }
     renderHistory();
-    renderChart();
+    // Note: We do NOT render chart automatically anymore
+}
+
+// Edit Setup Button
+if (editSetupBtn) {
+    editSetupBtn.addEventListener('click', () => {
+        if (ledgerSection) ledgerSection.classList.add('hidden');
+        if (setupSection) setupSection.classList.remove('hidden');
+        
+        // Pre-fill current values
+        if (realityInput) realityInput.value = user.realityIncome;
+        if (get('user-name')) get('user-name').value = user.userName;
+        
+        // Show cancel button
+        if (cancelSetupBtn) cancelSetupBtn.classList.remove('hidden');
+    });
+}
+
+// Cancel Setup Button
+if (cancelSetupBtn) {
+    cancelSetupBtn.addEventListener('click', () => {
+        showLedger(); // Go back without saving
+    });
+}
+
+// Toggle Chart Button
+if (toggleChartBtn) {
+    toggleChartBtn.addEventListener('click', () => {
+        if (chartContainer.classList.contains('hidden')) {
+            chartContainer.classList.remove('hidden');
+            toggleChartBtn.textContent = "Hide Balance Chart";
+            renderChart(); // Draw it only when asked
+        } else {
+            chartContainer.classList.add('hidden');
+            toggleChartBtn.textContent = "Show Balance Chart";
+        }
+    });
 }
 
 if (addEventBtn) addEventBtn.addEventListener('click', addEventRow);
@@ -241,7 +310,7 @@ function calculateTotals() {
 if (submitLedgerBtn) {
     submitLedgerBtn.addEventListener('click', async () => {
         if (dailySignature && !dailySignature.value) return alert("Please sign.");
-        if (!currentUser) return alert("You must be logged in to save to the cloud.");
+        if (!currentUser) return alert("Login required.");
 
         let totalHours = 0;
         document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
@@ -260,18 +329,20 @@ if (submitLedgerBtn) {
 
         if (error) {
             alert("Error saving: " + error.message);
-            console.error(error);
         } else {
-            alert(`Saved to Cloud! New Balance: ${formatCurrency(newBalance)}`);
+            alert(`Saved! New Balance: ${formatCurrency(newBalance)}`);
             location.reload();
         }
     });
 }
 
 if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-        if(confirm("Reset local data?")) {
-            localStorage.clear();
+    resetBtn.addEventListener('click', async () => {
+        if(confirm("This will delete ALL entries and settings from the cloud. Continue?")) {
+            // Delete entries
+            await supabase.from('entries').delete().eq('user_id', currentUser.id);
+            // Delete settings
+            await supabase.from('user_settings').delete().eq('user_id', currentUser.id);
             location.reload();
         }
     });
@@ -316,6 +387,7 @@ function renderChart() {
     else { if (labels[0] !== 'Start') { labels.unshift('Start'); dataPoints.unshift(0); } }
 
     if (chartInstance) chartInstance.destroy();
+
     if (typeof Chart !== 'undefined') {
         chartInstance = new Chart(ctx, {
             type: 'line',
@@ -330,8 +402,7 @@ function renderChart() {
                     tension: 0.3
                 }]
             },
-            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + value; } } } }
-            }
+            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + value; } } } } }
         });
     }
 }
