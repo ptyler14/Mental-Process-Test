@@ -27,15 +27,17 @@
         <header>
             <h1>The Mental Bank</h1>
             <p class="subtitle">Rewriting your subconscious script.</p>
+            <button id="logout-btn" class="text-btn">Log Out</button>
         </header>
 
         <div id="setup-section">
             <div class="card">
-                <h2>Initial Setup</h2>
+                <h2>Initial Setup / Update</h2>
                 <p>Please enter your current annual income.</p>
                 <label>Current Annual Reality Income ($):</label>
                 <input type="number" id="reality-income" placeholder="e.g. 50000">
                 <button id="calculate-btn">Calculate My Rates</button>
+                <button id="cancel-setup-btn" class="secondary-btn hidden">Cancel</button>
             </div>
             <div id="setup-results" class="hidden">
                 <div class="result-box">
@@ -47,20 +49,23 @@
                     <p>I, <input type="text" id="user-name" placeholder="Your Name">, commit to earning <strong><span id="contract-goal">$0</span></strong>/year.</p>
                     <label class="checkbox-container"><input type="checkbox" id="contract-signed"> I accept.</label>
                 </div>
-                <button id="save-setup-btn" disabled>Save & Continue</button>
+                <button id="save-setup-btn" disabled>Save Settings</button>
             </div>
         </div>
 
         <div id="ledger-section" class="hidden">
             
-            <div class="card">
-                <h3>Balance Growth</h3>
-                <canvas id="balanceChart"></canvas>
-            </div>
-
             <div class="card info-card">
                 <p><strong>Balance Forward:</strong> <span id="balance-forward">$0.00</span></p>
                 <p><strong>Rate:</strong> <span id="current-hourly-rate">$0.00</span></p>
+                <button id="edit-setup-btn" class="small-btn">Edit Income/Goal</button>
+            </div>
+
+            <button id="toggle-chart-btn" class="secondary-btn" style="margin-bottom: 20px;">Show Balance Chart</button>
+
+            <div id="chart-container" class="card hidden">
+                <h3>Balance Growth</h3>
+                <canvas id="balanceChart"></canvas>
             </div>
 
             <div class="card">
