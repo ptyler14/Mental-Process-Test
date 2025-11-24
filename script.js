@@ -7,6 +7,9 @@ let supabase;
 // --- ELEMENTS ---
 const get = (id) => document.getElementById(id);
 
+// We select these later to be safe
+let emailInput, passwordInput, authMessage;
+
 const realityInput = get('reality-income');
 const calculateBtn = get('calculate-btn');
 const setupResults = get('setup-results');
@@ -37,9 +40,6 @@ const historyList = get('history-list');
 
 const authContainer = get('auth-container');
 const loginBtn = get('login-btn');
-const emailInput = get('email-input');
-const passwordInput = get('password-input');
-const authMessage = get('auth-message');
 const mainAppContainer = get('main-app-container');
 
 // --- STATE ---
@@ -54,7 +54,7 @@ let user = {
 let chartInstance = null;
 let currentUser = null;
 
-// --- INITIALIZATION (Now waits for load) ---
+// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     if (window.supabase) {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -81,29 +81,34 @@ async function init() {
 // --- AUTH EVENTS ---
 if (loginBtn) {
     loginBtn.addEventListener('click', async () => {
-        const email = emailInput.value;
-        const password = passwordInput.value;
+        // Get elements freshly here to avoid null errors
+        const emailVal = get('email-input').value;
+        const passVal = get('password-input').value;
+        const msgEl = get('auth-message');
         
-        if(!email || !password) return alert("Please enter email and password");
+        if(!emailVal || !passVal) {
+            alert("Please enter email and password");
+            return;
+        }
 
-        authMessage.textContent = "Signing in...";
+        if(msgEl) msgEl.textContent = "Signing in...";
 
         // 1. Try to Login
         let { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
+            email: emailVal,
+            password: passVal
         });
 
         if (error) {
             console.log("Login failed, trying signup...", error.message);
             // 2. If login fails, try to Sign Up
             const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-                email: email,
-                password: password
+                email: emailVal,
+                password: passVal
             });
             
             if (signUpError) {
-                authMessage.textContent = signUpError.message;
+                if(msgEl) msgEl.textContent = signUpError.message;
             } else {
                 alert("Account created! If you don't log in automatically, check your email.");
                 location.reload();
@@ -325,7 +330,8 @@ function renderChart() {
                     tension: 0.3
                 }]
             },
-            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + value; } } } }
+            }
         });
     }
 }
