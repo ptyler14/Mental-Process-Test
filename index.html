@@ -6,8 +6,17 @@
     <title>The Mental Bank</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
+    <div id="auth-container" class="auth-overlay">
+        <div class="auth-box">
+            <h2>Welcome to Mental Bank</h2>
+            <p>Sign in to save your ledger securely.</p>
+            <button id="login-btn">Sign in with Google</button>
+        </div>
+    </div>
 
     <div class="container">
         <header>
@@ -46,7 +55,7 @@
 
             <div class="card info-card">
                 <p><strong>Balance Forward:</strong> <span id="balance-forward">$0.00</span></p>
-                <p><strong>Rate:</strong> <span id="current-hourly-rate">$0.00</span>/hr</p>
+                <p><strong>Rate:</strong> <span id="current-hourly-rate">$0.00</span></p>
             </div>
 
             <div class="card">
@@ -58,7 +67,7 @@
                     <label>Minus Reality Income:</label>
                     <input type="number" id="daily-reality-income" placeholder="0.00">
                 </div>
-
+                
                 <div class="notes-section">
                     <div class="note-box">
                         <label>Happenings:</label>
@@ -80,9 +89,7 @@
 
             <div class="card">
                 <h3>History Log</h3>
-                <div id="history-list">
-                    <p class="hint">No entries yet.</p>
-                </div>
+                <div id="history-list"><p class="hint">No entries yet.</p></div>
             </div>
 
             <button id="reset-btn" class="danger-btn">Reset All Data</button>
