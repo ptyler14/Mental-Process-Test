@@ -46,11 +46,16 @@ init();
 function init() {
     const savedData = localStorage.getItem('mb_user_data');
     if (savedData) {
-        user = JSON.parse(savedData);
-        if (!user.history) user.history = [];
-        
-        if (user.userName && user.hourlyRate > 0) {
-            showLedger();
+        try {
+            user = JSON.parse(savedData);
+            if (!user.history) user.history = [];
+            
+            if (user.userName && user.hourlyRate > 0) {
+                showLedger();
+            }
+        } catch (e) {
+            console.error("Error loading data", e);
+            localStorage.clear(); // Clear corrupted data
         }
     }
 }
@@ -70,30 +75,31 @@ if (calculateBtn) {
         user.mentalBankGoal = income * 2;
         user.hourlyRate = user.mentalBankGoal / 1000;
 
-        mbGoalDisplay.textContent = formatCurrency(user.mentalBankGoal);
-        hourlyRateDisplay.textContent = formatCurrency(user.hourlyRate);
-        contractGoal.textContent = formatCurrency(user.mentalBankGoal);
-        contractRate.textContent = formatCurrency(user.hourlyRate);
+        // Safe updates
+        if (mbGoalDisplay) mbGoalDisplay.textContent = formatCurrency(user.mentalBankGoal);
+        if (hourlyRateDisplay) hourlyRateDisplay.textContent = formatCurrency(user.hourlyRate);
+        if (contractGoal) contractGoal.textContent = formatCurrency(user.mentalBankGoal);
+        if (contractRate) contractRate.textContent = formatCurrency(user.hourlyRate);
 
-        setupResults.classList.remove('hidden');
+        if (setupResults) setupResults.classList.remove('hidden');
     });
 }
 
 if (contractSigned) {
     contractSigned.addEventListener('change', (e) => {
-        saveSetupBtn.disabled = !e.target.checked;
+        if (saveSetupBtn) saveSetupBtn.disabled = !e.target.checked;
     });
 }
 
 if (saveSetupBtn) {
     saveSetupBtn.addEventListener('click', () => {
-        const userName = document.getElementById('user-name').value;
-        if (!userName) {
+        const userNameInput = document.getElementById('user-name');
+        if (!userNameInput || !userNameInput.value) {
             alert("Please sign the contract with your name.");
             return;
         }
 
-        user.userName = userName;
+        user.userName = userNameInput.value;
         user.currentBalance = 0; 
         user.history = [];
         
@@ -105,15 +111,18 @@ if (saveSetupBtn) {
 // --- LEDGER EVENTS ---
 
 function showLedger() {
-    setupSection.classList.add('hidden');
-    ledgerSection.classList.remove('hidden');
+    if (setupSection) setupSection.classList.add('hidden');
+    if (ledgerSection) ledgerSection.classList.remove('hidden');
     
-    balanceForwardDisplay.textContent = formatCurrency(user.currentBalance);
-    currentHourlyRateDisplay.textContent = formatCurrency(user.hourlyRate);
+    if (balanceForwardDisplay) balanceForwardDisplay.textContent = formatCurrency(user.currentBalance);
+    if (currentHourlyRateDisplay) currentHourlyRateDisplay.textContent = formatCurrency(user.hourlyRate); // Removed extra "/hr"
     if (todayDateDisplay) todayDateDisplay.textContent = new Date().toLocaleDateString();
 
-    eventsContainer.innerHTML = '';
-    addEventRow(); 
+    if (eventsContainer) {
+        eventsContainer.innerHTML = '';
+        addEventRow(); 
+    }
+    
     renderHistory();
     renderChart(); 
 }
@@ -123,6 +132,8 @@ if (addEventBtn) {
 }
 
 function addEventRow() {
+    if (!eventsContainer) return;
+
     const row = document.createElement('div');
     row.className = 'event-row';
     row.innerHTML = `
@@ -154,22 +165,24 @@ function calculateTotals() {
     });
 
     const grossDeposit = totalHours * user.hourlyRate;
-    const realityDeduction = parseFloat(dailyRealityInput.value) || 0;
+    const realityDeduction = dailyRealityInput ? (parseFloat(dailyRealityInput.value) || 0) : 0;
+    
     const netDeposit = grossDeposit - realityDeduction;
     const newBalance = user.currentBalance + netDeposit;
 
     if (todaysDepositDisplay) todaysDepositDisplay.textContent = formatCurrency(netDeposit);
     if (newMbBalanceDisplay) newMbBalanceDisplay.textContent = formatCurrency(newBalance);
 }
+
 if (submitLedgerBtn) {
     submitLedgerBtn.addEventListener('click', () => {
-        if (!dailySignature.value) return alert("Please sign your entry.");
+        if (dailySignature && !dailySignature.value) return alert("Please sign your entry.");
         
         let totalHours = 0;
         document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
-        const gross = totalHours * user.hourlyRate;
-        const deduction = parseFloat(dailyRealityInput.value) || 0;
-        const net = gross - deduction;
+        
+        const realityVal = dailyRealityInput ? (parseFloat(dailyRealityInput.value) || 0) : 0;
+        const net = (totalHours * user.hourlyRate) - realityVal;
 
         user.currentBalance += net;
 
@@ -187,6 +200,7 @@ if (submitLedgerBtn) {
     });
 }
 
+// Updated Reset Button Logic
 if (resetBtn) {
     resetBtn.addEventListener('click', () => {
         if(confirm("Are you sure? This will delete all your data.")) {
@@ -226,8 +240,10 @@ function renderHistory() {
 }
 
 function renderChart() {
-    const ctx = document.getElementById('balanceChart');
-    if (!ctx) return;
+    const ctxCanvas = document.getElementById('balanceChart');
+    if (!ctxCanvas) return;
+    
+    const ctx = ctxCanvas.getContext('2d');
 
     const chronologicalHistory = [...user.history].reverse();
     let labels = chronologicalHistory.map(e => e.date);
@@ -237,46 +253,52 @@ function renderChart() {
         labels = ['Start'];
         dataPoints = [0];
     } else {
-        labels.unshift('Start');
-        dataPoints.unshift(0);
+        // Only add 'Start' if it's not already there
+        if (labels[0] !== 'Start') {
+             labels.unshift('Start');
+             dataPoints.unshift(0);
+        }
     }
 
     if (chartInstance) {
         chartInstance.destroy();
     }
 
-    chartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Mental Bank Balance',
-                data: dataPoints,
-                borderColor: '#27ae60',
-                backgroundColor: 'rgba(39, 174, 96, 0.2)',
-                fill: true,
-                tension: 0.3
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { callback: function(value) { return '$' + value; } }
-                }
+    // Check if Chart is defined (loaded from library)
+    if (typeof Chart !== 'undefined') {
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Mental Bank Balance',
+                    data: dataPoints,
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
             },
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return 'Balance: ' + formatCurrency(context.raw);
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { callback: function(value) { return '$' + value; } }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Balance: ' + formatCurrency(context.raw);
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    }
 }
 
 // --- HELPERS ---
