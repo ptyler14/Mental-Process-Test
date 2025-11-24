@@ -1,11 +1,10 @@
 // --- SUPABASE CONFIGURATION ---
 const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_zne-fHITlqAxNWyy4ndF7Q_8qWFn3LH'; // (Note: I masked part of your key for safety in this chat, but used the one you provided)
+const SUPABASE_KEY = 'sb_publishable_zne-fHITlqAxNWyy4ndF7Q_8qWFn3LH';
 
-// Initialize the client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase; 
 
-// --- ELEMENTS (Using our helper) ---
+// --- ELEMENTS ---
 const get = (id) => document.getElementById(id);
 
 const realityInput = get('reality-income');
@@ -36,7 +35,6 @@ const dailyHappenings = get('daily-happenings');
 const dailyAffirmations = get('daily-affirmations');
 const historyList = get('history-list');
 
-// Auth Elements
 const authContainer = get('auth-container');
 const loginBtn = get('login-btn');
 
@@ -52,11 +50,17 @@ let user = {
 let chartInstance = null;
 let currentUser = null;
 
-// --- INITIALIZATION ---
-init();
+// --- INITIALIZATION (Now waits for load) ---
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.supabase) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        init();
+    } else {
+        console.error("Supabase library not found.");
+    }
+});
 
 async function init() {
-    // Check Supabase session
     const { data: { session } } = await supabase.auth.getSession();
 
     if (session) {
@@ -64,7 +68,6 @@ async function init() {
         if(authContainer) authContainer.classList.add('hidden');
         loadUserData();
     } else {
-        // Show login
         if(authContainer) authContainer.classList.remove('hidden');
     }
 }
@@ -75,7 +78,7 @@ if (loginBtn) {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.href // Redirect back to this page
+                redirectTo: window.location.href
             }
         });
         if (error) alert("Login failed: " + error.message);
@@ -85,29 +88,20 @@ if (loginBtn) {
 // --- DATABASE LOADING ---
 
 async function loadUserData() {
-    // 1. Load Balance & History from DB
     const { data: entries, error } = await supabase
         .from('entries')
         .select('*')
         .order('created_at', { ascending: false });
 
-    if (error) {
-        console.error('DB Error:', error);
-        // Fallback to local storage if DB fails (or is empty and we want to migrate)
-    }
+    if (error) console.error('DB Error:', error);
 
-    // 2. Load Setup Constants (Income/Rate) from LocalStorage
     const localData = JSON.parse(localStorage.getItem('mb_user_data'));
     
     if (localData) {
-        user = localData; // Load rates/goals
+        user = localData;
         
         if (entries && entries.length > 0) {
-            // If we have DB entries, use the most recent one for the balance
-            // (Note: 'entries' is ordered newest first)
-            user.currentBalance = Number(entries[0].balance); // Ensure it's a number
-            
-            // Map DB entries to our history format
+            user.currentBalance = Number(entries[0].balance);
             user.history = entries.map(e => ({
                 date: new Date(e.created_at).toLocaleDateString(),
                 balance: Number(e.balance),
@@ -115,14 +109,12 @@ async function loadUserData() {
                 affirmations: e.affirmations
             }));
         } else {
-            // User has setup locally but no cloud entries yet
             user.currentBalance = 0;
             user.history = [];
         }
         
         showLedger();
     } else {
-        // No local setup? Show setup screen
         if(setupSection) setupSection.classList.remove('hidden');
     }
 }
@@ -156,7 +148,6 @@ if (saveSetupBtn) {
         const name = get('user-name').value;
         if (!name) return alert("Please sign.");
         user.userName = name;
-        // Save setup locally
         localStorage.setItem('mb_user_data', JSON.stringify(user));
         showLedger();
     });
@@ -224,7 +215,6 @@ if (submitLedgerBtn) {
         const net = (totalHours * user.hourlyRate) - deduction;
         const newBalance = user.currentBalance + net;
 
-        // --- SAVE TO SUPABASE ---
         const { error } = await supabase
             .from('entries')
             .insert({
