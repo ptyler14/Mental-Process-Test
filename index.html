@@ -13,9 +13,9 @@
     <div id="auth-container" class="auth-overlay">
         <div class="auth-box">
             <h2>Welcome to Mental Bank</h2>
-            <p>Sign in (or Sign up) to save your ledger.</p>
-            <input type="email" id="email-input" placeholder="Enter your email" style="width: 100%; margin-bottom: 10px;">
-            <input type="password" id="password-input" placeholder="Create a password" style="width: 100%; margin-bottom: 20px;">
+            <p>Sign in to save your ledger.</p>
+            <input type="email" id="email-input" placeholder="Email" style="width: 100%; margin-bottom: 10px;">
+            <input type="password" id="password-input" placeholder="Password" style="width: 100%; margin-bottom: 20px;">
             <button id="login-btn">Sign Up / Login</button>
             <p id="auth-message" style="color: red; margin-top: 10px;"></p>
         </div>
@@ -30,31 +30,28 @@
 
         <div id="setup-section">
             <div class="card">
-                <h2>Initial Setup / Update</h2>
-                
-                <label>Current Annual Reality Income ($):</label>
+                <h2>Initial Setup</h2>
+                <label>Annual Reality Income ($):</label>
                 <input type="number" id="reality-income" placeholder="e.g. 50000">
                 
                 <div class="goals-setup-box">
                     <h3>My Key Goals</h3>
-                    <p class="hint">List 1-3 major goals (e.g. "Financial Freedom", "Health").</p>
-                    <div id="setup-goals-list">
-                        </div>
+                    <div id="setup-goals-list"></div>
                     <button id="add-goal-input-btn" class="secondary-btn small-btn">+ Add Goal</button>
                 </div>
 
-                <button id="calculate-btn" style="margin-top: 20px;">Calculate My Rates</button>
+                <button id="calculate-btn" style="margin-top: 20px;">Calculate Rates</button>
                 <button id="cancel-setup-btn" class="secondary-btn hidden">Cancel</button>
             </div>
 
             <div id="setup-results" class="hidden">
                 <div class="result-box">
                     <p><strong>Goal (2x):</strong> <span id="mb-goal-display">$0</span></p>
-                    <p><strong>Hourly Rate:</strong> <span id="hourly-rate-display">$0</span>/hr</p>
+                    <p><strong>Hourly Rate:</strong> <span id="hourly-rate-display">$0</span></p>
                 </div>
                 <div class="contract-box">
                     <h3>Mental Script Contract</h3>
-                    <p>I, <input type="text" id="user-name" placeholder="Your Name">, commit to earning <strong><span id="contract-goal">$0</span></strong>/year.</p>
+                    <p>I, <input type="text" id="user-name" placeholder="Your Name">, commit to earning <span id="contract-goal">$0</span>/year.</p>
                     <label class="checkbox-container"><input type="checkbox" id="contract-signed"> I accept.</label>
                 </div>
                 <button id="save-setup-btn" disabled>Save Settings</button>
@@ -64,28 +61,43 @@
         <div id="ledger-section" class="hidden">
             
             <div class="card info-card">
-                <p><strong>Balance Forward:</strong> <span id="balance-forward">$0.00</span></p>
-                <p><strong>Rate:</strong> <span id="current-hourly-rate">$0.00</span></p>
+                <div class="info-item">
+                    <span class="info-label">Date</span>
+                    <span id="today-date-display" class="info-value-large"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Balance Forward</span>
+                    <span id="balance-forward" class="info-value">$0.00</span>
+                </div>
                 <button id="edit-setup-btn" class="small-btn">Edit Setup</button>
             </div>
 
-            <button id="toggle-chart-btn" class="secondary-btn" style="margin-bottom: 20px;">Show Balance Chart</button>
-
+            <button id="toggle-chart-btn" class="secondary-btn">Show Balance Chart</button>
             <div id="chart-container" class="card hidden">
-                <h3>Balance Growth</h3>
                 <canvas id="balanceChart"></canvas>
             </div>
 
             <div class="card">
-                <h3>Today's Entry</h3>
-                <div id="events-container"></div>
-                <button id="add-event-btn" class="secondary-btn">+ Add Event</button>
-
-                <div class="deduction-box">
-                    <label>Minus Reality Income:</label>
-                    <input type="number" id="daily-reality-income" placeholder="0.00">
-                </div>
+                <h3 id="entry-status-title">Today's Entry</h3>
                 
+                <div class="deduction-box">
+                     <label>Daily Reality Income (Auto-Deducted):</label>
+                     <input type="text" id="daily-reality-display" disabled class="readonly-input">
+                </div>
+
+                <div class="activity-input-area">
+                    <h4>Add Activity</h4>
+                    <div class="input-row">
+                        <input type="text" id="new-activity-name" placeholder="Activity (e.g. Gym)">
+                        <select id="new-activity-goal"><option>General</option></select>
+                        <input type="number" id="new-activity-hours" placeholder="Hrs" step="0.5" style="width: 80px;">
+                    </div>
+                    <button id="add-activity-btn" class="add-btn">Add to List</button>
+                </div>
+
+                <div id="todays-activities-list" class="activities-list">
+                    </div>
+
                 <div class="notes-section">
                     <div class="note-box">
                         <label>Happenings:</label>
@@ -98,16 +110,17 @@
                 </div>
 
                 <div class="totals-box">
+                    <p>Today's Net: <span id="todays-net">$0.00</span></p>
                     <p class="final-total">New Balance: <span id="new-mb-balance">$0.00</span></p>
                 </div>
 
-                <input type="text" id="daily-signature" placeholder="Sign here...">
+                <input type="text" id="daily-signature" placeholder="Sign here to validate...">
                 <button id="submit-ledger-btn">Submit Entry</button>
             </div>
 
             <div class="card">
                 <h3>History Log</h3>
-                <div id="history-list"><p class="hint">No entries yet.</p></div>
+                <div id="history-list"></div>
             </div>
 
             <button id="reset-btn" class="danger-btn">Reset All Data</button>
