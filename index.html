@@ -54,7 +54,7 @@
                 </div>
                 <div class="contract-box">
                     <h3>Mental Script Contract</h3>
-                    <p>I, <input type="text" id="user-name" placeholder="Your Name">, commit to my goals.</p>
+                    <p>I, <input type="text" id="user-name" placeholder="Your Name">, commit to earning <strong><span id="contract-goal">$0</span></strong>/year.</p>
                     <label class="checkbox-container"><input type="checkbox" id="contract-signed"> I accept.</label>
                 </div>
                 <button id="save-setup-btn" disabled>Save Settings</button>
@@ -62,6 +62,7 @@
         </div>
 
         <div id="ledger-section" class="hidden">
+            
             <div class="card info-card">
                 <p><strong>Balance Forward:</strong> <span id="balance-forward">$0.00</span></p>
                 <p><strong>Rate:</strong> <span id="current-hourly-rate">$0.00</span></p>
@@ -69,6 +70,7 @@
             </div>
 
             <button id="toggle-chart-btn" class="secondary-btn" style="margin-bottom: 20px;">Show Balance Chart</button>
+
             <div id="chart-container" class="card hidden">
                 <h3>Balance Growth</h3>
                 <canvas id="balanceChart"></canvas>
