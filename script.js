@@ -1,11 +1,11 @@
 // --- SUPABASE CONFIGURATION ---
-const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmcml3ZG93dXdqeGlmZXlwbGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTczMzIsImV4cCI6MjA3OTQ3MzMzMn0.AZa5GNVDRm1UXU-PiQx7KS0KxQqZ69JbV1Qn2DIlHq0';
+// REPLACE THESE WITH YOUR ACTUAL VALUES FROM THE SUPABASE DASHBOARD
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
 let supabase; 
-const get = (id) => document.getElementById(id);
 
-// State
+// --- STATE ---
 let user = {
     realityIncome: 0,
     mentalBankGoal: 0,
@@ -13,50 +13,270 @@ let user = {
     currentBalance: 0,
     userName: "",
     history: [],
-    goals: []
+    goals: [] 
 };
-// New State for Today's Entry
-let todayEntry = {
-    id: null, // Null if new, ID if editing
-    activities: [], // Array of { name, goal, hours, value }
-    happenings: "",
-    affirmations: "",
-    dailyRealityDeduction: 0
-};
-
+let chartInstance = null;
 let currentUser = null;
 let settingsId = null;
-let chartInstance = null;
 
-// --- INIT ---
+// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Supabase
     if (window.supabase) {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         init();
+    } else {
+        console.error("Supabase library not found.");
     }
+
+    // Attach Global Event Listeners Here (Safest Place)
+    attachEventListeners();
 });
 
 async function init() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
         currentUser = session.user;
-        get('auth-container').classList.add('hidden');
-        get('main-app-container').style.display = 'block';
+        document.getElementById('auth-container').classList.add('hidden');
+        document.getElementById('main-app-container').style.display = 'block';
         loadUserData();
     } else {
-        get('auth-container').classList.remove('hidden');
-        get('main-app-container').style.display = 'none';
+        document.getElementById('auth-container').classList.remove('hidden');
+        document.getElementById('main-app-container').style.display = 'none';
     }
 }
 
-// --- DATA LOADING ---
+// --- EVENT LISTENERS SETUP ---
+function attachEventListeners() {
+    const get = (id) => document.getElementById(id);
+
+    // Setup Goals Button
+    const addGoalBtn = get('add-goal-input-btn');
+    if (addGoalBtn) {
+        addGoalBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent form submission issues
+            addGoalInputRow();
+        });
+    }
+
+    // Calculate Button
+    const calcBtn = get('calculate-btn');
+    if (calcBtn) {
+        calcBtn.addEventListener('click', () => {
+            const realityInput = get('reality-income');
+            const income = parseFloat(realityInput.value);
+            if (!income || income <= 0) return alert("Enter valid income.");
+            
+            user.realityIncome = income;
+            user.mentalBankGoal = income * 2;
+            user.hourlyRate = user.mentalBankGoal / 1000;
+
+            safeSetText('mb-goal-display', formatCurrency(user.mentalBankGoal));
+            safeSetText('hourly-rate-display', formatCurrency(user.hourlyRate));
+            safeSetText('contract-goal', formatCurrency(user.mentalBankGoal));
+            safeSetText('contract-rate', formatCurrency(user.hourlyRate));
+            
+            get('setup-results').classList.remove('hidden');
+        });
+    }
+
+    // Save Setup Button
+    const saveSetupBtn = get('save-setup-btn');
+    if (saveSetupBtn) {
+        saveSetupBtn.addEventListener('click', async () => {
+            const name = get('user-name').value;
+            if (!name) return alert("Please sign.");
+            user.userName = name;
+
+            // 1. Save Settings
+            const settingsData = {
+                user_id: currentUser.id,
+                reality_income: user.realityIncome,
+                mental_bank_goal: user.mentalBankGoal,
+                hourly_rate: user.hourlyRate,
+                user_name: user.userName
+            };
+
+            if (settingsId) {
+                await supabase.from('user_settings').update(settingsData).eq('id', settingsId);
+            } else {
+                await supabase.from('user_settings').insert(settingsData);
+            }
+
+            // 2. Save Goals
+            await supabase.from('goals').delete().eq('user_id', currentUser.id);
+            
+            const goalInputs = document.querySelectorAll('.goal-name-input');
+            const newGoals = [];
+            goalInputs.forEach(input => {
+                if(input.value.trim()) {
+                    newGoals.push({ user_id: currentUser.id, title: input.value.trim() });
+                }
+            });
+            
+            if (newGoals.length > 0) {
+                const { data: savedGoals } = await supabase.from('goals').insert(newGoals).select();
+                if(savedGoals) user.goals = savedGoals;
+            }
+
+            showLedger();
+        });
+    }
+
+    // Contract Checkbox
+    const contractSigned = get('contract-signed');
+    if (contractSigned) {
+        contractSigned.addEventListener('change', (e) => {
+            const btn = get('save-setup-btn');
+            if (btn) btn.disabled = !e.target.checked;
+        });
+    }
+
+    // Add Event Button (Ledger)
+    const addEventBtn = get('add-event-btn');
+    if (addEventBtn) {
+        addEventBtn.addEventListener('click', addEventRow);
+    }
+
+    // Submit Ledger Button
+    const submitBtn = get('submit-ledger-btn');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', async () => {
+            const sig = get('daily-signature');
+            if (sig && !sig.value) return alert("Please sign.");
+            if (!currentUser) return alert("Login required.");
+
+            let totalHours = 0;
+            document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
+            const deduction = get('daily-reality-income') ? (parseFloat(get('daily-reality-income').value) || 0) : 0;
+            const net = (totalHours * user.hourlyRate) - deduction;
+            const newBalance = user.currentBalance + net;
+
+            const { error } = await supabase
+                .from('entries')
+                .insert({
+                    user_id: currentUser.id,
+                    balance: newBalance,
+                    happenings: get('daily-happenings') ? get('daily-happenings').value : '',
+                    affirmations: get('daily-affirmations') ? get('daily-affirmations').value : ''
+                });
+
+            if (error) {
+                alert("Error saving: " + error.message);
+            } else {
+                alert(`Saved! New Balance: ${formatCurrency(newBalance)}`);
+                location.reload();
+            }
+        });
+    }
+
+    // Edit Setup Button
+    const editBtn = get('edit-setup-btn');
+    if (editBtn) {
+        editBtn.addEventListener('click', () => {
+            get('ledger-section').classList.add('hidden');
+            get('setup-section').classList.remove('hidden');
+            
+            if (get('reality-income')) get('reality-income').value = user.realityIncome;
+            if (get('user-name')) get('user-name').value = user.userName;
+            
+            // Load existing goals into inputs
+            const list = get('setup-goals-list');
+            list.innerHTML = '';
+            if (user.goals.length > 0) {
+                user.goals.forEach(g => addGoalInputRow(g.title));
+            } else {
+                addGoalInputRow();
+            }
+            
+            if (get('cancel-setup-btn')) get('cancel-setup-btn').classList.remove('hidden');
+        });
+    }
+
+    // Cancel Setup Button
+    const cancelBtn = get('cancel-setup-btn');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => showLedger());
+    }
+    
+    // Toggle Chart Button
+    const toggleChartBtn = get('toggle-chart-btn');
+    if (toggleChartBtn) {
+        toggleChartBtn.addEventListener('click', () => {
+            const container = get('chart-container');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+                toggleChartBtn.textContent = "Hide Balance Chart";
+                renderChart();
+            } else {
+                container.classList.add('hidden');
+                toggleChartBtn.textContent = "Show Balance Chart";
+            }
+        });
+    }
+
+    // Login Button
+    const loginBtn = get('login-btn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+            const emailVal = get('email-input').value;
+            const passVal = get('password-input').value;
+            const msgEl = get('auth-message');
+            
+            if(!emailVal || !passVal) return alert("Enter email and password");
+            if(msgEl) msgEl.textContent = "Signing in...";
+
+            let { data, error } = await supabase.auth.signInWithPassword({ email: emailVal, password: passVal });
+
+            if (error) {
+                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email: emailVal, password: passVal });
+                if (signUpError && msgEl) msgEl.textContent = signUpError.message;
+                else { alert("Account created! Login to continue."); location.reload(); }
+            } else {
+                location.reload();
+            }
+        });
+    }
+
+    // Logout Button
+    const logoutBtn = get('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            location.reload();
+        });
+    }
+    
+    // Daily Reality Input Logic
+    const dailyInput = get('daily-reality-income');
+    if (dailyInput) dailyInput.addEventListener('input', calculateTotals);
+}
+
+// --- HELPER FUNCTIONS ---
+
+function addGoalInputRow(value = "") {
+    const list = document.getElementById('setup-goals-list');
+    if (!list) return;
+
+    const row = document.createElement('div');
+    row.className = 'goal-input-row';
+    row.innerHTML = `
+        <input type="text" placeholder="Goal (e.g. Health)" class="goal-name-input" value="${value}">
+        <button class="remove-event" type="button">X</button>
+    `;
+    
+    // Attach remove listener immediately
+    row.querySelector('.remove-event').addEventListener('click', function() {
+        this.parentElement.remove();
+    });
+
+    list.appendChild(row);
+}
+
 async function loadUserData() {
-    // 1. Settings
     const { data: settings } = await supabase.from('user_settings').select('*').limit(1);
-    // 2. Goals
     const { data: goals } = await supabase.from('goals').select('*');
     if (goals) user.goals = goals;
-    // 3. Entries
     const { data: entries } = await supabase.from('entries').select('*').order('created_at', { ascending: false });
 
     if (settings && settings.length > 0) {
@@ -67,230 +287,137 @@ async function loadUserData() {
         user.hourlyRate = set.hourly_rate;
         user.userName = set.user_name;
 
-        // Process History
-        if (entries) {
-            user.history = entries;
-            user.currentBalance = entries.length > 0 ? Number(entries[0].balance) : 0;
-            
-            // CHECK FOR TODAY'S ENTRY
-            const todayStr = new Date().toLocaleDateString();
-            const lastEntry = entries[0];
-            
-            if (lastEntry && new Date(lastEntry.created_at).toLocaleDateString() === todayStr) {
-                // EDIT MODE
-                todayEntry.id = lastEntry.id;
-                todayEntry.activities = lastEntry.activities || []; // Load saved activities
-                todayEntry.happenings = lastEntry.happenings;
-                todayEntry.affirmations = lastEntry.affirmations;
-                
-                // If editing, "Current Balance" should be yesterday's balance (entry #2)
-                user.currentBalance = entries.length > 1 ? Number(entries[1].balance) : 0;
-                
-                get('submit-ledger-btn').textContent = "Update Today's Entry";
-                get('entry-status-title').textContent = "Editing Today's Entry";
-                
-                // Pre-fill UI
-                get('daily-happenings').value = todayEntry.happenings || '';
-                get('daily-affirmations').value = todayEntry.affirmations || '';
-            } else {
-                // NEW MODE
-                todayEntry.id = null;
-                todayEntry.activities = [];
-                get('submit-ledger-btn').textContent = "Submit Daily Entry";
-                get('entry-status-title').textContent = "Today's Entry";
-            }
+        if (entries && entries.length > 0) {
+            user.currentBalance = Number(entries[0].balance);
+            user.history = entries.map(e => ({
+                date: new Date(e.created_at).toLocaleDateString(),
+                balance: Number(e.balance),
+                happenings: e.happenings,
+                affirmations: e.affirmations
+            }));
+        } else {
+            user.currentBalance = 0;
+            user.history = [];
         }
-        
         showLedger();
     } else {
-        get('setup-section').classList.remove('hidden');
+        document.getElementById('setup-section').classList.remove('hidden');
+        if(document.getElementById('cancel-setup-btn')) 
+            document.getElementById('cancel-setup-btn').classList.add('hidden');
+        addGoalInputRow(); 
     }
 }
-
-// --- LEDGER LOGIC ---
 
 function showLedger() {
-    get('setup-section').classList.add('hidden');
-    get('ledger-section').classList.remove('hidden');
-
-    // Header Info
-    const dateOptions = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
-    get('today-date-display').textContent = new Date().toLocaleDateString('en-US', dateOptions);
-    get('balance-forward').textContent = formatCurrency(user.currentBalance);
-
-    // Auto-Calculate Daily Reality Income (Annual / 365)
-    todayEntry.dailyRealityDeduction = user.realityIncome / 365;
-    get('daily-reality-display').value = `-${formatCurrency(todayEntry.dailyRealityDeduction)} (Daily Reality Income)`;
-
-    renderActivityList();
-    renderGoalsDropdown();
-    renderHistory();
-    renderChart();
-    calculateTotals();
-}
-
-// Goals Dropdown for New Activity
-function renderGoalsDropdown() {
-    const select = get('new-activity-goal');
-    select.innerHTML = '<option value="">General</option>';
-    user.goals.forEach(g => {
-        select.innerHTML += `<option value="${g.title}">${g.title}</option>`;
-    });
-}
-
-// Add Activity Button Logic
-get('add-activity-btn').addEventListener('click', () => {
-    const name = get('new-activity-name').value;
-    const goal = get('new-activity-goal').value;
-    const hours = parseFloat(get('new-activity-hours').value);
-
-    if (!name || !hours || hours <= 0) return alert("Please enter valid activity and hours.");
-
-    const value = hours * user.hourlyRate;
-
-    // Add to state
-    todayEntry.activities.push({ name, goal, hours, value });
-
-    // Clear inputs
-    get('new-activity-name').value = '';
-    get('new-activity-hours').value = '';
+    document.getElementById('setup-section').classList.add('hidden');
+    document.getElementById('ledger-section').classList.remove('hidden');
     
-    renderActivityList();
-    calculateTotals();
-});
-
-function renderActivityList() {
-    const container = get('todays-activities-list');
-    container.innerHTML = '';
-
-    todayEntry.activities.forEach((act, index) => {
-        const div = document.createElement('div');
-        div.className = 'activity-item';
-        div.innerHTML = `
-            <div class="activity-details">
-                <strong>${act.name}</strong>
-                <span class="activity-goal-tag">${act.goal || 'General'}</span>
-                <span>${act.hours} hrs @ ${formatCurrency(user.hourlyRate)}/hr</span>
-            </div>
-            <div class="activity-value">
-                <strong>${formatCurrency(act.value)}</strong>
-                <button class="delete-activity-btn" onclick="removeActivity(${index})">&times;</button>
-            </div>
-        `;
-        container.appendChild(div);
-    });
+    safeSetText('balance-forward', formatCurrency(user.currentBalance));
+    safeSetText('current-hourly-rate', formatCurrency(user.hourlyRate)); 
+    safeSetText('today-date', new Date().toLocaleDateString());
+    
+    const container = document.getElementById('events-container');
+    if (container) {
+        container.innerHTML = '';
+        addEventRow();
+    }
+    renderHistory();
 }
 
-// Make removeActivity global so onclick works
-window.removeActivity = (index) => {
-    todayEntry.activities.splice(index, 1);
-    renderActivityList();
-    calculateTotals();
-};
+function addEventRow() {
+    const container = document.getElementById('events-container');
+    if (!container) return;
+    
+    let goalOptions = '<option value="">(General / No Goal)</option>';
+    if (user.goals && user.goals.length > 0) {
+        user.goals.forEach(g => {
+            goalOptions += `<option value="${g.title}">${g.title}</option>`;
+        });
+    }
+
+    const row = document.createElement('div');
+    row.className = 'event-row';
+    row.innerHTML = `
+        <input type="text" placeholder="Activity" class="event-name">
+        <select class="event-goal">${goalOptions}</select>
+        <input type="number" placeholder="Hours" class="event-hours" step="0.5">
+        <button class="remove-event">X</button>
+    `;
+    row.querySelector('.event-hours').addEventListener('input', calculateTotals);
+    row.querySelector('.remove-event').addEventListener('click', () => {
+        row.remove();
+        calculateTotals();
+    });
+    container.appendChild(row);
+}
 
 function calculateTotals() {
-    // Sum activity values
-    const gross = todayEntry.activities.reduce((sum, act) => sum + act.value, 0);
-    const net = gross - todayEntry.dailyRealityDeduction;
+    let totalHours = 0;
+    document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
+    const gross = totalHours * user.hourlyRate;
+    const dailyInput = document.getElementById('daily-reality-income');
+    const deduction = dailyInput ? (parseFloat(dailyInput.value) || 0) : 0;
+    const net = gross - deduction;
     const newBalance = user.currentBalance + net;
-
-    get('todays-net').textContent = formatCurrency(net);
-    get('new-mb-balance').textContent = formatCurrency(newBalance);
     
-    return { net, newBalance }; // Return for submit
+    safeSetText('todays-deposit', formatCurrency(net));
+    safeSetText('new-mb-balance', formatCurrency(newBalance));
 }
 
-get('submit-ledger-btn').addEventListener('click', async () => {
-    if (!get('daily-signature').value) return alert("Please sign.");
-    
-    const { net, newBalance } = calculateTotals();
-    
-    const payload = {
-        user_id: currentUser.id,
-        balance: newBalance,
-        happenings: get('daily-happenings').value,
-        affirmations: get('daily-affirmations').value,
-        activities: todayEntry.activities // Save the list!
-    };
-
-    let error;
-    if (todayEntry.id) {
-        // Update existing
-        const res = await supabase.from('entries').update(payload).eq('id', todayEntry.id);
-        error = res.error;
-    } else {
-        // Insert new
-        const res = await supabase.from('entries').insert(payload);
-        error = res.error;
-    }
-
-    if (error) alert("Error: " + error.message);
-    else {
-        alert("Saved!");
-        location.reload();
-    }
-});
-
-// --- HISTORY ---
 function renderHistory() {
-    const list = get('history-list');
+    const list = document.getElementById('history-list');
+    if (!list) return;
     if (user.history.length === 0) {
         list.innerHTML = '<p class="hint">No entries yet.</p>';
         return;
     }
     list.innerHTML = '';
-    
     user.history.forEach(entry => {
-        // Parse activities if they exist (handle old entries gracefully)
-        let activityHtml = '';
-        if (entry.activities && Array.isArray(entry.activities)) {
-            entry.activities.forEach(act => {
-                activityHtml += `<span class="history-activity">• ${act.name} (${act.goal || 'Gen'}): ${formatCurrency(act.hours * user.hourlyRate)}</span>`;
-            });
-        }
-
         const div = document.createElement('div');
         div.className = 'history-item';
         div.innerHTML = `
-            <div class="history-header">
-                <span>${new Date(entry.created_at).toLocaleDateString()}</span>
-                <span style="color:#27ae60">${formatCurrency(entry.balance)}</span>
+            <div class="history-date">
+                <span>${entry.date}</span>
+                <span class="history-balance">${formatCurrency(entry.balance)}</span>
             </div>
-            ${activityHtml}
             <div class="history-notes">
-                Happenings: ${entry.happenings || '-'} <br>
-                Affirmations: ${entry.affirmations || '-'}
+                <span class="history-label">Happenings:</span> ${entry.happenings || ''} <br>
+                <span class="history-label">Affirmations:</span> ${entry.affirmations || ''}
             </div>
         `;
         list.appendChild(div);
     });
 }
 
-// --- SETUP & AUTH HANDLERS ---
-// (Included simplified setup logic for completeness)
-get('calculate-btn').addEventListener('click', () => {
-    const income = parseFloat(get('reality-income').value);
-    if(!income) return;
-    user.realityIncome = income;
-    user.mentalBankGoal = income * 2;
-    user.hourlyRate = user.mentalBankGoal / 1000;
-    get('mb-goal-display').textContent = formatCurrency(user.mentalBankGoal);
-    get('hourly-rate-display').textContent = formatCurrency(user.hourlyRate);
-    get('setup-results').classList.remove('hidden');
-});
-get('save-setup-btn').addEventListener('click', async () => {
-    user.userName = get('user-name').value;
-    const payload = { user_id: currentUser.id, reality_income: user.realityIncome, mental_bank_goal: user.mentalBankGoal, hourly_rate: user.hourlyRate, user_name: user.userName };
-    if(settingsId) await supabase.from('user_settings').update(payload).eq('id', settingsId);
-    else await supabase.from('user_settings').insert(payload);
-    location.reload(); // Reload to refresh state
-});
-get('login-btn').addEventListener('click', async () => {
-    const { error } = await supabase.auth.signInWithPassword({ email: get('email-input').value, password: get('password-input').value });
-    if(error) alert(error.message); else location.reload();
-});
-get('contract-signed').addEventListener('change', e => get('save-setup-btn').disabled = !e.target.checked);
+function renderChart() {
+    const ctxCanvas = document.getElementById('balanceChart');
+    if (!ctxCanvas) return;
+    const ctx = ctxCanvas.getContext('2d');
+    const chronologicalHistory = [...user.history].reverse();
+    let labels = chronologicalHistory.map(e => e.date);
+    let dataPoints = chronologicalHistory.map(e => e.balance);
+    if (labels.length === 0) { labels = ['Start']; dataPoints = [0]; }
+    else { if (labels[0] !== 'Start') { labels.unshift('Start'); dataPoints.unshift(0); } }
 
-// --- HELPERS ---
+    if (chartInstance) chartInstance.destroy();
+    if (typeof Chart !== 'undefined') {
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Balance',
+                    data: dataPoints,
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '$' + value; } } } } }
+        });
+    }
+}
+
+function safeSetText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
 function formatCurrency(num) { return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num); }
-function renderChart() { /* (Chart code same as before) */ }
