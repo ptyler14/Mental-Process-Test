@@ -7,7 +7,6 @@ let supabase;
 // --- ELEMENTS ---
 const get = (id) => document.getElementById(id);
 
-// Setup Elements
 const realityInput = get('reality-income');
 const calculateBtn = get('calculate-btn');
 const setupResults = get('setup-results');
@@ -21,7 +20,6 @@ const cancelSetupBtn = get('cancel-setup-btn');
 const setupGoalsList = get('setup-goals-list');
 const addGoalInputBtn = get('add-goal-input-btn');
 
-// Ledger Elements
 const setupSection = get('setup-section');
 const ledgerSection = get('ledger-section');
 const resetBtn = get('reset-btn');
@@ -42,7 +40,6 @@ const historyList = get('history-list');
 const toggleChartBtn = get('toggle-chart-btn');
 const chartContainer = get('chart-container');
 
-// Auth Elements
 const authContainer = get('auth-container');
 const loginBtn = get('login-btn');
 const emailInput = get('email-input');
@@ -64,6 +61,7 @@ let user = {
 let chartInstance = null;
 let currentUser = null;
 let settingsId = null;
+let todaysEntryId = null; // Stores ID if we are editing today's entry
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -121,11 +119,9 @@ if (logoutBtn) {
 async function loadUserData() {
     // 1. Load Settings
     const { data: settings } = await supabase.from('user_settings').select('*').limit(1);
-    
     // 2. Load Goals
     const { data: goals } = await supabase.from('goals').select('*');
     if (goals) user.goals = goals;
-
     // 3. Load Entries
     const { data: entries } = await supabase.from('entries').select('*').order('created_at', { ascending: false });
 
@@ -137,14 +133,44 @@ async function loadUserData() {
         user.hourlyRate = set.hourly_rate;
         user.userName = set.user_name;
 
+        // Process History
         if (entries && entries.length > 0) {
-            user.currentBalance = Number(entries[0].balance);
+            // Convert DB entries to our format
             user.history = entries.map(e => ({
+                id: e.id, // Save ID for updates
+                dateRaw: new Date(e.created_at), // Keep raw date for comparison
                 date: new Date(e.created_at).toLocaleDateString(),
                 balance: Number(e.balance),
                 happenings: e.happenings,
-                affirmations: e.affirmations
+                affirmations: e.affirmations,
+                net: Number(e.balance) - (entries.find(prev => prev.id < e.id) ? Number(entries.find(prev => prev.id < e.id).balance) : 0) // Approximate net for display
             }));
+            
+            // Check if the MOST RECENT entry is from "Today"
+            const lastEntry = user.history[0];
+            const todayStr = new Date().toLocaleDateString();
+            
+            if (lastEntry.date === todayStr) {
+                // ENTRY EXISTS FOR TODAY -> EDIT MODE
+                todaysEntryId = lastEntry.id;
+                user.currentBalance = (user.history[1] ? user.history[1].balance : 0); // Balance Forward is YESTERDAY'S balance
+                
+                // Pre-fill UI with today's data
+                if (dailyHappenings) dailyHappenings.value = lastEntry.happenings || '';
+                if (dailyAffirmations) dailyAffirmations.value = lastEntry.affirmations || '';
+                if (submitLedgerBtn) submitLedgerBtn.textContent = "Update Today's Entry";
+                
+                // Note: We can't easily pre-fill specific events/reality income 
+                // because we didn't save them individually in the DB yet.
+                // For now, user re-enters the math for the update.
+                
+            } else {
+                // NO ENTRY FOR TODAY -> NEW MODE
+                user.currentBalance = lastEntry.balance;
+                todaysEntryId = null;
+                if (submitLedgerBtn) submitLedgerBtn.textContent = "Submit Daily Entry";
+            }
+
         } else {
             user.currentBalance = 0;
             user.history = [];
@@ -158,11 +184,7 @@ async function loadUserData() {
 }
 
 // --- SETUP EVENTS ---
-
-// Add Goal Input Row
-if (addGoalInputBtn) {
-    addGoalInputBtn.addEventListener('click', () => addGoalInputRow());
-}
+if (addGoalInputBtn) addGoalInputBtn.addEventListener('click', () => addGoalInputRow());
 
 function addGoalInputRow(value = "") {
     const row = document.createElement('div');
@@ -202,7 +224,6 @@ if (saveSetupBtn) {
         if (!name) return alert("Please sign.");
         user.userName = name;
 
-        // 1. Save Settings
         const settingsData = {
             user_id: currentUser.id,
             reality_income: user.realityIncome,
@@ -217,22 +238,13 @@ if (saveSetupBtn) {
             await supabase.from('user_settings').insert(settingsData);
         }
 
-        // 2. Save Goals
-        // First delete old goals to keep it simple (full sync)
         await supabase.from('goals').delete().eq('user_id', currentUser.id);
-        
         const goalInputs = document.querySelectorAll('.goal-name-input');
         const newGoals = [];
         goalInputs.forEach(input => {
-            if(input.value.trim()) {
-                newGoals.push({ user_id: currentUser.id, title: input.value.trim() });
-            }
+            if(input.value.trim()) newGoals.push({ user_id: currentUser.id, title: input.value.trim() });
         });
-        
-        if (newGoals.length > 0) {
-            const { data: savedGoals } = await supabase.from('goals').insert(newGoals).select();
-            if(savedGoals) user.goals = savedGoals;
-        }
+        if (newGoals.length > 0) await supabase.from('goals').insert(newGoals);
 
         showLedger();
     });
@@ -259,17 +271,12 @@ if (editSetupBtn) {
     editSetupBtn.addEventListener('click', () => {
         if (ledgerSection) ledgerSection.classList.add('hidden');
         if (setupSection) setupSection.classList.remove('hidden');
-        
         if (realityInput) realityInput.value = user.realityIncome;
         if (get('user-name')) get('user-name').value = user.userName;
         
-        // Load existing goals into inputs
         setupGoalsList.innerHTML = '';
-        if (user.goals.length > 0) {
-            user.goals.forEach(g => addGoalInputRow(g.title));
-        } else {
-            addGoalInputRow();
-        }
+        if (user.goals.length > 0) user.goals.forEach(g => addGoalInputRow(g.title));
+        else addGoalInputRow();
         
         if (cancelSetupBtn) cancelSetupBtn.classList.remove('hidden');
     });
@@ -296,15 +303,10 @@ if (addEventBtn) addEventBtn.addEventListener('click', addEventRow);
 
 function addEventRow() {
     if (!eventsContainer) return;
-    
-    // Build Goal Options
-    let goalOptions = '<option value="">(General / No Goal)</option>';
+    let goalOptions = '<option value="">(General)</option>';
     if (user.goals && user.goals.length > 0) {
-        user.goals.forEach(g => {
-            goalOptions += `<option value="${g.title}">${g.title}</option>`;
-        });
+        user.goals.forEach(g => { goalOptions += `<option value="${g.title}">${g.title}</option>`; });
     }
-
     const row = document.createElement('div');
     row.className = 'event-row';
     row.innerHTML = `
@@ -314,10 +316,7 @@ function addEventRow() {
         <button class="remove-event">X</button>
     `;
     row.querySelector('.event-hours').addEventListener('input', calculateTotals);
-    row.querySelector('.remove-event').addEventListener('click', () => {
-        row.remove();
-        calculateTotals();
-    });
+    row.querySelector('.remove-event').addEventListener('click', () => { row.remove(); calculateTotals(); });
     eventsContainer.appendChild(row);
 }
 
@@ -344,24 +343,32 @@ if (submitLedgerBtn) {
         document.querySelectorAll('.event-hours').forEach(i => totalHours += (parseFloat(i.value) || 0));
         const deduction = dailyRealityInput ? (parseFloat(dailyRealityInput.value) || 0) : 0;
         const net = (totalHours * user.hourlyRate) - deduction;
+        
+        // IMPORTANT: If updating, 'user.currentBalance' is YESTERDAY's balance
         const newBalance = user.currentBalance + net;
 
-        // OPTIONAL: You could save the specific events/goals to a separate table here
-        // For now, we just save the aggregate balance.
+        const payload = {
+            user_id: currentUser.id,
+            balance: newBalance,
+            happenings: dailyHappenings ? dailyHappenings.value : '',
+            affirmations: dailyAffirmations ? dailyAffirmations.value : ''
+        };
 
-        const { error } = await supabase
-            .from('entries')
-            .insert({
-                user_id: currentUser.id,
-                balance: newBalance,
-                happenings: dailyHappenings ? dailyHappenings.value : '',
-                affirmations: dailyAffirmations ? dailyAffirmations.value : ''
-            });
+        let error;
+        if (todaysEntryId) {
+            // UPDATE existing entry
+            const res = await supabase.from('entries').update(payload).eq('id', todaysEntryId);
+            error = res.error;
+        } else {
+            // INSERT new entry
+            const res = await supabase.from('entries').insert(payload);
+            error = res.error;
+        }
 
         if (error) {
-            alert("Error saving: " + error.message);
+            alert("Error: " + error.message);
         } else {
-            alert(`Saved! New Balance: ${formatCurrency(newBalance)}`);
+            alert(todaysEntryId ? "Entry Updated!" : "Entry Saved!");
             location.reload();
         }
     });
