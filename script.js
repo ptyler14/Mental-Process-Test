@@ -346,6 +346,9 @@ if (submitLedgerBtn) {
         const net = (totalHours * user.hourlyRate) - deduction;
         const newBalance = user.currentBalance + net;
 
+        // OPTIONAL: You could save the specific events/goals to a separate table here
+        // For now, we just save the aggregate balance.
+
         const { error } = await supabase
             .from('entries')
             .insert({
