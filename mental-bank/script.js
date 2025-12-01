@@ -43,7 +43,8 @@ async function init() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
         currentUser = session.user;
-        // No auth container to hide anymore, just load data
+        // NO AUTH CONTAINER HERE (Handled by Home Page)
+        // Just load data
         loadUserData();
     } else {
         // SECURITY CHECK: If not logged in, redirect to Home
@@ -92,7 +93,7 @@ function attachEventListeners() {
     // Setup Save
     if(get('save-setup-btn')) get('save-setup-btn').addEventListener('click', handleSaveSetup);
 
-    // Logout (still useful to have inside the app)
+    // Logout
     if(get('logout-btn')) get('logout-btn').addEventListener('click', async () => {
         await supabase.auth.signOut();
         window.location.href = "../index.html";
@@ -141,8 +142,11 @@ function handleStep1Next() {
     
     user.realityIncome = income;
     user.mentalBankGoal = income * 2;
+    
+    // REVERTED MATH: Goal / 1000 (Standard Mental Bank Rule)
     user.hourlyRate = user.mentalBankGoal / 1000;
 
+    // ADDED "/yr" and "/hr" labels
     safeSetText('mb-goal-display', formatCurrency(user.mentalBankGoal) + " /yr");
     safeSetText('hourly-rate-display', formatCurrency(user.hourlyRate) + " /hr");
     safeSetText('contract-goal', formatCurrency(user.mentalBankGoal));
@@ -232,7 +236,7 @@ function addActivityToList() {
     const goal = get('new-activity-goal').value;
     const hours = parseFloat(get('new-activity-hours').value);
 
-    if (!name || !hours || hours <= 0) return alert("Enter activity and hours.");
+    if (!name || !hours || hours <= 0) return alert("Enter valid activity.");
 
     const value = hours * user.hourlyRate;
     todayEntry.activities.push({ name, goal, hours, value });
@@ -250,21 +254,18 @@ function renderActivityList() {
         const div = document.createElement('div');
         div.className = 'activity-item';
         div.innerHTML = `
-            <div class="activity-details">
-                <strong>${act.name}</strong>
-                <span class="activity-goal-tag">${act.goal || 'General'}</span>
-                <span>${act.hours} hrs @ ${formatCurrency(user.hourlyRate)}/hr</span>
-            </div>
-            <div class="activity-value">
-                <strong>${formatCurrency(act.value)}</strong>
-                <button class="delete-activity-btn" onclick="removeActivity(${index})">&times;</button>
-            </div>
+            <div class="activity-details"><strong>${act.name}</strong><span class="activity-goal-tag">${act.goal || 'General'}</span><span>${act.hours} hrs @ ${formatCurrency(user.hourlyRate)}/hr</span></div>
+            <div class="activity-value"><strong>${formatCurrency(act.value)}</strong><button class="delete-activity-btn" onclick="removeActivity(${index})">&times;</button></div>
         `;
         container.appendChild(div);
     });
 }
 
-window.removeActivity = (index) => { todayEntry.activities.splice(index, 1); renderActivityList(); calculateTotals(); }
+window.removeActivity = (index) => {
+    todayEntry.activities.splice(index, 1);
+    renderActivityList();
+    calculateTotals();
+}
 
 function calculateTotals() {
     const gross = todayEntry.activities.reduce((sum, act) => sum + act.value, 0);
@@ -300,8 +301,10 @@ async function handleSubmitLedger() {
 
     if (error) alert("Error: " + error.message);
     else {
+        // Show Success Message
         get('entry-form-container').classList.add('hidden');
         get('success-message').classList.remove('hidden');
+        // Scroll to top of success message
         get('success-message').scrollIntoView({ behavior: 'smooth' });
     }
 }
@@ -356,7 +359,6 @@ async function loadUserData() {
     }
 }
 
-// --- VISUALIZATION & UTILS ---
 function handleToggleChart() {
     const c = get('chart-container');
     c.classList.toggle('hidden');
