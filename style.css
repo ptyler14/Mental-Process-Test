@@ -1,0 +1,26 @@
+:root {
+    --primary: #2c3e50;
+    --bg: #f4f6f8;
+    --accent: #2980b9;
+    --danger: #e74c3c;
+}
+body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--primary); display: flex; justify-content: center; padding: 40px 20px; margin: 0; }
+.container { width: 100%; max-width: 800px; text-align: center; }
+h1 { font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 10px; color: #2c3e50; }
+.subtitle { color: #7f8c8d; font-size: 1.1rem; margin-bottom: 40px; }
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.tool-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #e0e0e0; text-decoration: none; color: inherit; display: block; text-align: left; }
+.tool-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); border-color: #2980b9; }
+.tool-card h2 { font-family: 'Merriweather', serif; font-size: 1.5rem; margin-top: 0; margin-bottom: 10px; color: #2980b9; }
+.tool-card p { color: #555; line-height: 1.5; }
+.badge { display: inline-block; background: #e0f7fa; color: #006064; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; margin-bottom: 15px; }
+
+/* AUTH STYLES */
+.auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.auth-box { background: white; padding: 40px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.auth-box input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+.primary-btn { background-color: var(--accent); color: white; padding: 12px 20px; border: none; border-radius: 6px; font-weight: 600; font-size: 1rem; cursor: pointer; width: 100%; }
+.text-btn { background: none; border: none; color: #7f8c8d; text-decoration: underline; cursor: pointer; }
+.error-text { color: var(--danger); margin-top: 10px; font-size: 0.9rem; }
+.hidden { display: none !important; }
+.header-content { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
