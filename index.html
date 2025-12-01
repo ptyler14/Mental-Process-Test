@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Mental Bank</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -39,12 +37,12 @@
                 <div class="card">
                     <div class="step-indicator">Step 1 of 3</div>
                     <h2>Financial Foundation</h2>
-                    <p class="intro-text">The Mental Bank uses your current income to calculate a "Value Rate" for your time. This helps reprogram your mind to value your efforts more highly.</p>
+                    <p class="intro-text">The Mental Bank uses your current income to calculate a "Value Rate" for your time.</p>
                     
                     <div class="input-group">
                         <label>Current Annual Reality Income ($)</label>
-                        <input type="number" id="reality-income" placeholder="e.g. 50000">
-                        <p class="helper-text">Enter your gross annual income from all sources. This is your "Reality" baseline.</p>
+                        <input type="text" id="reality-income" placeholder="e.g. 50,000">
+                        <p class="helper-text">Enter your gross annual income.</p>
                     </div>
 
                     <button id="step-1-next-btn" class="primary-btn full-width">Calculate & Continue</button>
@@ -55,11 +53,11 @@
                 <div class="card">
                     <div class="step-indicator">Step 2 of 3</div>
                     <h2>Your Key Goals</h2>
-                    <p class="intro-text">What are you working towards? Assigning activities to specific goals reinforces their value.</p>
+                    <p class="intro-text">Assigning activities to specific goals reinforces their value.</p>
                     
                     <div class="goals-setup-box">
                         <div class="goal-input-wrapper">
-                            <input type="text" id="new-goal-input" placeholder="e.g. Financial Freedom, Health, Career">
+                            <input type="text" id="new-goal-input" placeholder="e.g. Financial Freedom, Health">
                             <button id="add-goal-btn" class="secondary-btn">Add</button>
                         </div>
                         <div id="setup-goals-list"></div>
@@ -76,7 +74,7 @@
                 <div class="card">
                     <div class="step-indicator">Step 3 of 3</div>
                     <h2>The Mental Script Contract</h2>
-                    <p class="intro-text">This is your commitment to your subconscious. Review your new rates below.</p>
+                    <p class="intro-text">Review your new rates below.</p>
 
                     <div class="result-box">
                         <div class="result-item">
@@ -94,10 +92,10 @@
                         <p>I understand that my time is valuable. My subconscious mind accepts my value at a rate of <span id="contract-rate">$0</span> per hour.</p>
                     </div>
                     
-                    <label class="checkbox-container">
+                    <div class="checkbox-wrapper">
                         <input type="checkbox" id="contract-signed">
-                        I accept this contract and am ready to begin.
-                    </label>
+                        <label for="contract-signed">I accept this contract and am ready to begin.</label>
+                    </div>
 
                     <div class="button-row">
                         <button id="step-3-back-btn" class="text-btn">Back</button>
@@ -152,7 +150,7 @@
                 <div class="notes-section">
                     <div class="note-group">
                         <label>Happenings</label>
-                        <textarea id="daily-happenings" rows="3" placeholder="Positive events from today..."></textarea>
+                        <textarea id="daily-happenings" rows="3" placeholder="Positive events..."></textarea>
                     </div>
                     <div class="note-group">
                         <label>Affirmations</label>
