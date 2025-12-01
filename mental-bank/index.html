@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Mental Bank</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -50,7 +47,7 @@
                     
                     <div class="goals-setup-box">
                         <div class="goal-input-wrapper">
-                            <input type="text" id="new-goal-input" placeholder="e.g. Financial Freedom, Health">
+                            <input type="text" id="new-goal-input" placeholder="e.g. Financial Freedom">
                             <button id="add-goal-btn" class="secondary-btn">Add</button>
                         </div>
                         <div id="setup-goals-list"></div>
@@ -101,12 +98,9 @@
         <div id="ledger-section" class="hidden">
             
             <div id="success-message" class="card hidden" style="text-align: center; padding: 40px;">
-                <h3 style="color: var(--success); margin-bottom: 15px; font-size: 1.5rem;">Excellent Work.</h3>
-                <p style="font-size: 1.1rem; line-height: 1.6; color: var(--primary);">
-                    Your ledger is updated. As you sleep tonight, your subconscious mind will process these deposits and work to bring your reality into alignment with your new script.
-                </p>
-                <p style="margin-top: 20px; font-style: italic; color: var(--text-light);">Rest well knowing your inner mind is building your future.</p>
-                <button onclick="location.reload()" class="secondary-btn" style="margin-top: 30px; width: auto;">Close & Refresh</button>
+                <h3 style="color: var(--success); margin-bottom: 15px;">Excellent Work.</h3>
+                <p>Your ledger is updated.</p>
+                <button onclick="location.reload()" class="secondary-btn">Close</button>
             </div>
 
             <div id="entry-form-container">
@@ -141,23 +135,22 @@
                     <div class="activity-section">
                         <h4>Log Value Events</h4>
                         <div class="add-activity-row">
-                            <input type="text" id="new-activity-name" placeholder="Activity (e.g. Gym)">
+                            <input type="text" id="new-activity-name" placeholder="Activity">
                             <select id="new-activity-goal"><option>General</option></select>
                             <input type="number" id="new-activity-hours" placeholder="Hrs" step="0.5">
                             <button id="add-activity-btn" class="add-btn">+</button>
                         </div>
-                        
                         <div id="todays-activities-list" class="activities-list"></div>
                     </div>
 
                     <div class="notes-section">
                         <div class="note-group">
                             <label>Happenings</label>
-                            <textarea id="daily-happenings" rows="3" placeholder="Positive events..."></textarea>
+                            <textarea id="daily-happenings" rows="3"></textarea>
                         </div>
                         <div class="note-group">
                             <label>Affirmations</label>
-                            <textarea id="daily-affirmations" rows="2" placeholder="I am..."></textarea>
+                            <textarea id="daily-affirmations" rows="2"></textarea>
                         </div>
                     </div>
 
@@ -167,7 +160,7 @@
                     </div>
 
                     <div class="submit-section">
-                        <input type="text" id="daily-signature" placeholder="Sign here to validate...">
+                        <input type="text" id="daily-signature" placeholder="Sign here...">
                         <button id="submit-ledger-btn" class="primary-btn full-width">Submit Entry</button>
                     </div>
                 </div>
