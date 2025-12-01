@@ -1,0 +1,53 @@
+/* --- VARIABLES & RESET --- */
+:root {
+    --primary: #2c3e50;
+    --accent: #8e44ad; /* Purple for spiritual/mindset tools */
+    --accent-hover: #7d3c98;
+    --bg: #fcfcfc;
+    --card-bg: #ffffff;
+    --text-light: #7f8c8d;
+    --border: #e0e0e0;
+}
+
+* { box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--primary); display: flex; justify-content: center; padding: 20px; margin: 0; line-height: 1.6; }
+.container { width: 100%; max-width: 700px; }
+
+header { text-align: center; margin-bottom: 30px; position: relative; }
+h1, h2 { font-family: 'Merriweather', serif; margin-top: 0; }
+.home-link { position: absolute; left: 0; top: 5px; text-decoration: none; font-size: 1.2rem; }
+.subtitle { color: var(--text-light); font-style: italic; }
+
+/* TABS */
+.tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+.tab-btn { background: transparent; border: none; border-bottom: 3px solid transparent; padding: 10px 20px; font-size: 1rem; cursor: pointer; color: var(--text-light); transition: all 0.3s; }
+.tab-btn:hover { color: var(--accent); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab-content { display: none; animation: fadeIn 0.3s ease-in; }
+.tab-content.active { display: block; }
+
+/* CARDS */
+.card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border); }
+.bullet-list { padding-left: 20px; color: #555; }
+.bullet-list li { margin-bottom: 8px; }
+
+/* PRACTICE MODE */
+.scenario-box { background: #f3e5f5; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; border: 1px solid #e1bee7; }
+.scenario-text { font-size: 1.2rem; font-weight: 600; color: var(--accent); margin: 0; }
+textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; font-family: inherit; margin-bottom: 10px; display: block; margin-top: 10px;}
+
+/* BUTTONS */
+.primary-btn { background-color: var(--accent); color: white; padding: 12px 25px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; }
+.primary-btn:hover { background-color: var(--accent-hover); }
+.secondary-btn { background-color: white; color: var(--primary); border: 1px solid var(--border); padding: 8px 15px; border-radius: 6px; cursor: pointer; }
+.secondary-btn:hover { background-color: #f9f9f9; }
+
+.success-text { color: var(--accent); font-weight: bold; text-align: center; margin-top: 15px; font-size: 1.1rem; }
+.hidden { display: none; }
+
+/* AUDIO */
+.audio-player-wrapper { text-align: center; margin: 20px 0; }
+audio { width: 100%; }
+.helper-text { font-size: 0.85rem; color: var(--text-light); margin-top: 5px; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
