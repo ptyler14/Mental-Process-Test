@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Mental Bank</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -12,117 +15,160 @@
 
     <div id="auth-container" class="auth-overlay">
         <div class="auth-box">
-            <h2>Welcome to Mental Bank</h2>
-            <p>Sign in (or Sign up) to save your ledger.</p>
-            <input type="email" id="email-input" placeholder="Email" style="width: 100%; margin-bottom: 10px;">
-            <input type="password" id="password-input" placeholder="Password" style="width: 100%; margin-bottom: 20px;">
-            <button id="login-btn">Sign Up / Login</button>
-            <p id="auth-message" style="color: red; margin-top: 10px;"></p>
+            <h2>Welcome to Your Mental Bank</h2>
+            <p>Sign in to access your secure ledger.</p>
+            <input type="email" id="email-input" placeholder="Email">
+            <input type="password" id="password-input" placeholder="Password">
+            <button id="login-btn" class="primary-btn full-width">Sign Up / Login</button>
+            <p id="auth-message" class="error-text"></p>
         </div>
     </div>
 
-    <div id="main-app-container" class="container">
+    <div id="main-app-container" class="container hidden">
         <header>
-            <h1>The Mental Bank</h1>
-            <p class="subtitle">Rewriting your subconscious script.</p>
-            <button id="logout-btn" class="text-btn">Log Out</button>
+            <div class="header-content">
+                <h1>The Mental Bank</h1>
+                <button id="logout-btn" class="text-btn">Log Out</button>
+            </div>
+            <p class="subtitle">Rewriting your subconscious script, one entry at a time.</p>
         </header>
 
-        <div id="setup-section">
-            <div class="card">
-                <h2>Initial Setup / Update</h2>
-                
-                <label>Current Annual Reality Income ($):</label>
-                <input type="number" id="reality-income" placeholder="e.g. 50000">
-                
-                <div class="goals-setup-box">
-                    <h3>My Key Goals</h3>
-                    <p class="hint">List 1-3 major goals (e.g. "Financial Freedom", "Health").</p>
+        <div id="setup-wizard" class="hidden">
+            
+            <div id="step-1" class="wizard-step">
+                <div class="card">
+                    <div class="step-indicator">Step 1 of 3</div>
+                    <h2>Financial Foundation</h2>
+                    <p class="intro-text">The Mental Bank uses your current income to calculate a "Value Rate" for your time. This helps reprogram your mind to value your efforts more highly.</p>
                     
-                    <div class="goal-input-wrapper" style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <input type="text" id="new-goal-input" placeholder="Type a goal here..." style="margin-bottom: 0;">
-                        <button id="add-goal-btn" class="secondary-btn small-btn" style="margin: 0; width: auto;">Add</button>
+                    <div class="input-group">
+                        <label>Current Annual Reality Income ($)</label>
+                        <input type="number" id="reality-income" placeholder="e.g. 50000">
+                        <p class="helper-text">Enter your gross annual income from all sources. This is your "Reality" baseline.</p>
                     </div>
 
-                    <div id="setup-goals-list">
-                        </div>
+                    <button id="step-1-next-btn" class="primary-btn full-width">Calculate & Continue</button>
                 </div>
-
-                <button id="calculate-btn" style="margin-top: 20px;">Calculate Rates</button>
-                <button id="cancel-setup-btn" class="secondary-btn hidden">Cancel</button>
             </div>
 
-            <div id="setup-results" class="hidden">
-                <div class="result-box">
-                    <p><strong>Goal (2x):</strong> <span id="mb-goal-display">$0</span></p>
-                    <p><strong>Hourly Rate:</strong> <span id="hourly-rate-display">$0</span></p>
+            <div id="step-2" class="wizard-step hidden">
+                <div class="card">
+                    <div class="step-indicator">Step 2 of 3</div>
+                    <h2>Your Key Goals</h2>
+                    <p class="intro-text">What are you working towards? Assigning activities to specific goals reinforces their value.</p>
+                    
+                    <div class="goals-setup-box">
+                        <div class="goal-input-wrapper">
+                            <input type="text" id="new-goal-input" placeholder="e.g. Financial Freedom, Health, Career">
+                            <button id="add-goal-btn" class="secondary-btn">Add</button>
+                        </div>
+                        <div id="setup-goals-list"></div>
+                    </div>
+
+                    <div class="button-row">
+                        <button id="step-2-back-btn" class="text-btn">Back</button>
+                        <button id="step-2-next-btn" class="primary-btn">Continue</button>
+                    </div>
                 </div>
-                <div class="contract-box">
-                    <h3>Mental Script Contract</h3>
-                    <p>I, <input type="text" id="user-name" placeholder="Your Name">, commit to earning <strong><span id="contract-goal">$0</span></strong>/year.</p>
-                    <label class="checkbox-container"><input type="checkbox" id="contract-signed"> I accept.</label>
+            </div>
+
+            <div id="step-3" class="wizard-step hidden">
+                <div class="card">
+                    <div class="step-indicator">Step 3 of 3</div>
+                    <h2>The Mental Script Contract</h2>
+                    <p class="intro-text">This is your commitment to your subconscious. Review your new rates below.</p>
+
+                    <div class="result-box">
+                        <div class="result-item">
+                            <span class="label">Mental Bank Goal (2x Income)</span>
+                            <span class="value" id="mb-goal-display">$0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Your Hourly Value Rate</span>
+                            <span class="value" id="hourly-rate-display">$0/hr</span>
+                        </div>
+                    </div>
+
+                    <div class="contract-text">
+                        <p>I, <input type="text" id="user-name" class="inline-input" placeholder="Your Name">, commit to the goal of earning <span id="contract-goal">$0</span> per year.</p>
+                        <p>I understand that my time is valuable. My subconscious mind accepts my value at a rate of <span id="contract-rate">$0</span> per hour.</p>
+                    </div>
+                    
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="contract-signed">
+                        I accept this contract and am ready to begin.
+                    </label>
+
+                    <div class="button-row">
+                        <button id="step-3-back-btn" class="text-btn">Back</button>
+                        <button id="save-setup-btn" class="primary-btn" disabled>Sign & Enter Ledger</button>
+                    </div>
                 </div>
-                <button id="save-setup-btn" disabled>Save Settings</button>
             </div>
         </div>
 
         <div id="ledger-section" class="hidden">
             
-            <div class="card info-card">
-                <div class="info-item">
-                    <span class="info-label">Date</span>
-                    <span id="today-date-display" class="info-value-large"></span>
+            <div class="dashboard-header card">
+                <div class="balance-box">
+                    <span class="label">Balance Forward</span>
+                    <span id="balance-forward" class="big-balance">$0.00</span>
                 </div>
-                <div class="info-item">
-                    <span class="info-label">Balance Forward</span>
-                    <span id="balance-forward" class="info-value">$0.00</span>
+                <div class="meta-info">
+                    <p><span class="label">Date:</span> <span id="today-date-display"></span></p>
+                    <p><span class="label">Rate:</span> <span id="current-hourly-rate">$0.00</span></p>
+                    <button id="edit-setup-btn" class="text-btn small">Edit Settings</button>
                 </div>
-                <button id="edit-setup-btn" class="small-btn">Edit Setup</button>
             </div>
 
-            <button id="toggle-chart-btn" class="secondary-btn">Show Balance Chart</button>
+            <button id="toggle-chart-btn" class="secondary-btn full-width mb-20">Show Growth Chart</button>
             <div id="chart-container" class="card hidden">
                 <canvas id="balanceChart"></canvas>
             </div>
 
             <div class="card">
-                <h3 id="entry-status-title">Today's Entry</h3>
+                <div class="card-header">
+                    <h3>Today's Entry</h3>
+                    <span id="entry-status-badge" class="status-new">New</span>
+                </div>
                 
                 <div class="deduction-box">
-                     <label>Daily Reality Income (Auto-Deducted):</label>
+                     <label>Daily Reality Income <span class="sub-label">(Auto-Deducted)</span></label>
                      <input type="text" id="daily-reality-display" disabled class="readonly-input">
                 </div>
 
-                <div class="activity-input-area">
-                    <h4>Add Activity</h4>
-                    <div class="input-row">
+                <div class="activity-section">
+                    <h4>Log Value Events</h4>
+                    <div class="add-activity-row">
                         <input type="text" id="new-activity-name" placeholder="Activity (e.g. Gym)">
                         <select id="new-activity-goal"><option>General</option></select>
-                        <input type="number" id="new-activity-hours" placeholder="Hrs" step="0.5" style="width: 80px;">
+                        <input type="number" id="new-activity-hours" placeholder="Hrs" step="0.5">
+                        <button id="add-activity-btn" class="add-btn">+</button>
                     </div>
-                    <button id="add-activity-btn" class="add-btn">Add to List</button>
+                    
+                    <div id="todays-activities-list" class="activities-list"></div>
                 </div>
-
-                <div id="todays-activities-list" class="activities-list"></div>
 
                 <div class="notes-section">
-                    <div class="note-box">
-                        <label>Happenings:</label>
-                        <textarea id="daily-happenings" rows="3"></textarea>
+                    <div class="note-group">
+                        <label>Happenings</label>
+                        <textarea id="daily-happenings" rows="3" placeholder="Positive events from today..."></textarea>
                     </div>
-                    <div class="note-box">
-                        <label>Affirmations:</label>
-                        <textarea id="daily-affirmations" rows="2"></textarea>
+                    <div class="note-group">
+                        <label>Affirmations</label>
+                        <textarea id="daily-affirmations" rows="2" placeholder="I am..."></textarea>
                     </div>
                 </div>
 
-                <div class="totals-box">
-                    <p>Today's Net: <span id="todays-net">$0.00</span></p>
-                    <p class="final-total">New Balance: <span id="new-mb-balance">$0.00</span></p>
+                <div class="totals-row">
+                    <span>Today's Net: <strong id="todays-net">$0.00</strong></span>
+                    <span>New Balance: <strong id="new-mb-balance">$0.00</strong></span>
                 </div>
 
-                <input type="text" id="daily-signature" placeholder="Sign here to validate...">
-                <button id="submit-ledger-btn">Submit Entry</button>
+                <div class="submit-section">
+                    <input type="text" id="daily-signature" placeholder="Sign here to validate...">
+                    <button id="submit-ledger-btn" class="primary-btn full-width">Submit Entry</button>
+                </div>
             </div>
 
             <div class="card">
@@ -130,7 +176,7 @@
                 <div id="history-list"></div>
             </div>
 
-            <button id="reset-btn" class="danger-btn">Reset All Data</button>
+            <button id="reset-btn" class="danger-btn full-width">Reset All Data</button>
         </div>
     </div>
     <script src="script.js"></script>
