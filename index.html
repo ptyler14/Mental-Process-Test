@@ -30,14 +30,22 @@
 
         <div id="setup-section">
             <div class="card">
-                <h2>Initial Setup</h2>
-                <label>Annual Reality Income ($):</label>
+                <h2>Initial Setup / Update</h2>
+                
+                <label>Current Annual Reality Income ($):</label>
                 <input type="number" id="reality-income" placeholder="e.g. 50000">
                 
                 <div class="goals-setup-box">
                     <h3>My Key Goals</h3>
-                    <div id="setup-goals-list"></div>
-                    <button id="add-goal-input-btn" class="secondary-btn small-btn">+ Add Goal</button>
+                    <p class="hint">List 1-3 major goals (e.g. "Financial Freedom", "Health").</p>
+                    
+                    <div class="goal-input-wrapper" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <input type="text" id="new-goal-input" placeholder="Type a goal here..." style="margin-bottom: 0;">
+                        <button id="add-goal-btn" class="secondary-btn small-btn" style="margin: 0; width: auto;">Add</button>
+                    </div>
+
+                    <div id="setup-goals-list">
+                        </div>
                 </div>
 
                 <button id="calculate-btn" style="margin-top: 20px;">Calculate Rates</button>
@@ -51,7 +59,7 @@
                 </div>
                 <div class="contract-box">
                     <h3>Mental Script Contract</h3>
-                    <p>I, <input type="text" id="user-name" placeholder="Your Name">, commit to earning <span id="contract-goal">$0</span>/year.</p>
+                    <p>I, <input type="text" id="user-name" placeholder="Your Name">, commit to earning <strong><span id="contract-goal">$0</span></strong>/year.</p>
                     <label class="checkbox-container"><input type="checkbox" id="contract-signed"> I accept.</label>
                 </div>
                 <button id="save-setup-btn" disabled>Save Settings</button>
@@ -95,8 +103,7 @@
                     <button id="add-activity-btn" class="add-btn">Add to List</button>
                 </div>
 
-                <div id="todays-activities-list" class="activities-list">
-                    </div>
+                <div id="todays-activities-list" class="activities-list"></div>
 
                 <div class="notes-section">
                     <div class="note-box">
