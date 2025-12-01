@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Segment Intending</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <a href="../index.html" class="home-link">🏠 Home</a>
+            <h1>Segment Intending</h1>
+            <p class="subtitle">Pre-paving your vibrational path.</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="learn">Learn</button>
+            <button class="tab-btn" data-tab="practice">Practice</button>
+            <button class="tab-btn" data-tab="install">Install</button>
+        </div>
+
+        <div id="learn" class="tab-content active">
+            <div class="card">
+                <h2>What is a Segment?</h2>
+                <p>A new segment begins anytime your intentions change, even slightly. Examples include:</p>
+                <ul class="bullet-list">
+                    <li>When the phone rings.</li>
+                    <li>When you get into your car.</li>
+                    <li>When someone walks into the room.</li>
+                    <li>Transitioning from work to rest.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h2>Why Intend?</h2>
+                <p>By pausing to set an intention <em>before</em> you enter a new segment, you "pre-pave" your vibrational path. This reduces resistance, confusion, and overwhelm, allowing you to move through your day with clarity and flow.</p>
+            </div>
+        </div>
+
+        <div id="practice" class="tab-content">
+            <div class="card practice-card">
+                <h2>Practice Mode</h2>
+                <p>Train your mind to pause and intend. Click below to get a random daily scenario.</p>
+                
+                <div id="scenario-display" class="scenario-box hidden">
+                    <p class="scenario-text" id="scenario-text"></p>
+                </div>
+
+                <button id="new-scenario-btn" class="primary-btn">Get Scenario</button>
+                
+                <div id="intention-input-area" class="hidden">
+                    <label>What is your intention for this segment?</label>
+                    <textarea id="intention-input" rows="2" placeholder="e.g., Safety, flow, and ease..."></textarea>
+                    <button id="submit-intention-btn" class="secondary-btn">Set Intention</button>
+                </div>
+                
+                <p id="feedback-msg" class="success-text hidden">✨ Segment Pre-Paved! ✨</p>
+            </div>
+        </div>
+
+        <div id="install" class="tab-content">
+            <div class="card">
+                <h2>Hypnotic Installation</h2>
+                <p>Listen to this session to program your subconscious mind to automatically trigger the "Segment Intending" habit throughout your day.</p>
+                
+                <div class="audio-player-wrapper">
+                    <audio controls>
+                        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <p class="helper-text">Audio duration: ~10 mins. Use headphones.</p>
+                </div>
+
+                <div class="journal-area">
+                    <label>Post-Session Insight:</label>
+                    <textarea id="post-session-note" rows="3" placeholder="What came up for you?"></textarea>
+                    <button id="save-note-btn" class="secondary-btn">Save Insight</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
