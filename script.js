@@ -5,29 +5,13 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let supabase; 
 const get = (id) => document.getElementById(id);
 
-// State
-let user = {
-    realityIncome: 0,
-    mentalBankGoal: 0,
-    hourlyRate: 0,
-    currentBalance: 0,
-    userName: "",
-    history: [],
-    goals: [] 
-};
-let todayEntry = {
-    id: null,
-    activities: [],
-    happenings: "",
-    affirmations: "",
-    dailyRealityDeduction: 0
-};
+let user = { realityIncome: 0, mentalBankGoal: 0, hourlyRate: 0, currentBalance: 0, userName: "", history: [], goals: [] };
+let todayEntry = { id: null, activities: [], happenings: "", affirmations: "", dailyRealityDeduction: 0 };
 let chartInstance = null;
 let currentUser = null;
 let settingsId = null;
 let todaysEntryId = null;
 
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
     if (window.supabase) {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -52,30 +36,18 @@ async function init() {
     }
 }
 
-// --- INCOME FORMATTING ---
 function setupIncomeFormatting() {
     const input = get('reality-income');
-    if (input) {
-        input.addEventListener('input', (e) => {
-            let value = e.target.value.replace(/,/g, '');
-            if (!isNaN(value) && value.length > 0) {
-                e.target.value = Number(value).toLocaleString('en-US');
-            }
-        });
-    }
+    if (input) input.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/,/g, '');
+        if (!isNaN(value) && value.length > 0) e.target.value = Number(value).toLocaleString('en-US');
+    });
     const goalInput = get('new-goal-input');
-    if (goalInput) {
-        goalInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addGoalToListUI(goalInput.value.trim());
-                goalInput.value = '';
-            }
-        });
-    }
+    if (goalInput) goalInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); addGoalToListUI(goalInput.value.trim()); goalInput.value = ''; }
+    });
 }
 
-// --- GLOBAL CLICK HANDLER ---
 function attachEventListeners() {
     if(get('step-1-next-btn')) get('step-1-next-btn').addEventListener('click', handleStep1Next);
     if(get('step-2-back-btn')) get('step-2-back-btn').addEventListener('click', () => showStep('step-1'));
@@ -110,7 +82,6 @@ function attachEventListeners() {
     });
 }
 
-// --- NAVIGATION ---
 function showStep(stepId) {
     get('setup-wizard').classList.add('hidden');
     get('ledger-section').classList.add('hidden');
@@ -124,8 +95,6 @@ function showStep(stepId) {
     }
 }
 
-// --- HANDLERS ---
-
 function handleStep1Next() {
     const rawIncome = get('reality-income').value.replace(/,/g, '');
     const income = parseFloat(rawIncome);
@@ -133,11 +102,8 @@ function handleStep1Next() {
     
     user.realityIncome = income;
     user.mentalBankGoal = income * 2;
-    
-    // REVERTED MATH: Goal / 1000 (Standard Mental Bank Rule)
     user.hourlyRate = user.mentalBankGoal / 1000;
 
-    // ADDED "/yr" and "/hr" labels
     safeSetText('mb-goal-display', formatCurrency(user.mentalBankGoal) + " /yr");
     safeSetText('hourly-rate-display', formatCurrency(user.hourlyRate) + " /hr");
     safeSetText('contract-goal', formatCurrency(user.mentalBankGoal));
@@ -179,11 +145,8 @@ async function handleSaveSetup() {
         user_name: user.userName
     };
 
-    if (settingsId) {
-        await supabase.from('user_settings').update(settingsData).eq('id', settingsId);
-    } else {
-        await supabase.from('user_settings').insert(settingsData);
-    }
+    if (settingsId) await supabase.from('user_settings').update(settingsData).eq('id', settingsId);
+    else await supabase.from('user_settings').insert(settingsData);
 
     await supabase.from('goals').delete().eq('user_id', currentUser.id);
     const dbGoals = user.goals.map(g => ({ user_id: currentUser.id, title: g.title }));
@@ -196,18 +159,25 @@ function showLedger() {
     showStep('ledger-section');
 
     const dateOptions = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
-    safeSetText('today-date-display', new Date().toLocaleDateString('en-US', dateOptions));
+    const todayStr = new Date().toLocaleDateString('en-US', dateOptions);
+    safeSetText('today-date-display', todayStr);
     safeSetText('balance-forward', formatCurrency(user.currentBalance));
-    safeSetText('current-hourly-rate', formatCurrency(user.hourlyRate) + "/hr"); // Ensure /hr is here too
+    safeSetText('current-hourly-rate', formatCurrency(user.hourlyRate) + " /hr");
+    
+    // Append Date to "Today's Entry" Title
+    const entryTitle = get('entry-status-title');
+    if (entryTitle) {
+        // Keep the "Editing" or "Today's Entry" prefix, just add date
+        const baseText = todaysEntryId ? "Editing Entry for" : "Entry for";
+        entryTitle.textContent = `${baseText} ${todayStr}`;
+    }
     
     todayEntry.dailyRealityDeduction = Math.round(user.realityIncome / 365);
     get('daily-reality-display').value = `-${formatCurrency(todayEntry.dailyRealityDeduction)}`;
 
     const select = get('new-activity-goal');
     select.innerHTML = '<option value="">General</option>';
-    user.goals.forEach(g => {
-        select.innerHTML += `<option value="${g.title}">${g.title}</option>`;
-    });
+    user.goals.forEach(g => { select.innerHTML += `<option value="${g.title}">${g.title}</option>`; });
 
     renderActivityList();
     renderHistory();
@@ -220,14 +190,13 @@ function addActivityToList() {
     const goal = get('new-activity-goal').value;
     const hours = parseFloat(get('new-activity-hours').value);
 
-    if (!name || !hours || hours <= 0) return alert("Enter activity and hours.");
+    if (!name || !hours || hours <= 0) return alert("Enter valid activity.");
 
     const value = hours * user.hourlyRate;
     todayEntry.activities.push({ name, goal, hours, value });
 
     get('new-activity-name').value = '';
     get('new-activity-hours').value = '';
-    
     renderActivityList();
     calculateTotals();
 }
@@ -239,31 +208,19 @@ function renderActivityList() {
         const div = document.createElement('div');
         div.className = 'activity-item';
         div.innerHTML = `
-            <div class="activity-details">
-                <strong>${act.name}</strong>
-                <span class="activity-goal-tag">${act.goal || 'General'}</span>
-                <span>${act.hours} hrs @ ${formatCurrency(user.hourlyRate)}/hr</span>
-            </div>
-            <div class="activity-value">
-                <strong>${formatCurrency(act.value)}</strong>
-                <button class="delete-activity-btn" onclick="removeActivity(${index})">&times;</button>
-            </div>
+            <div class="activity-details"><strong>${act.name}</strong><span class="activity-goal-tag">${act.goal || 'General'}</span><span>${act.hours} hrs @ ${formatCurrency(user.hourlyRate)}/hr</span></div>
+            <div class="activity-value"><strong>${formatCurrency(act.value)}</strong><button class="delete-activity-btn" onclick="removeActivity(${index})">&times;</button></div>
         `;
         container.appendChild(div);
     });
 }
 
-window.removeActivity = (index) => {
-    todayEntry.activities.splice(index, 1);
-    renderActivityList();
-    calculateTotals();
-};
+window.removeActivity = (index) => { todayEntry.activities.splice(index, 1); renderActivityList(); calculateTotals(); }
 
 function calculateTotals() {
     const gross = todayEntry.activities.reduce((sum, act) => sum + act.value, 0);
     const net = gross - todayEntry.dailyRealityDeduction;
     const newBalance = user.currentBalance + net;
-
     safeSetText('todays-net', formatCurrency(net));
     safeSetText('new-mb-balance', formatCurrency(newBalance));
     return { net, newBalance };
@@ -273,13 +230,12 @@ async function handleSubmitLedger() {
     if (!get('daily-signature').value) return alert("Please sign.");
     
     const { net, newBalance } = calculateTotals();
-    
     const payload = {
         user_id: currentUser.id,
         balance: newBalance,
         happenings: get('daily-happenings').value,
         affirmations: get('daily-affirmations').value,
-        activities: todayEntry.activities 
+        activities: todayEntry.activities
     };
 
     let error;
@@ -293,12 +249,14 @@ async function handleSubmitLedger() {
 
     if (error) alert("Error: " + error.message);
     else {
-        alert(todaysEntryId ? "Updated!" : "Saved!");
-        location.reload();
+        // Show Success Message
+        get('entry-form-container').classList.add('hidden');
+        get('success-message').classList.remove('hidden');
+        // Scroll to top of success message
+        get('success-message').scrollIntoView({ behavior: 'smooth' });
     }
 }
 
-// --- AUTH & DATA LOADING ---
 async function handleLogin() {
     const emailVal = get('email-input').value;
     const passVal = get('password-input').value;
@@ -310,15 +268,10 @@ async function handleLogin() {
         const { error: signUpError } = await supabase.auth.signUp({ email: emailVal, password: passVal });
         if (signUpError) get('auth-message').textContent = signUpError.message;
         else { alert("Account created!"); location.reload(); }
-    } else {
-        location.reload();
-    }
+    } else { location.reload(); }
 }
 
-async function handleLogout() {
-    await supabase.auth.signOut();
-    location.reload();
-}
+async function handleLogout() { await supabase.auth.signOut(); location.reload(); }
 
 async function loadUserData() {
     const { data: settings } = await supabase.from('user_settings').select('*').limit(1);
@@ -370,14 +323,13 @@ async function loadUserData() {
     }
 }
 
-// --- VISUALIZATION & UTILS ---
 function handleToggleChart() {
     const c = get('chart-container');
     c.classList.toggle('hidden');
     if (!c.classList.contains('hidden')) renderChart();
 }
 
-function renderHistory() { /* (Same as before) */
+function renderHistory() {
     const list = get('history-list');
     if (!list) return;
     if (user.history.length === 0) { list.innerHTML = '<p class="hint">No entries yet.</p>'; return; }
@@ -396,7 +348,7 @@ function renderHistory() { /* (Same as before) */
     });
 }
 
-function renderChart() { /* (Same as before) */
+function renderChart() {
     const ctxCanvas = get('balanceChart');
     if (!ctxCanvas) return;
     const ctx = ctxCanvas.getContext('2d');
@@ -406,10 +358,12 @@ function renderChart() { /* (Same as before) */
     if (labels.length === 0) { labels = ['Start']; dataPoints = [0]; }
     else { if (labels[0] !== 'Start') { labels.unshift('Start'); dataPoints.unshift(0); } }
     if (chartInstance) chartInstance.destroy();
-    chartInstance = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Balance', data: dataPoints, borderColor: '#2980b9', fill: false }] } });
+    if (typeof Chart !== 'undefined') {
+        chartInstance = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Balance', data: dataPoints, borderColor: '#2980b9', fill: false }] } });
+    }
 }
 
-async function handleReset() { /* (Same as before) */
+async function handleReset() {
     if(confirm("Delete ALL data?")) {
         await supabase.from('entries').delete().eq('user_id', currentUser.id);
         await supabase.from('user_settings').delete().eq('user_id', currentUser.id);
