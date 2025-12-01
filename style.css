@@ -24,3 +24,14 @@ h1 { font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 10px;
 .error-text { color: var(--danger); margin-top: 10px; font-size: 0.9rem; }
 .hidden { display: none !important; }
 .header-content { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;}
+/* Auth Toggle Styles */
+.toggle-text {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #666;
+}
+.toggle-text .text-btn {
+    font-weight: bold;
+    color: var(--accent);
+    margin-left: 5px;
+}
