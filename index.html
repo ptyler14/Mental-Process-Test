@@ -38,13 +38,11 @@
                     <div class="step-indicator">Step 1 of 3</div>
                     <h2>Financial Foundation</h2>
                     <p class="intro-text">The Mental Bank uses your current income to calculate a "Value Rate" for your time.</p>
-                    
                     <div class="input-group">
                         <label>Current Annual Reality Income ($)</label>
                         <input type="text" id="reality-income" placeholder="e.g. 50,000">
                         <p class="helper-text">Enter your gross annual income.</p>
                     </div>
-
                     <button id="step-1-next-btn" class="primary-btn full-width">Calculate & Continue</button>
                 </div>
             </div>
@@ -54,7 +52,6 @@
                     <div class="step-indicator">Step 2 of 3</div>
                     <h2>Your Key Goals</h2>
                     <p class="intro-text">Assigning activities to specific goals reinforces their value.</p>
-                    
                     <div class="goals-setup-box">
                         <div class="goal-input-wrapper">
                             <input type="text" id="new-goal-input" placeholder="e.g. Financial Freedom, Health">
@@ -62,7 +59,6 @@
                         </div>
                         <div id="setup-goals-list"></div>
                     </div>
-
                     <div class="button-row">
                         <button id="step-2-back-btn" class="text-btn">Back</button>
                         <button id="step-2-next-btn" class="primary-btn">Continue</button>
@@ -75,7 +71,6 @@
                     <div class="step-indicator">Step 3 of 3</div>
                     <h2>The Mental Script Contract</h2>
                     <p class="intro-text">Review your new rates below.</p>
-
                     <div class="result-box">
                         <div class="result-item">
                             <span class="label">Mental Bank Goal (2x Income)</span>
@@ -86,17 +81,14 @@
                             <span class="value" id="hourly-rate-display">$0/hr</span>
                         </div>
                     </div>
-
                     <div class="contract-text">
                         <p>I, <input type="text" id="user-name" class="inline-input" placeholder="Your Name">, commit to the goal of earning <span id="contract-goal">$0</span> per year.</p>
                         <p>I understand that my time is valuable. My subconscious mind accepts my value at a rate of <span id="contract-rate">$0</span> per hour.</p>
                     </div>
-                    
                     <div class="checkbox-wrapper">
                         <input type="checkbox" id="contract-signed">
                         <label for="contract-signed">I accept this contract and am ready to begin.</label>
                     </div>
-
                     <div class="button-row">
                         <button id="step-3-back-btn" class="text-btn">Back</button>
                         <button id="save-setup-btn" class="primary-btn" disabled>Sign & Enter Ledger</button>
@@ -125,47 +117,57 @@
             </div>
 
             <div class="card">
-                <div class="card-header">
-                    <h3>Today's Entry</h3>
-                    <span id="entry-status-badge" class="status-new">New</span>
-                </div>
-                
-                <div class="deduction-box">
-                     <label>Daily Reality Income <span class="sub-label">(Auto-Deducted)</span></label>
-                     <input type="text" id="daily-reality-display" disabled class="readonly-input">
+                <div id="success-message" class="hidden" style="text-align: center; padding: 20px;">
+                    <h3 style="color: var(--success); margin-bottom: 15px;">Excellent Work.</h3>
+                    <p style="font-size: 1.1rem; line-height: 1.6; color: var(--primary);">
+                        Your ledger is updated. As you sleep tonight, your subconscious mind will process these deposits and work to bring your reality into alignment with your new script.
+                    </p>
+                    <p style="margin-top: 20px; font-style: italic; color: var(--text-light);">Rest well knowing your inner mind is building your future.</p>
+                    <button onclick="location.reload()" class="secondary-btn" style="margin-top: 20px; width: auto;">Close</button>
                 </div>
 
-                <div class="activity-section">
-                    <h4>Log Value Events</h4>
-                    <div class="add-activity-row">
-                        <input type="text" id="new-activity-name" placeholder="Activity (e.g. Gym)">
-                        <select id="new-activity-goal"><option>General</option></select>
-                        <input type="number" id="new-activity-hours" placeholder="Hrs" step="0.5">
-                        <button id="add-activity-btn" class="add-btn">+</button>
+                <div id="entry-form-container">
+                    <div class="card-header">
+                        <h3 id="entry-status-title">Today's Entry</h3>
+                        <span id="entry-status-badge" class="status-new">New</span>
                     </div>
                     
-                    <div id="todays-activities-list" class="activities-list"></div>
-                </div>
-
-                <div class="notes-section">
-                    <div class="note-group">
-                        <label>Happenings</label>
-                        <textarea id="daily-happenings" rows="3" placeholder="Positive events..."></textarea>
+                    <div class="deduction-box">
+                         <label>Daily Reality Income <span class="sub-label">(Auto-Deducted)</span></label>
+                         <input type="text" id="daily-reality-display" disabled class="readonly-input">
                     </div>
-                    <div class="note-group">
-                        <label>Affirmations</label>
-                        <textarea id="daily-affirmations" rows="2" placeholder="I am..."></textarea>
+
+                    <div class="activity-section">
+                        <h4>Log Value Events</h4>
+                        <div class="add-activity-row">
+                            <input type="text" id="new-activity-name" placeholder="Activity (e.g. Gym)">
+                            <select id="new-activity-goal"><option>General</option></select>
+                            <input type="number" id="new-activity-hours" placeholder="Hrs" step="0.5">
+                            <button id="add-activity-btn" class="add-btn">+</button>
+                        </div>
+                        <div id="todays-activities-list" class="activities-list"></div>
                     </div>
-                </div>
 
-                <div class="totals-row">
-                    <span>Today's Net: <strong id="todays-net">$0.00</strong></span>
-                    <span>New Balance: <strong id="new-mb-balance">$0.00</strong></span>
-                </div>
+                    <div class="notes-section">
+                        <div class="note-group">
+                            <label>Happenings</label>
+                            <textarea id="daily-happenings" rows="3" placeholder="Positive events..."></textarea>
+                        </div>
+                        <div class="note-group">
+                            <label>Affirmations</label>
+                            <textarea id="daily-affirmations" rows="2" placeholder="I am..."></textarea>
+                        </div>
+                    </div>
 
-                <div class="submit-section">
-                    <input type="text" id="daily-signature" placeholder="Sign here to validate...">
-                    <button id="submit-ledger-btn" class="primary-btn full-width">Submit Entry</button>
+                    <div class="totals-row">
+                        <span>Today's Net: <strong id="todays-net">$0.00</strong></span>
+                        <span>New Balance: <strong id="new-mb-balance">$0.00</strong></span>
+                    </div>
+
+                    <div class="submit-section">
+                        <input type="text" id="daily-signature" placeholder="Sign here to validate...">
+                        <button id="submit-ledger-btn" class="primary-btn full-width">Submit Entry</button>
+                    </div>
                 </div>
             </div>
 
