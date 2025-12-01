@@ -14,17 +14,13 @@
         <div class="auth-box">
             <h2 id="auth-title">Welcome Back</h2>
             <p id="auth-subtitle">Sign in to access your wellness tools.</p>
-            
             <input type="email" id="email-input" placeholder="Email">
             <input type="password" id="password-input" placeholder="Password">
-            
             <button id="auth-action-btn" class="primary-btn full-width">Log In</button>
-            
             <p class="toggle-text">
                 <span id="toggle-auth-prompt">Don't have an account?</span>
                 <button id="toggle-auth-btn" class="text-btn">Sign Up</button>
             </p>
-
             <p id="auth-message" class="error-text"></p>
         </div>
     </div>
@@ -39,17 +35,63 @@
         </header>
 
         <div class="tools-grid">
-            <a href="mental-bank/index.html" class="tool-card">
+            
+            <div class="tool-card">
                 <span class="badge">Active</span>
                 <h2>The Mental Bank</h2>
-                <p>A nightly ledger ritual to reprogram your subconscious mind, track value events, and increase your prosperity consciousness.</p>
-            </a>
+                <p>A nightly ledger ritual to reprogram your subconscious mind and increase prosperity consciousness.</p>
+                <div class="card-actions">
+                    <a href="mental-bank/index.html" class="primary-btn small-btn">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-mental-bank')">ⓘ Learn More</button>
+                </div>
+            </div>
 
-            <a href="placemat/index.html" class="tool-card">
+            <div class="tool-card">
                 <span class="badge" style="background:#f3e5f5; color:#8e44ad;">Active</span>
                 <h2>The Placemat</h2>
                 <p>Overwhelmed? Delegate tasks to the Universe and focus only on what you can do today.</p>
-            </a>
+                <div class="card-actions">
+                    <a href="placemat/index.html" class="primary-btn small-btn" style="background-color:#8e44ad;">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-placemat')">ⓘ Learn More</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="modal-mental-bank" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-mental-bank')">&times;</button>
+            <h2>The Mental Bank Ledger</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A nightly journaling practice where you "pay" yourself for positive habits, reinforcing your value to your subconscious.</p>
+                
+                <h3>Why use it?</h3>
+                <p>To break through financial or success "ceilings" by reprogramming your inner script to accept higher levels of abundance.</p>
+                
+                <h3>How to do it?</h3>
+                <p>Every night before bed (the "magic 30 minutes"), log your daily "Value Events" (gym, reading, work) and calculate your fantasy deposit. Watch your balance grow!</p>
+            </div>
+            <button class="primary-btn full-width" onclick="window.location.href='mental-bank/index.html'">Start Now</button>
+        </div>
+    </div>
+
+    <div id="modal-placemat" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-placemat')">&times;</button>
+            <h2>The Placemat Process</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A task management tool that splits your to-do list into two columns: things YOU will do, and things the UNIVERSE will handle.</p>
+                
+                <h3>Why use it?</h3>
+                <p>To relieve overwhelm and anxiety. By consciously delegating tasks you can't control, you release resistance and allow solutions to come to you.</p>
+                
+                <h3>How to do it?</h3>
+                <p>List tasks you *must* do today in the "Me" column. Put everything else—worries, long-term goals, problems—in the "Universe" column. Then, let them go.</p>
+            </div>
+            <button class="primary-btn full-width" style="background-color:#8e44ad;" onclick="window.location.href='placemat/index.html'">Start Now</button>
         </div>
     </div>
 
@@ -74,8 +116,15 @@
         const authSubtitle = document.getElementById('auth-subtitle');
         const toggleAuthPrompt = document.getElementById('toggle-auth-prompt');
 
-        // State
         let isLoginMode = true;
+
+        // --- MODAL LOGIC ---
+        window.openModal = (id) => {
+            document.getElementById(id).classList.remove('hidden');
+        }
+        window.closeModal = (id) => {
+            document.getElementById(id).classList.add('hidden');
+        }
 
         // Check User
         async function init() {
@@ -94,21 +143,19 @@
         toggleAuthBtn.addEventListener('click', () => {
             isLoginMode = !isLoginMode;
             if (isLoginMode) {
-                // Switch to Login View
                 authTitle.textContent = "Welcome Back";
                 authSubtitle.textContent = "Sign in to access your wellness tools.";
                 authActionBtn.textContent = "Log In";
                 toggleAuthPrompt.textContent = "Don't have an account?";
                 toggleAuthBtn.textContent = "Sign Up";
             } else {
-                // Switch to Signup View
                 authTitle.textContent = "Create Account";
                 authSubtitle.textContent = "Start your journey today.";
                 authActionBtn.textContent = "Sign Up";
                 toggleAuthPrompt.textContent = "Already have an account?";
                 toggleAuthBtn.textContent = "Log In";
             }
-            authMessage.textContent = ""; // Clear errors
+            authMessage.textContent = "";
         });
 
         // Handle Auth Action
@@ -120,19 +167,13 @@
             authMessage.textContent = isLoginMode ? "Logging in..." : "Creating account...";
 
             if (isLoginMode) {
-                // LOGIN LOGIC
                 let { error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) authMessage.textContent = error.message;
                 else location.reload();
             } else {
-                // SIGNUP LOGIC
                 let { error } = await supabase.auth.signUp({ email, password });
-                if (error) {
-                    authMessage.textContent = error.message;
-                } else {
-                    alert("Account created successfully! Logging you in...");
-                    location.reload();
-                }
+                if (error) authMessage.textContent = error.message;
+                else { alert("Account created! Logging you in..."); location.reload(); }
             }
         });
 
