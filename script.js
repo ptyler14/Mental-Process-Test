@@ -5,7 +5,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let supabase; 
 const get = (id) => document.getElementById(id);
 
-// --- STATE ---
+// State
 let user = {
     realityIncome: 0,
     mentalBankGoal: 0,
@@ -25,7 +25,7 @@ let todayEntry = {
 let chartInstance = null;
 let currentUser = null;
 let settingsId = null;
-let todaysEntryId = null; // FIX: Defined globally to prevent ReferenceError
+let todaysEntryId = null;
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -52,20 +52,17 @@ async function init() {
     }
 }
 
-// --- INCOME FORMATTING (Commas) ---
+// --- INCOME FORMATTING ---
 function setupIncomeFormatting() {
     const input = get('reality-income');
     if (input) {
         input.addEventListener('input', (e) => {
-            // Remove non-digits
             let value = e.target.value.replace(/,/g, '');
             if (!isNaN(value) && value.length > 0) {
-                // Add commas back
                 e.target.value = Number(value).toLocaleString('en-US');
             }
         });
     }
-    // Also for goal input (Enter key support)
     const goalInput = get('new-goal-input');
     if (goalInput) {
         goalInput.addEventListener('keypress', (e) => {
@@ -80,28 +77,20 @@ function setupIncomeFormatting() {
 
 // --- GLOBAL CLICK HANDLER ---
 function attachEventListeners() {
-    
-    // WIZARD NAVIGATION
     if(get('step-1-next-btn')) get('step-1-next-btn').addEventListener('click', handleStep1Next);
     if(get('step-2-back-btn')) get('step-2-back-btn').addEventListener('click', () => showStep('step-1'));
     if(get('step-2-next-btn')) get('step-2-next-btn').addEventListener('click', () => showStep('step-3'));
     if(get('step-3-back-btn')) get('step-3-back-btn').addEventListener('click', () => showStep('step-2'));
 
-    // GOALS
     if(get('add-goal-btn')) get('add-goal-btn').addEventListener('click', () => {
         const input = get('new-goal-input');
         addGoalToListUI(input.value.trim());
         input.value = '';
     });
 
-    // FINAL SAVE
     if(get('save-setup-btn')) get('save-setup-btn').addEventListener('click', handleSaveSetup);
-
-    // LOGIN/OUT
     if(get('login-btn')) get('login-btn').addEventListener('click', handleLogin);
     if(get('logout-btn')) get('logout-btn').addEventListener('click', handleLogout);
-
-    // LEDGER ACTIONS
     if(get('add-activity-btn')) get('add-activity-btn').addEventListener('click', addActivityToList);
     if(get('submit-ledger-btn')) get('submit-ledger-btn').addEventListener('click', handleSubmitLedger);
     
@@ -115,7 +104,6 @@ function attachEventListeners() {
     if(get('toggle-chart-btn')) get('toggle-chart-btn').addEventListener('click', handleToggleChart);
     if(get('reset-btn')) get('reset-btn').addEventListener('click', handleReset);
 
-    // Contract Checkbox
     const contractSigned = get('contract-signed');
     if (contractSigned) contractSigned.addEventListener('change', (e) => {
         get('save-setup-btn').disabled = !e.target.checked;
@@ -139,20 +127,19 @@ function showStep(stepId) {
 // --- HANDLERS ---
 
 function handleStep1Next() {
-    // Strip commas to get number
     const rawIncome = get('reality-income').value.replace(/,/g, '');
     const income = parseFloat(rawIncome);
-    
     if (!income || income <= 0) return alert("Enter valid income.");
     
     user.realityIncome = income;
     user.mentalBankGoal = income * 2;
     
-    // FIX: Rate is Goal / 2000 (approx hourly wage logic)
-    user.hourlyRate = user.mentalBankGoal / 2000;
+    // REVERTED MATH: Goal / 1000 (Standard Mental Bank Rule)
+    user.hourlyRate = user.mentalBankGoal / 1000;
 
-    safeSetText('mb-goal-display', formatCurrency(user.mentalBankGoal));
-    safeSetText('hourly-rate-display', formatCurrency(user.hourlyRate));
+    // ADDED "/yr" and "/hr" labels
+    safeSetText('mb-goal-display', formatCurrency(user.mentalBankGoal) + " /yr");
+    safeSetText('hourly-rate-display', formatCurrency(user.hourlyRate) + " /hr");
     safeSetText('contract-goal', formatCurrency(user.mentalBankGoal));
     safeSetText('contract-rate', formatCurrency(user.hourlyRate));
 
@@ -161,11 +148,8 @@ function handleStep1Next() {
 
 function addGoalToListUI(title) {
     if (!title) return;
-    // Check if already exists to prevent dups
     const exists = user.goals.some(g => g.title === title);
-    if (!exists) {
-        user.goals.push({ title: title, isNew: true });
-    }
+    if (!exists) user.goals.push({ title: title, isNew: true });
     renderGoalsListUI();
 }
 
@@ -180,10 +164,7 @@ function renderGoalsListUI() {
     });
 }
 
-window.removeGoal = (index) => {
-    user.goals.splice(index, 1);
-    renderGoalsListUI();
-}
+window.removeGoal = (index) => { user.goals.splice(index, 1); renderGoalsListUI(); }
 
 async function handleSaveSetup() {
     const name = get('user-name').value;
@@ -217,9 +198,8 @@ function showLedger() {
     const dateOptions = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' };
     safeSetText('today-date-display', new Date().toLocaleDateString('en-US', dateOptions));
     safeSetText('balance-forward', formatCurrency(user.currentBalance));
-    safeSetText('current-hourly-rate', formatCurrency(user.hourlyRate));
+    safeSetText('current-hourly-rate', formatCurrency(user.hourlyRate) + "/hr"); // Ensure /hr is here too
     
-    // FIX: Auto-Calculate Reality Deduction (Rounded)
     todayEntry.dailyRealityDeduction = Math.round(user.realityIncome / 365);
     get('daily-reality-display').value = `-${formatCurrency(todayEntry.dailyRealityDeduction)}`;
 
@@ -289,7 +269,6 @@ function calculateTotals() {
     return { net, newBalance };
 }
 
-// FIX: Renamed to match listener
 async function handleSubmitLedger() {
     if (!get('daily-signature').value) return alert("Please sign.");
     
@@ -304,7 +283,6 @@ async function handleSubmitLedger() {
     };
 
     let error;
-    // Uses the global todaysEntryId we fixed at the top
     if (todaysEntryId) {
         const res = await supabase.from('entries').update(payload).eq('id', todaysEntryId);
         error = res.error;
@@ -320,8 +298,7 @@ async function handleSubmitLedger() {
     }
 }
 
-// --- AUTH & DATA LOADING (Standard) ---
-
+// --- AUTH & DATA LOADING ---
 async function handleLogin() {
     const emailVal = get('email-input').value;
     const passVal = get('password-input').value;
@@ -360,6 +337,7 @@ async function loadUserData() {
         if (entries) {
             user.history = entries.map(e => ({
                 id: e.id,
+                dateRaw: new Date(e.created_at),
                 date: new Date(e.created_at).toLocaleDateString(),
                 balance: Number(e.balance),
                 happenings: e.happenings,
@@ -371,10 +349,8 @@ async function loadUserData() {
             const lastEntry = user.history[0];
 
             if (lastEntry && lastEntry.date === todayStr) {
-                // Edit Mode
-                todaysEntryId = lastEntry.id; // This was the scope issue!
+                todaysEntryId = lastEntry.id;
                 user.currentBalance = (user.history[1] ? Number(user.history[1].balance) : 0);
-
                 todayEntry.activities = lastEntry.activities || [];
                 todayEntry.happenings = lastEntry.happenings;
                 todayEntry.affirmations = lastEntry.affirmations;
@@ -384,7 +360,6 @@ async function loadUserData() {
                 get('daily-happenings').value = todayEntry.happenings || '';
                 get('daily-affirmations').value = todayEntry.affirmations || '';
             } else {
-                // New Mode
                 user.currentBalance = lastEntry ? Number(lastEntry.balance) : 0;
                 todaysEntryId = null;
             }
@@ -395,14 +370,14 @@ async function loadUserData() {
     }
 }
 
-// --- VISUALIZATION ---
+// --- VISUALIZATION & UTILS ---
 function handleToggleChart() {
     const c = get('chart-container');
     c.classList.toggle('hidden');
     if (!c.classList.contains('hidden')) renderChart();
 }
 
-function renderHistory() {
+function renderHistory() { /* (Same as before) */
     const list = get('history-list');
     if (!list) return;
     if (user.history.length === 0) { list.innerHTML = '<p class="hint">No entries yet.</p>'; return; }
@@ -421,7 +396,7 @@ function renderHistory() {
     });
 }
 
-function renderChart() {
+function renderChart() { /* (Same as before) */
     const ctxCanvas = get('balanceChart');
     if (!ctxCanvas) return;
     const ctx = ctxCanvas.getContext('2d');
@@ -431,16 +406,10 @@ function renderChart() {
     if (labels.length === 0) { labels = ['Start']; dataPoints = [0]; }
     else { if (labels[0] !== 'Start') { labels.unshift('Start'); dataPoints.unshift(0); } }
     if (chartInstance) chartInstance.destroy();
-    chartInstance = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{ label: 'Balance', data: dataPoints, borderColor: '#2980b9', fill: false }]
-        }
-    });
+    chartInstance = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Balance', data: dataPoints, borderColor: '#2980b9', fill: false }] } });
 }
 
-async function handleReset() {
+async function handleReset() { /* (Same as before) */
     if(confirm("Delete ALL data?")) {
         await supabase.from('entries').delete().eq('user_id', currentUser.id);
         await supabase.from('user_settings').delete().eq('user_id', currentUser.id);
