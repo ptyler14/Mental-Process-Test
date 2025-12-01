@@ -3,182 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Mental Bank</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>My Wellness Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6f8;
+            color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+        h1 {
+            font-family: 'Merriweather', serif;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .tool-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e0e0e0;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-color: #2980b9;
+        }
+        .tool-card h2 {
+            font-family: 'Merriweather', serif;
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #2980b9;
+        }
+        .tool-card p {
+            color: #555;
+            line-height: 1.5;
+        }
+        .badge {
+            display: inline-block;
+            background: #e0f7fa;
+            color: #006064;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
 
-    <div id="auth-container" class="auth-overlay">
-        <div class="auth-box">
-            <h2>Welcome to Your Mental Bank</h2>
-            <p>Sign in to access your secure ledger.</p>
-            <input type="email" id="email-input" placeholder="Email">
-            <input type="password" id="password-input" placeholder="Password">
-            <button id="login-btn" class="primary-btn full-width">Sign Up / Login</button>
-            <p id="auth-message" class="error-text"></p>
-        </div>
-    </div>
-
-    <div id="main-app-container" class="container hidden">
+    <div class="container">
         <header>
-            <div class="header-content">
-                <h1>The Mental Bank</h1>
-                <button id="logout-btn" class="text-btn">Log Out</button>
-            </div>
-            <p class="subtitle">Rewriting your subconscious script, one entry at a time.</p>
+            <h1>My Wellness Tools</h1>
+            <p class="subtitle">A collection of tools for growth and mindset.</p>
         </header>
 
-        <div id="setup-wizard" class="hidden">
-            
-            <div id="step-1" class="wizard-step">
-                <div class="card">
-                    <div class="step-indicator">Step 1 of 3</div>
-                    <h2>Financial Foundation</h2>
-                    <p class="intro-text">The Mental Bank uses your current income to calculate a "Value Rate" for your time.</p>
-                    <div class="input-group">
-                        <label>Current Annual Reality Income ($)</label>
-                        <input type="text" id="reality-income" placeholder="e.g. 50,000">
-                        <p class="helper-text">Enter your gross annual income.</p>
-                    </div>
-                    <button id="step-1-next-btn" class="primary-btn full-width">Calculate & Continue</button>
-                </div>
+        <div class="tools-grid">
+            <a href="mental-bank/index.html" class="tool-card">
+                <span class="badge">Active</span>
+                <h2>The Mental Bank</h2>
+                <p>A nightly ledger ritual to reprogram your subconscious mind, track value events, and increase your prosperity consciousness.</p>
+            </a>
+
+            <div class="tool-card" style="opacity: 0.6; cursor: default;">
+                <span class="badge" style="background:#eee; color:#777;">Coming Soon</span>
+                <h2 style="color: #7f8c8d;">More Tools</h2>
+                <p>New hypnosis and tracking tools will be added here soon.</p>
             </div>
-
-            <div id="step-2" class="wizard-step hidden">
-                <div class="card">
-                    <div class="step-indicator">Step 2 of 3</div>
-                    <h2>Your Key Goals</h2>
-                    <p class="intro-text">Assigning activities to specific goals reinforces their value.</p>
-                    <div class="goals-setup-box">
-                        <div class="goal-input-wrapper">
-                            <input type="text" id="new-goal-input" placeholder="e.g. Financial Freedom, Health">
-                            <button id="add-goal-btn" class="secondary-btn">Add</button>
-                        </div>
-                        <div id="setup-goals-list"></div>
-                    </div>
-                    <div class="button-row">
-                        <button id="step-2-back-btn" class="text-btn">Back</button>
-                        <button id="step-2-next-btn" class="primary-btn">Continue</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="step-3" class="wizard-step hidden">
-                <div class="card">
-                    <div class="step-indicator">Step 3 of 3</div>
-                    <h2>The Mental Script Contract</h2>
-                    <p class="intro-text">Review your new rates below.</p>
-                    <div class="result-box">
-                        <div class="result-item">
-                            <span class="label">Mental Bank Goal (2x Income)</span>
-                            <span class="value" id="mb-goal-display">$0</span>
-                        </div>
-                        <div class="result-item">
-                            <span class="label">Your Hourly Value Rate</span>
-                            <span class="value" id="hourly-rate-display">$0/hr</span>
-                        </div>
-                    </div>
-                    <div class="contract-text">
-                        <p>I, <input type="text" id="user-name" class="inline-input" placeholder="Your Name">, commit to the goal of earning <span id="contract-goal">$0</span> per year.</p>
-                        <p>I understand that my time is valuable. My subconscious mind accepts my value at a rate of <span id="contract-rate">$0</span> per hour.</p>
-                    </div>
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" id="contract-signed">
-                        <label for="contract-signed">I accept this contract and am ready to begin.</label>
-                    </div>
-                    <div class="button-row">
-                        <button id="step-3-back-btn" class="text-btn">Back</button>
-                        <button id="save-setup-btn" class="primary-btn" disabled>Sign & Enter Ledger</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="ledger-section" class="hidden">
-            
-            <div class="dashboard-header card">
-                <div class="balance-box">
-                    <span class="label">Balance Forward</span>
-                    <span id="balance-forward" class="big-balance">$0.00</span>
-                </div>
-                <div class="meta-info">
-                    <p><span class="label">Date:</span> <span id="today-date-display"></span></p>
-                    <p><span class="label">Rate:</span> <span id="current-hourly-rate">$0.00</span></p>
-                    <button id="edit-setup-btn" class="text-btn small">Edit Settings</button>
-                </div>
-            </div>
-
-            <button id="toggle-chart-btn" class="secondary-btn full-width mb-20">Show Growth Chart</button>
-            <div id="chart-container" class="card hidden">
-                <canvas id="balanceChart"></canvas>
-            </div>
-
-            <div class="card">
-                <div id="success-message" class="hidden" style="text-align: center; padding: 20px;">
-                    <h3 style="color: var(--success); margin-bottom: 15px;">Excellent Work.</h3>
-                    <p style="font-size: 1.1rem; line-height: 1.6; color: var(--primary);">
-                        Your ledger is updated. As you sleep tonight, your subconscious mind will process these deposits and work to bring your reality into alignment with your new script.
-                    </p>
-                    <p style="margin-top: 20px; font-style: italic; color: var(--text-light);">Rest well knowing your inner mind is building your future.</p>
-                    <button onclick="location.reload()" class="secondary-btn" style="margin-top: 20px; width: auto;">Close</button>
-                </div>
-
-                <div id="entry-form-container">
-                    <div class="card-header">
-                        <h3 id="entry-status-title">Today's Entry</h3>
-                        <span id="entry-status-badge" class="status-new">New</span>
-                    </div>
-                    
-                    <div class="deduction-box">
-                         <label>Daily Reality Income <span class="sub-label">(Auto-Deducted)</span></label>
-                         <input type="text" id="daily-reality-display" disabled class="readonly-input">
-                    </div>
-
-                    <div class="activity-section">
-                        <h4>Log Value Events</h4>
-                        <div class="add-activity-row">
-                            <input type="text" id="new-activity-name" placeholder="Activity (e.g. Gym)">
-                            <select id="new-activity-goal"><option>General</option></select>
-                            <input type="number" id="new-activity-hours" placeholder="Hrs" step="0.5">
-                            <button id="add-activity-btn" class="add-btn">+</button>
-                        </div>
-                        <div id="todays-activities-list" class="activities-list"></div>
-                    </div>
-
-                    <div class="notes-section">
-                        <div class="note-group">
-                            <label>Happenings</label>
-                            <textarea id="daily-happenings" rows="3" placeholder="Positive events..."></textarea>
-                        </div>
-                        <div class="note-group">
-                            <label>Affirmations</label>
-                            <textarea id="daily-affirmations" rows="2" placeholder="I am..."></textarea>
-                        </div>
-                    </div>
-
-                    <div class="totals-row">
-                        <span>Today's Net: <strong id="todays-net">$0.00</strong></span>
-                        <span>New Balance: <strong id="new-mb-balance">$0.00</strong></span>
-                    </div>
-
-                    <div class="submit-section">
-                        <input type="text" id="daily-signature" placeholder="Sign here to validate...">
-                        <button id="submit-ledger-btn" class="primary-btn full-width">Submit Entry</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>History Log</h3>
-                <div id="history-list"></div>
-            </div>
-
-            <button id="reset-btn" class="danger-btn full-width">Reset All Data</button>
         </div>
     </div>
-    <script src="script.js"></script>
+
 </body>
 </html>
