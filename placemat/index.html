@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Placemat Process</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <a href="../index.html" class="home-link">🏠 Home</a>
+            <h1>The Placemat</h1>
+            <p class="subtitle">Release the struggle. Let the Universe handle the details.</p>
+        </header>
+
+        <div class="input-area card">
+            <input type="text" id="new-task-input" placeholder="What needs to be done?">
+            <div class="button-group">
+                <button id="add-my-task" class="btn-me">I Will Do This</button>
+                <button id="add-universe-task" class="btn-universe">✨ Let the Universe Do It</button>
+            </div>
+        </div>
+
+        <div class="placemat-board">
+            
+            <div class="column me-column">
+                <div class="column-header">
+                    <h2>Things I Will Do Today</h2>
+                    <span class="count" id="me-count">0</span>
+                </div>
+                <div id="me-list" class="task-list">
+                    </div>
+            </div>
+
+            <div class="column universe-column">
+                <div class="column-header">
+                    <h2>Things I Would Like the Universe to Do</h2>
+                    <span class="count" id="universe-count">0</span>
+                </div>
+                <div id="universe-list" class="task-list">
+                    </div>
+            </div>
+
+        </div>
+
+        <button id="clear-all-btn" class="text-btn">Clear the Placemat</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
