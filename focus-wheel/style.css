@@ -114,3 +114,14 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 }
 
 .hidden { display: none !important; }
+/* ... (Keep existing styles) ... */
+
+/* SPIN ANIMATION */
+@keyframes spin-victory {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(1080deg); } /* 3 full spins */
+}
+
+.spinning {
+    animation: spin-victory 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
