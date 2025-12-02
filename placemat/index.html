@@ -18,11 +18,19 @@
         </header>
 
         <div class="input-area card">
-            <input type="text" id="new-task-input" placeholder="What needs to be done?">
-            <div class="button-group">
-                <button id="add-my-task" class="btn-me">I Will Do This</button>
-                <button id="add-universe-task" class="btn-universe">✨ Let the Universe Do It</button>
+            <h2>Step 1: The Brain Dump</h2>
+            <p class="hint">Get everything out of your head. List all tasks here first.</p>
+            <div class="input-row">
+                <input type="text" id="new-task-input" placeholder="Type a task and hit Enter...">
+                <button id="add-to-dump-btn" class="btn-neutral">Add</button>
             </div>
+        </div>
+
+        <div id="brain-dump-section" class="card hidden">
+            <h3>Unsorted Tasks (<span id="dump-count">0</span>)</h3>
+            <p class="hint">Now, decide who does what. Be realistic about what YOU can do today.</p>
+            <div id="brain-dump-list" class="task-list">
+                </div>
         </div>
 
         <div class="placemat-board">
@@ -32,22 +40,20 @@
                     <h2>Things I Will Do Today</h2>
                     <span class="count" id="me-count">0</span>
                 </div>
-                <div id="me-list" class="task-list">
-                    </div>
+                <div id="me-list" class="task-list"></div>
             </div>
 
             <div class="column universe-column">
                 <div class="column-header">
-                    <h2>Things I Would Like the Universe to Do</h2>
+                    <h2>Things the Universe Will Do</h2>
                     <span class="count" id="universe-count">0</span>
                 </div>
-                <div id="universe-list" class="task-list">
-                    </div>
+                <div id="universe-list" class="task-list"></div>
             </div>
 
         </div>
 
-        <button id="clear-all-btn" class="text-btn">Clear the Placemat</button>
+        <button id="clear-all-btn" class="text-btn">Clear Board & Start Over</button>
     </div>
 
     <script src="script.js"></script>
