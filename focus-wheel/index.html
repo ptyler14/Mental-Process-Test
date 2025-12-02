@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Focus Wheel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -21,35 +21,47 @@
             <h2>Step 1: Identify the Desire</h2>
             <p class="intro-text">Focus on what is bothering you, then pivot. What do you <em>want</em> to feel?</p>
             <label>My Desire (Center of the Wheel):</label>
-            <input type="text" id="center-input" placeholder="e.g., I want to feel slender and energetic.">
+            <input type="text" id="center-input" placeholder="e.g., I am rich and abundant.">
             <button id="start-wheel-btn" class="primary-btn">Start Wheel</button>
         </div>
 
         <div id="step-wheel" class="hidden">
-            <div class="wheel-container">
-                <div class="wheel">
-                    <div class="center-circle">
-                        <p id="center-text-display">My Desire</p>
+            <div class="wheel-container-wrapper">
+                <div class="wheel-container" id="wheel-input-container">
+                    <div class="wheel">
+                        <div class="center-circle">
+                            <p id="center-text-display">My Desire</p>
+                        </div>
+                        <div id="segments-container"></div>
                     </div>
-                    <div id="segments-container"></div>
                 </div>
             </div>
 
             <div class="input-area card">
                 <h3>Add a Believable Statement (<span id="statement-count">0</span>/12)</h3>
                 <p class="hint">Find a general thought that feels true and brings relief.</p>
-                <input type="text" id="statement-input" placeholder="e.g., My body knows how to be healthy...">
+                <input type="text" id="statement-input" placeholder="e.g., Money flows to me easily...">
                 <div class="button-group">
                      <button id="add-statement-btn" class="primary-btn">Add Statement</button>
-                     <button id="reset-btn" class="text-btn" style="color:#e74c3c">Reset</button>
                 </div>
             </div>
         </div>
         
-        <div id="step-complete" class="card hidden" style="text-align:center;">
-            <h2 style="color:var(--accent)">Alignment Achieved!</h2>
-            <p>You have completed the wheel. Take a moment to feel the relief and momentum you've built.</p>
-            <button onclick="location.reload()" class="secondary-btn">Start New Wheel</button>
+        <div id="step-complete" class="hidden" style="text-align:center;">
+            <div class="card">
+                <h2 style="color:var(--accent); font-family: 'Dancing Script', cursive; font-size: 2rem;">Alignment Achieved!</h2>
+                <p>Click "Rotate Wheel" to focus on each statement and feel the momentum you've built.</p>
+            </div>
+            
+            <div class="wheel-container-wrapper">
+                <div class="wheel-container" id="wheel-complete-container">
+                    </div>
+            </div>
+
+            <div class="card button-card">
+                <button id="rotate-btn" class="primary-btn" style="margin-bottom: 10px;">🔄 Rotate Wheel & Reflect</button>
+                <button onclick="location.reload()" class="text-btn" style="color: var(--text-light);">Start New Wheel</button>
+            </div>
         </div>
 
     </div>
