@@ -7,8 +7,10 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // --- STATE ---
 let statements = [];
 let centerDesire = "";
-let wheelRotation = 0; // Tracks how much the whole wheel has spun
-let currentHighlightIndex = -1;
+let wheelRotation = 0; 
+// Track which statement index is currently at the 3 o'clock position
+// Start at -1 (none), first add becomes 0
+let currentFocusIndex = 0; 
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -57,30 +59,20 @@ function addStatement() {
     
     // 1. Add to array
     statements.push(text);
+    const index = statements.length - 1;
     input.value = '';
     document.getElementById('statement-count').textContent = statements.length;
 
     // 2. Render the NEW segment
-    // Logic: Each new segment is placed at a position 30 degrees FURTHER than the last one
-    // relative to the wheel's origin. So index 0 is at 0deg, index 1 is at 30deg, etc.
-    renderNewSegment(text, statements.length - 1);
+    // IMPORTANT: We add it at a fixed rotation relative to the wheel's current state.
+    // If wheel is at -30deg, we add text at +30deg so it appears at 0deg visually.
+    // Actually, simpler: We add text at `index * 30` degrees.
+    // Since the wheel rotates `-30` for each item, `index * 30` + `wheel * -30` = 0 (3 o'clock).
+    
+    renderNewSegment(text, index);
 
-    // 3. Rotate the WHOLE wheel backwards so the new segment stays at 3 o'clock (visual entry point)
-    // Actually, to keep the entry point static (3 o'clock), we need to rotate the wheel -30deg 
-    // BEFORE adding the next one? No, we want the NEW one to appear at 3 o'clock.
-    
-    // Let's refine:
-    // We want Segment 1 to appear at 3 o'clock. 
-    // Then we rotate -30deg. 
-    // Segment 1 is now at 2 o'clock. 3 o'clock is empty.
-    // We add Segment 2 at 3 o'clock.
-    // Perfect.
-    
-    // So, when adding Statement #1 (Index 0):
-    // - Place text at rotation 0deg (relative to wheel).
-    // - Wheel rotation is currently 0deg.
-    // - Rotate wheel to -30deg AFTER adding.
-    
+    // 3. Rotate the WHOLE wheel backwards AFTER adding
+    // This moves the item we just added UP to 2 o'clock, clearing 3 o'clock for the next one.
     rotateWheel(-30);
 
     if (statements.length >= 12) {
@@ -95,14 +87,14 @@ function renderNewSegment(text, index) {
     el.textContent = text;
     el.id = `segment-${index}`;
     
-    // The segment's permanent home on the wheel is at (Index * 30) degrees.
-    // e.g., Item 0 is at 0deg. Item 1 is at 30deg.
+    // Each item lives permanently at this angle on the wheel
     const segmentAngle = index * 30;
     
     const isMobile = window.innerWidth < 600;
     const radius = isMobile ? 60 : 90; 
     
     // Place it: Rotate to angle -> Push out to radius
+    // Note: CSS transform-origin is left center, so it pivots from center
     el.style.transform = `rotate(${segmentAngle}deg) translate(${radius}px)`;
 
     container.appendChild(el);
@@ -110,16 +102,15 @@ function renderNewSegment(text, index) {
 
 function rotateWheel(degrees) {
     const wheel = document.querySelector('.wheel');
-    const centerText = document.querySelector('.center-circle p'); // Text inside the center circle
+    const centerText = document.querySelector('.center-circle p'); 
 
     wheelRotation += degrees;
     
     wheel.style.transform = `rotate(${wheelRotation}deg)`;
     
-    // Counter-rotate the center text so it always stays upright!
-    // (Otherwise the desire text spins upside down)
+    // Counter-rotate center text
     centerText.style.transform = `rotate(${-wheelRotation}deg)`; 
-    centerText.style.display = 'block'; // Ensure block for transform
+    centerText.style.display = 'block'; 
 }
 
 // --- COMPLETION ---
@@ -131,33 +122,61 @@ function completeWheel() {
         document.getElementById('step-wheel').classList.add('hidden');
         document.getElementById('step-complete').classList.remove('hidden');
         
-        // Victory Spin
         wheel.classList.add('spinning');
         document.querySelector('.center-circle').style.boxShadow = "0 0 25px #e67e22";
         
-        // After spin, reset rotation class but keep position? 
-        // Actually, let's just let it spin and land.
+        // Set focus index to start (so first rotate brings item 0 to view)
+        // If we rotated -30 * 12 times = -360. We are back at start.
+        // Item 0 is at 0deg.
+        currentFocusIndex = -1; // Ready for first click
     }, 1000);
 }
 
 function rotateWheelForReflection() {
-    // This rotates FORWARD to show items 1 by 1
-    rotateWheel(30); 
-    
-    // Highlight logic
-    // We are rotating +30deg, which brings the PREVIOUS item into view?
-    // Let's highlight the item currently at 3 o'clock (0 degrees visual).
-    // If wheel is at -30, Item 1 (30deg) is at 0 visual.
-    
-    // Reset previous highlight
-    if (currentHighlightIndex >= 0) {
-        const prevSeg = document.getElementById(`segment-${currentHighlightIndex}`);
-        if(prevSeg) prevSeg.classList.remove('highlighted');
+    // 1. Clear old highlight
+    if (currentFocusIndex >= 0) {
+        const oldSeg = document.getElementById(`segment-${currentFocusIndex}`);
+        if (oldSeg) {
+            oldSeg.classList.remove('highlighted');
+            // Restore rotation position
+            const isMobile = window.innerWidth < 600;
+            const radius = isMobile ? 60 : 90; 
+            oldSeg.style.transform = `rotate(${currentFocusIndex * 30}deg) translate(${radius}px)`;
+        }
     }
 
-    currentHighlightIndex = (currentHighlightIndex + 1) % 12;
-    const newSeg = document.getElementById(`segment-${currentHighlightIndex}`);
+    // 2. Advance Index
+    currentFocusIndex++;
+    if (currentFocusIndex >= statements.length) currentFocusIndex = 0; // Loop
+
+    // 3. Rotate Wheel to bring this item to 3 o'clock
+    // Item is at `index * 30`. We want it at 0.
+    // Wheel rotation needs to be `-index * 30`.
+    // Since we might have spun a lot, we calculate relative target.
     
+    const targetRotation = -(currentFocusIndex * 30);
+    
+    // Reset wheelRotation to match target (jump or smooth? CSS transition handles smooth)
+    // To avoid "unwinding" (spinning 360 backwards), we handle modular math, 
+    // but simplest is just to keep subtracting 30.
+    
+    // Let's use the simple "rotate forward one step" logic
+    // We are currently at -360 (end of add). 
+    // We want to see Item 0 (at 0deg). Rotation should be 0 (or -360).
+    // Rotate to see Item 1 (at 30deg). Rotation should be -30.
+    // Wait, Item 0 is at 0deg. To see it at 3 o'clock (0deg visual), rotation is 0.
+    // Item 1 is at 30deg. To see it at 3 o'clock, we rotate wheel -30.
+    
+    // Since we ended "Add Mode" by rotating -30 * 12 = -360, we are at 0 effectively.
+    // Clicking "Rotate" should show Item 0 first? Or Item 1?
+    // Let's show the NEXT item.
+    
+    // Force specific rotation calculation
+    wheelRotation = -(currentFocusIndex * 30);
+    rotateWheel(0); // Just apply the value we set above
+
+    // 4. Highlight New
+    const newSeg = document.getElementById(`segment-${currentFocusIndex}`);
     if (newSeg) {
         newSeg.classList.add('highlighted');
     }
