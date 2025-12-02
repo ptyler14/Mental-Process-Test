@@ -5,6 +5,7 @@
     --card-bg: #ffffff;
     --text-light: #7f8c8d;
     --border: #e0e0e0;
+    --highlight: #ffe0b2; /* Color for highlighted segment */
 }
 
 * { box-sizing: border-box; }
@@ -17,6 +18,7 @@ h1 { font-family: 'Merriweather', serif; margin: 0; font-size: 2.5rem; }
 .home-link { position: absolute; left: 0; top: 10px; text-decoration: none; font-size: 1.2rem; }
 
 .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid var(--border); }
+.button-card { background: transparent; box-shadow: none; border: none; padding: 0; }
 
 input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; margin-bottom: 15px; }
 input:focus { outline: none; border-color: var(--accent); }
@@ -24,70 +26,78 @@ input:focus { outline: none; border-color: var(--accent); }
 button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1rem; font-weight: 600; border: none; width: 100%; transition: background 0.2s; }
 .primary-btn { background-color: var(--accent); color: white; }
 .primary-btn:hover { background-color: #d35400; }
-.secondary-btn { background-color: white; color: var(--primary); border: 1px solid var(--border); }
-.text-btn { background: none; color: var(--text-light); text-decoration: underline; width: auto; padding: 0; }
+.text-btn { background: none; color: var(--text-light); text-decoration: underline; width: auto; padding: 10px; display: inline-block; }
+.hint { margin-top: -10px; margin-bottom: 15px; font-size: 0.9rem; color: #7f8c8d; }
 
-/* THE WHEEL VISUALIZATION */
+/* --- THE WHEEL VISUALIZATION --- */
+.wheel-container-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
 .wheel-container {
     position: relative;
-    width: 300px;
-    height: 300px; /* Set fixed size for calculation */
-    margin: 0 auto 30px auto;
+    width: 320px; height: 320px; /* Fixed size for calculation */
 }
-
-/* Mobile responsive size */
-@media (min-width: 600px) {
-    .wheel-container { width: 500px; height: 500px; }
-}
+@media (min-width: 600px) { .wheel-container { width: 500px; height: 500px; } }
 
 .wheel {
-    width: 100%;
-    height: 100%;
-    border: 2px dashed var(--border);
+    width: 100%; height: 100%;
+    border: 3px solid var(--primary);
     border-radius: 50%;
     position: relative;
-    background: white;
+    background-color: white;
+    /* Create 12 segments using gradients for spokes */
+    background-image: 
+        linear-gradient(0deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
+        linear-gradient(30deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
+        linear-gradient(60deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
+        linear-gradient(90deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
+        linear-gradient(120deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
+        linear-gradient(150deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .center-circle {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 30%;
-    height: 30%;
-    background: var(--accent);
-    color: white;
+    width: 35%; height: 35%;
+    background: white;
+    border: 3px solid var(--primary);
+    color: var(--primary);
     border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     text-align: center;
-    padding: 10px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+    padding: 15px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.2rem; font-weight: bold;
     z-index: 10;
+    box-shadow: inset 0 0 20px rgba(230, 126, 34, 0.1);
 }
+@media (min-width: 600px) { .center-circle { font-size: 1.5rem; } }
 
 .segment-text {
     position: absolute;
-    width: 120px;
-    font-size: 0.7rem;
+    top: 50%; left: 50%;
+    /* Position at center, then transform out */
+    width: 140px; /* Fixed width for text */
     text-align: center;
-    background: #fff3e0;
+    font-size: 0.7rem; font-weight: 600;
+    color: var(--primary);
+    font-family: 'Dancing Script', cursive;
+    white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
     padding: 5px;
     border-radius: 4px;
-    border: 1px solid #ffe0b2;
-    
-    /* Centering logic handled by JS usually, but here is CSS approach */
-    top: 50%; left: 50%;
-    margin-top: -15px; /* half height */
-    margin-left: -60px; /* half width */
-    transition: all 0.5s ease;
+    /* Transform origin is the center of the wheel */
+    transform-origin: 0 0;
+    transition: all 0.3s ease;
 }
+@media (min-width: 600px) { .segment-text { width: 220px; font-size: 1rem; } }
 
-@media (min-width: 600px) {
-    .segment-text { width: 160px; font-size: 0.85rem; margin-left: -80px; }
+/* Highlighted state for reflection */
+.segment-text.highlighted {
+    background-color: var(--highlight);
+    box-shadow: 0 0 10px var(--highlight);
+    color: #d35400;
+    z-index: 5;
 }
 
 .hidden { display: none !important; }
