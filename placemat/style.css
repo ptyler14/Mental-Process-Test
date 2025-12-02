@@ -1,82 +1,76 @@
-/* --- VARIABLES & RESET --- */
 :root {
-    --primary: #2c3e50;
-    --accent: #2980b9; /* Unified Blue Theme */
-    --accent-hover: #2471a3;
-    --bg: #fcfcfc;
+    --bg: #fdfbf7;
     --card-bg: #ffffff;
-    --text-light: #7f8c8d;
-    --border: #e0e0e0;
+    --text: #2c3e50;
     --me-color: #3498db;
-    --universe-color: #9b59b6; /* Keep the purple for Universe column only */
-    --universe-bg: #f3e5f5;
+    --universe-color: #9b59b6;
+    --neutral-color: #95a5a6;
+    --border: #e0e0e0;
 }
 
 * { box-sizing: border-box; }
-body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--primary); display: flex; justify-content: center; padding: 20px; margin: 0; line-height: 1.6; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
 .container { width: 100%; max-width: 900px; }
 
 header { text-align: center; margin-bottom: 30px; position: relative; }
-h1 { 
-    font-family: 'Dancing Script', cursive; 
-    font-size: 3rem; 
-    margin: 0; 
-    color: var(--primary);
-}
-.home-link { position: absolute; left: 0; top: 5px; text-decoration: none; font-size: 1.2rem; }
-.subtitle { color: var(--text-light); font-style: italic; }
+h1 { font-family: 'Dancing Script', cursive; font-size: 3rem; margin: 0; }
+.subtitle { color: #7f8c8d; margin-top: 5px; font-style: italic; }
+.home-link { position: absolute; left: 0; top: 10px; text-decoration: none; font-size: 1.2rem; }
 
-/* INPUT AREA */
-.input-area {
-    background: white;
+/* CARD STYLE */
+.card {
+    background: var(--card-bg);
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    margin-bottom: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    margin-bottom: 20px;
     border: 1px solid var(--border);
 }
+.hint { margin-top: -10px; margin-bottom: 15px; font-size: 0.9rem; color: #7f8c8d; }
 
+/* INPUT AREA */
+.input-row { display: flex; gap: 10px; }
 input {
-    width: 100%;
-    padding: 15px;
-    font-size: 1.1rem;
+    flex: 1;
+    padding: 12px;
+    font-size: 1rem;
     border: 2px solid var(--border);
     border-radius: 8px;
     outline: none;
-    transition: border-color 0.2s;
 }
-input:focus { border-color: var(--me-color); }
+input:focus { border-color: var(--neutral-color); }
+.btn-neutral { background-color: var(--neutral-color); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
 
-.button-group { display: flex; gap: 10px; }
-
-button {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.1s, opacity 0.2s;
+/* BRAIN DUMP LIST */
+#brain-dump-section { background-color: #f8f9fa; }
+.unsorted-item {
+    background: white;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: popIn 0.3s ease-out;
 }
-button:active { transform: scale(0.98); }
-
-.btn-me { background-color: var(--me-color); color: white; }
-.btn-universe { 
-    background: linear-gradient(135deg, #9b59b6, #8e44ad); 
-    color: white; 
-}
+.sort-buttons { display: flex; gap: 5px; }
+.sort-btn { padding: 5px 10px; font-size: 0.8rem; border-radius: 4px; border: none; cursor: pointer; color: white; font-weight: bold; }
+.sort-me { background-color: var(--me-color); }
+.sort-universe { background-color: var(--universe-color); }
 
 /* PLACEMAT BOARD */
-.placemat-board {
-    display: flex;
-    gap: 20px;
-    min-height: 400px;
-}
-
+.placemat-board { display: flex; gap: 20px; min-height: 400px; }
 .column {
     flex: 1;
     background: white;
@@ -84,37 +78,13 @@ button:active { transform: scale(0.98); }
     padding: 20px;
     border: 1px solid var(--border);
     box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-    display: flex;
-    flex-direction: column;
 }
-
-.universe-column {
-    background-color: #faf5fc;
-    border-color: #e1bee7;
-}
-
-.column-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--border);
-}
-
+.universe-column { background-color: #faf5fc; border-color: #e1bee7; }
+.column-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
 .column-header h2 { margin: 0; font-size: 1.2rem; }
+.count { background: #eee; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: bold; }
 
-.count {
-    background: #eee;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-.task-list { flex: 1; }
-
-/* TASK ITEM */
+/* SORTED TASK ITEMS */
 .task-item {
     background: white;
     padding: 12px;
@@ -124,44 +94,18 @@ button:active { transform: scale(0.98); }
     display: flex;
     justify-content: space-between;
     align-items: center;
-    animation: popIn 0.3s ease-out;
+    animation: slideIn 0.3s ease-out;
 }
+@keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes popIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+.universe-column .task-item { border-left: 4px solid var(--universe-color); }
+.me-column .task-item { border-left: 4px solid var(--me-color); }
 
-.universe-column .task-item {
-    border-left: 4px solid var(--universe-color);
-}
+.delete-btn { background: none; color: #ccc; border: none; font-size: 1.2rem; cursor: pointer; }
+.delete-btn:hover { color: #e74c3c; }
 
-.me-column .task-item {
-    border-left: 4px solid var(--me-color);
-}
+.text-btn { background: none; border: none; color: #95a5a6; margin-top: 30px; width: 100%; text-decoration: underline; cursor: pointer; }
+.hidden { display: none; }
 
-.delete-btn {
-    background: none;
-    color: #ccc;
-    font-size: 1.2rem;
-    padding: 0 5px;
-    flex: 0;
-    cursor: pointer;
-    border: none;
-}
-.delete-btn:hover { color: var(--danger); }
-
-.text-btn {
-    background: none;
-    border: none;
-    color: #95a5a6;
-    margin-top: 30px;
-    width: 100%;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-/* Responsive for mobile */
-@media (max-width: 700px) {
-    .placemat-board { flex-direction: column; }
-}
+@media (max-width: 700px) { .placemat-board { flex-direction: column; } }
