@@ -8,7 +8,9 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let statements = [];
 let centerDesire = "";
 let wheelRotation = 0; 
-let currentHighlightIndex = -1;
+// Track which statement index is currently at the 3 o'clock position
+// Start at -1 (none), first add becomes 0
+let currentFocusIndex = -1; 
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -55,17 +57,28 @@ function addStatement() {
     const text = input.value.trim();
     if (!text) return;
     
+    // 1. Add to array
     statements.push(text);
+    const index = statements.length - 1;
     input.value = '';
     document.getElementById('statement-count').textContent = statements.length;
 
-    // 1. Rotation
-    if (statements.length > 1) {
-        rotateWheel(-30);
-    }
+    // 2. Render the NEW segment
+    // We place it based on its index. Index 0 is at 0 degrees (3 o'clock).
+    // Index 1 is at 30 degrees.
+    // Since we rotate the wheel -30 degrees for each new item, the *visual* result is
+    // that the new item always appears at 3 o'clock.
+    renderNewSegment(text, index);
 
-    // 2. Render
-    renderNewSegment(text, statements.length - 1);
+    // 3. Rotate the WHOLE wheel backwards to clear the spot for the next one
+    // Exception: Don't rotate for the *very first* item so it stays visible while we type the second.
+    // Wait, no - if we don't rotate, the second item will overlap visually until we rotate.
+    // Better UX: Add item at 3 o'clock. Then rotate immediately so 3 o'clock is open again.
+    // Let's try immediate rotation.
+    
+    if (statements.length > 0) {
+         rotateWheel(-30);
+    }
 
     if (statements.length >= 12) {
         completeWheel();
@@ -79,46 +92,19 @@ function renderNewSegment(text, index) {
     el.textContent = text;
     el.id = `segment-${index}`;
     
-    const segmentAngle = index * 30; 
+    // Each item lives permanently at this angle on the wheel relative to the wheel's start
+    // Item 0 is at 0 degrees. Item 1 is at 30 degrees.
+    const segmentAngle = index * 30;
     
     const isMobile = window.innerWidth < 600;
-    const radius = isMobile ? 55 : 85; 
+    const radius = isMobile ? 60 : 90; 
     
-    // Offset Calculation:
-    // We want the text to be above the line.
-    // "Above" means rotating slightly LESS than the spoke angle (counter-clockwise shift)
-    // OR translating Y upwards.
-    // Let's translate Y upwards by 15px to lift it off the line.
+    // Place it: Rotate to angle -> Push out to radius
+    // Note: CSS transform-origin is left center, so it pivots from center
+    el.style.transform = `rotate(${segmentAngle}deg) translate(${radius}px)`;
     
-    // TRANSFORM LOGIC:
-    // 1. Rotate to spoke angle.
-    // 2. Translate X (outward).
-    // 3. Translate Y (lift up off the line).
-    
-    let transform = `rotate(${segmentAngle}deg) translate(${radius}px, -15px)`;
-
-    // Left Side Flip Logic (90 to 270 degrees)
-    const normAngle = (segmentAngle + 360) % 360;
-    if (normAngle > 90 && normAngle < 270) {
-        // If flipped, "up" becomes "down". 
-        // So we need to translate Y *down* (positive) to move it above the line visually.
-        // Also, text alignment needs to flip.
-        
-        el.style.textAlign = 'right';
-        el.style.transformOrigin = 'right center'; 
-        // Push out further because anchor flipped
-        const adjustRadius = radius + (isMobile ? 60 : 100); 
-        
-        // Flip Transform: Rotate + Translate + Flip (rotate 180)
-        // Note: Translate Y becomes +15px because the whole coordinate system flips.
-        transform = `rotate(${segmentAngle}deg) translate(${adjustRadius}px, 15px) rotate(180deg)`; 
-    } else {
-        el.style.textAlign = 'left';
-        el.style.transformOrigin = 'left center';
-    }
-
-    el.style.transform = transform;
-    el.dataset.baseTransform = transform;
+    // Store base transform for later (restoring after highlight)
+    el.dataset.baseTransform = el.style.transform;
 
     container.appendChild(el);
 }
@@ -130,6 +116,8 @@ function rotateWheel(degrees) {
     wheelRotation += degrees;
     
     wheel.style.transform = `rotate(${wheelRotation}deg)`;
+    
+    // Counter-rotate the center text so it always stays upright!
     centerText.style.transform = `rotate(${-wheelRotation}deg)`; 
     centerText.style.display = 'block'; 
 }
@@ -145,24 +133,43 @@ function completeWheel() {
         
         wheel.classList.add('spinning');
         document.querySelector('.center-circle').style.boxShadow = "0 0 25px #2980b9";
-        currentHighlightIndex = -1; 
+        
+        // Reset focus index. Since we rotated -30 * 12 = -360 deg, we are back at start.
+        // The item at 3 o'clock is Item 0 (visually).
+        // Wait, if we rotated -360, then Item 0 is at 0 deg relative to wheel.
+        // Wheel is at 0 deg (effectively).
+        // So Item 0 is at 3 o'clock.
+        
+        // We want the FIRST click of "Rotate" to highlight Item 0.
+        currentFocusIndex = -1; 
     }, 1000);
 }
 
 function rotateWheelForReflection() {
-    rotateWheel(30); 
-    
+    // 1. Clear old highlight
     if (currentHighlightIndex >= 0) {
-        const prevSeg = document.getElementById(`segment-${currentHighlightIndex}`);
-        if(prevSeg) {
-            prevSeg.classList.remove('highlighted');
-            prevSeg.style.transform = prevSeg.dataset.baseTransform;
+        const oldSeg = document.getElementById(`segment-${currentHighlightIndex}`);
+        if (oldSeg) {
+            oldSeg.classList.remove('highlighted');
+            // Restore basic position
+            oldSeg.style.transform = oldSeg.dataset.baseTransform;
         }
     }
 
-    currentHighlightIndex = (currentHighlightIndex + 1) % 12;
-    const newSeg = document.getElementById(`segment-${currentHighlightIndex}`);
+    // 2. Advance Index
+    currentHighlightIndex++;
+    if (currentHighlightIndex >= statements.length) currentHighlightIndex = 0;
+
+    // 3. Rotate wheel to bring this item to 3 o'clock (0 deg visual)
+    // Item is at `index * 30`.
+    // Wheel needs to be at `-index * 30`.
+    // We animate to that specific rotation.
     
+    wheelRotation = -(currentHighlightIndex * 30);
+    rotateWheel(0); // Apply the absolute rotation calculation above
+
+    // 4. Highlight New
+    const newSeg = document.getElementById(`segment-${currentHighlightIndex}`);
     if (newSeg) {
         newSeg.classList.add('highlighted');
     }
