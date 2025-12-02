@@ -7,6 +7,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // --- STATE ---
 let statements = [];
 let centerDesire = "";
+let wheelRotation = 0; // Tracks how much the whole wheel has spun
 let currentHighlightIndex = -1;
 
 // --- INIT ---
@@ -31,9 +32,7 @@ function attachEventListeners() {
     document.getElementById('statement-input').addEventListener('keypress', (e) => {
         if(e.key === 'Enter') addStatement();
     });
-    
-    // Rotate Button (for reflection phase)
-    document.getElementById('rotate-btn').addEventListener('click', rotateWheel);
+    document.getElementById('rotate-btn').addEventListener('click', rotateWheelForReflection);
 }
 
 // --- LOGIC ---
@@ -56,72 +55,71 @@ function addStatement() {
     const text = input.value.trim();
     if (!text) return;
     
+    // 1. Add to array
     statements.push(text);
     input.value = '';
-    
-    renderStatementOnWheel(text, statements.length - 1);
     document.getElementById('statement-count').textContent = statements.length;
+
+    // 2. Render the NEW segment
+    // Logic: Each new segment is placed at a position 30 degrees FURTHER than the last one
+    // relative to the wheel's origin. So index 0 is at 0deg, index 1 is at 30deg, etc.
+    renderNewSegment(text, statements.length - 1);
+
+    // 3. Rotate the WHOLE wheel backwards so the new segment stays at 3 o'clock (visual entry point)
+    // Actually, to keep the entry point static (3 o'clock), we need to rotate the wheel -30deg 
+    // BEFORE adding the next one? No, we want the NEW one to appear at 3 o'clock.
+    
+    // Let's refine:
+    // We want Segment 1 to appear at 3 o'clock. 
+    // Then we rotate -30deg. 
+    // Segment 1 is now at 2 o'clock. 3 o'clock is empty.
+    // We add Segment 2 at 3 o'clock.
+    // Perfect.
+    
+    // So, when adding Statement #1 (Index 0):
+    // - Place text at rotation 0deg (relative to wheel).
+    // - Wheel rotation is currently 0deg.
+    // - Rotate wheel to -30deg AFTER adding.
+    
+    rotateWheel(-30);
 
     if (statements.length >= 12) {
         completeWheel();
     }
 }
 
-function renderStatementOnWheel(text, index) {
+function renderNewSegment(text, index) {
     const container = document.getElementById('segments-container');
     const el = document.createElement('div');
     el.className = 'segment-text';
     el.textContent = text;
     el.id = `segment-${index}`;
     
-    // Angle Calculation
-    // 12 segments = 30 degrees each.
-    // Index 0 starts at "1 o'clock". 
-    // In CSS, 0deg is 3 o'clock. 12 o'clock is -90deg.
-    // So 1 o'clock is -60deg.
-    const startAngle = -60; 
-    const angleDeg = startAngle + (index * 30);
+    // The segment's permanent home on the wheel is at (Index * 30) degrees.
+    // e.g., Item 0 is at 0deg. Item 1 is at 30deg.
+    const segmentAngle = index * 30;
     
-    // Radius: Distance from center to start of text
     const isMobile = window.innerWidth < 600;
     const radius = isMobile ? 60 : 90; 
     
-    // Apply Transform
-    // 1. Rotate to the correct angle (points the element in the right direction)
-    // 2. Translate outwards (moves it along that line)
-    // 3. Rotate text to be readable (optional flip for left side)
-    
-    let rotation = angleDeg;
-    let textRotation = 0;
-    
-    // Normalize angle to 0-360
-    let normalizedAngle = (angleDeg + 360) % 360;
-    
-    // Logic: Text on the left side (90 to 270 degrees) is upside down. Flip it.
-    if (normalizedAngle > 90 && normalizedAngle < 270) {
-        textRotation = 180;
-        el.style.textAlign = 'right'; // Anchor text to the outer edge so it grows inward
-        // We need to push it out further because the anchor point flips
-        // This is a visual adjustment based on text length usually, but fixed radius helps.
-    } else {
-        el.style.textAlign = 'left';
-    }
-
-    // Combine transforms
-    // The order matters: Rotate (direction) -> Translate (distance) -> Rotate (readability flip)
-    el.style.transform = `rotate(${angleDeg}deg) translate(${radius}px) rotate(${textRotation}deg)`;
-    
-    // Critical for radiating text:
-    el.style.transformOrigin = "left center"; 
-    el.style.position = "absolute";
-    el.style.top = "50%";
-    el.style.left = "50%";
-    el.style.width = "140px"; // Limit width so it doesn't overflow
-    
-    // Save base transform for later use (resetting highlight)
-    el.dataset.baseTransform = el.style.transform;
+    // Place it: Rotate to angle -> Push out to radius
+    el.style.transform = `rotate(${segmentAngle}deg) translate(${radius}px)`;
 
     container.appendChild(el);
+}
+
+function rotateWheel(degrees) {
+    const wheel = document.querySelector('.wheel');
+    const centerText = document.querySelector('.center-circle p'); // Text inside the center circle
+
+    wheelRotation += degrees;
+    
+    wheel.style.transform = `rotate(${wheelRotation}deg)`;
+    
+    // Counter-rotate the center text so it always stays upright!
+    // (Otherwise the desire text spins upside down)
+    centerText.style.transform = `rotate(${-wheelRotation}deg)`; 
+    centerText.style.display = 'block'; // Ensure block for transform
 }
 
 // --- COMPLETION ---
@@ -133,24 +131,28 @@ function completeWheel() {
         document.getElementById('step-wheel').classList.add('hidden');
         document.getElementById('step-complete').classList.remove('hidden');
         
-        // Add spinning animation class
+        // Victory Spin
         wheel.classList.add('spinning');
-        
         document.querySelector('.center-circle').style.boxShadow = "0 0 25px #e67e22";
+        
+        // After spin, reset rotation class but keep position? 
+        // Actually, let's just let it spin and land.
     }, 1000);
 }
 
-function rotateWheel() {
+function rotateWheelForReflection() {
+    // This rotates FORWARD to show items 1 by 1
+    rotateWheel(30); 
+    
+    // Highlight logic
+    // We are rotating +30deg, which brings the PREVIOUS item into view?
+    // Let's highlight the item currently at 3 o'clock (0 degrees visual).
+    // If wheel is at -30, Item 1 (30deg) is at 0 visual.
+    
     // Reset previous highlight
     if (currentHighlightIndex >= 0) {
         const prevSeg = document.getElementById(`segment-${currentHighlightIndex}`);
-        if (prevSeg) {
-            prevSeg.classList.remove('highlighted');
-            // Restore original position/rotation
-            prevSeg.style.transform = prevSeg.dataset.baseTransform;
-        }
-    } else {
-         document.querySelector('.center-circle').style.boxShadow = "inset 0 0 20px rgba(230, 126, 34, 0.1)";
+        if(prevSeg) prevSeg.classList.remove('highlighted');
     }
 
     currentHighlightIndex = (currentHighlightIndex + 1) % 12;
@@ -158,9 +160,5 @@ function rotateWheel() {
     
     if (newSeg) {
         newSeg.classList.add('highlighted');
-        // When highlighted, we can scale it up slightly in place
-        // The CSS handles the appearance, but we ensure it keeps its rotation
-        // Note: CSS 'transform' property overrides inline style, so we might need to re-apply rotation in CSS or JS
-        // Let's trust the CSS class to add scale/z-index, but keep the inline rotation.
     }
 }
