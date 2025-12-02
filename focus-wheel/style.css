@@ -41,11 +41,11 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 
 .wheel {
     width: 100%; height: 100%;
-    border: 2px solid var(--primary); /* Thinner border */
+    border: 2px solid var(--primary);
     border-radius: 50%;
     position: relative;
     background-color: white;
-    /* THINNER SPOKES (0.4% width instead of 1%) */
+    /* Spoke lines */
     background-image: 
         linear-gradient(0deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
         linear-gradient(30deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
@@ -80,15 +80,12 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .segment-text {
     position: absolute;
     top: 50%; left: 50%;
+    /* Move text slightly ABOVE the spoke line (negative margin-top) */
+    margin-top: -15px; 
+    padding-left: 10px; /* Space from center circle */
     
-    /* POSITIONING FIX: 
-       Start from center. Transform origin is LEFT CENTER.
-       Margin-top moves it UP to sit above the line. */
-    margin-top: -18px; 
-    padding-left: 5px; /* Push slightly away from center circle */
-    
-    width: 130px; 
-    text-align: left; /* Always align left (radiating out) */
+    width: 120px; 
+    text-align: left;
     font-size: 0.75rem; font-weight: 600;
     color: var(--primary);
     font-family: 'Dancing Script', cursive;
@@ -97,10 +94,11 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     overflow: hidden; 
     text-overflow: ellipsis;
     
+    /* Pivot from left center */
     transform-origin: left center; 
     pointer-events: none; 
 }
-@media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; margin-top: -22px; } }
+@media (min-width: 600px) { .segment-text { width: 180px; font-size: 1rem; margin-top: -20px; } }
 
 .segment-text.highlighted {
     background-color: var(--highlight);
@@ -112,7 +110,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     white-space: normal; 
     overflow: visible;
     border: 2px solid var(--accent);
-    /* Reset to horizontal when highlighted */
+    /* Reset rotation to horizontal for reading */
     transform: rotate(0deg) translate(60px) !important; 
 }
 @media (min-width: 600px) { 
