@@ -1,4 +1,4 @@
-/* ... (Variables & Reset same as before) ... */
+/* ... (Variables same as before) ... */
 :root {
     --primary: #2c3e50;
     --accent: #2980b9; 
@@ -45,7 +45,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     border-radius: 50%;
     position: relative;
     background-color: white;
-    /* Spoke lines */
+    /* Spoke lines - Adjusted to be perfectly centered on angles */
     background-image: 
         linear-gradient(0deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
         linear-gradient(30deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
@@ -80,12 +80,20 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .segment-text {
     position: absolute;
     top: 50%; left: 50%;
-    /* Reset margins - we handle offset in JS transform now */
-    margin: 0; 
-    padding: 0;
+    
+    /* ALIGNMENT FIX: 
+       We set height to 0 so the "center" is truly the line.
+       Then we use negative margin-top to lift the text block up.
+       (1.5em line-height usually means text is ~20px tall. -20px lifts it up).
+    */
+    height: 0;
+    line-height: 0; /* Reset box height */
+    
+    margin-top: -18px; /* Lifts text above the 3 o'clock line */
+    padding-left: 0;
     
     width: 130px; 
-    text-align: center;
+    text-align: left;
     font-size: 0.75rem; font-weight: 600;
     color: var(--primary);
     font-family: 'Dancing Script', cursive;
@@ -94,29 +102,46 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     overflow: hidden; 
     text-overflow: ellipsis;
     
-    /* Crucial: Pivot from center of wheel */
-    transform-origin: left center; 
+    /* Pivot from the exact center of the wheel */
+    transform-origin: 0 0; 
     pointer-events: none; 
 }
-@media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; } }
+@media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; margin-top: -25px; } }
+
+.segment-text span {
+    /* Inner wrapper to give padding/background if needed */
+    display: inline-block;
+    padding: 2px 5px;
+    line-height: 1.2; /* Restore line height for text */
+}
 
 .segment-text.highlighted {
+    /* Reset margin so it centers */
+    margin-top: 0;
+    
+    z-index: 100; 
+    width: auto; 
+    max-width: 250px; 
+    white-space: normal; 
+    overflow: visible;
+    
+    /* Use flex to center content vertically */
+    display: flex;
+    align-items: center;
+    
+    /* The highlight box style */
     background-color: var(--highlight);
     color: var(--highlight-text);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 100; 
-    width: auto; 
-    max-width: 200px; 
-    white-space: normal; 
-    overflow: visible;
     border: 2px solid var(--accent);
-    padding: 5px;
-    border-radius: 4px;
-    /* Reset rotation to horizontal for reading */
-    transform: rotate(0deg) translate(60px) !important; 
+    border-radius: 6px;
+    padding: 10px;
+
+    /* Position it dead center horizontally on the right side */
+    transform: rotate(0deg) translate(60px, -50%) !important; 
 }
 @media (min-width: 600px) { 
-    .segment-text.highlighted { transform: rotate(0deg) translate(90px) !important; }
+    .segment-text.highlighted { transform: rotate(0deg) translate(90px, -50%) !important; }
 }
 
 .spinning { animation: spin-victory 3s cubic-bezier(0.25, 0.1, 0.25, 1); }
