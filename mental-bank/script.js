@@ -5,7 +5,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let supabase; 
 const get = (id) => document.getElementById(id);
 
-// State
+// --- STATE ---
 let user = {
     realityIncome: 0,
     mentalBankGoal: 0,
@@ -43,11 +43,10 @@ async function init() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
         currentUser = session.user;
-        // NO AUTH CONTAINER HERE (Handled by Home Page)
-        // Just load data
+        // User is logged in! Load their data.
         loadUserData();
     } else {
-        // SECURITY CHECK: If not logged in, redirect to Home
+        // User is NOT logged in. Redirect them to the Home Page.
         window.location.href = "../index.html";
     }
 }
@@ -75,8 +74,9 @@ function setupIncomeFormatting() {
     }
 }
 
-// --- GLOBAL CLICK HANDLER ---
+// --- EVENT LISTENERS ---
 function attachEventListeners() {
+    
     // Wizard Nav
     if(get('step-1-next-btn')) get('step-1-next-btn').addEventListener('click', handleStep1Next);
     if(get('step-2-back-btn')) get('step-2-back-btn').addEventListener('click', () => showStep('step-1'));
@@ -93,7 +93,7 @@ function attachEventListeners() {
     // Setup Save
     if(get('save-setup-btn')) get('save-setup-btn').addEventListener('click', handleSaveSetup);
 
-    // Logout
+    // Logout (Redirects to home after signing out)
     if(get('logout-btn')) get('logout-btn').addEventListener('click', async () => {
         await supabase.auth.signOut();
         window.location.href = "../index.html";
@@ -142,11 +142,8 @@ function handleStep1Next() {
     
     user.realityIncome = income;
     user.mentalBankGoal = income * 2;
-    
-    // REVERTED MATH: Goal / 1000 (Standard Mental Bank Rule)
     user.hourlyRate = user.mentalBankGoal / 1000;
 
-    // ADDED "/yr" and "/hr" labels
     safeSetText('mb-goal-display', formatCurrency(user.mentalBankGoal) + " /yr");
     safeSetText('hourly-rate-display', formatCurrency(user.hourlyRate) + " /hr");
     safeSetText('contract-goal', formatCurrency(user.mentalBankGoal));
@@ -301,14 +298,13 @@ async function handleSubmitLedger() {
 
     if (error) alert("Error: " + error.message);
     else {
-        // Show Success Message
         get('entry-form-container').classList.add('hidden');
         get('success-message').classList.remove('hidden');
-        // Scroll to top of success message
         get('success-message').scrollIntoView({ behavior: 'smooth' });
     }
 }
 
+// --- DATA LOADING ---
 async function loadUserData() {
     const { data: settings } = await supabase.from('user_settings').select('*').limit(1);
     const { data: goals } = await supabase.from('goals').select('*');
@@ -359,6 +355,7 @@ async function loadUserData() {
     }
 }
 
+// --- VISUALIZATION & UTILS ---
 function handleToggleChart() {
     const c = get('chart-container');
     c.classList.toggle('hidden');
