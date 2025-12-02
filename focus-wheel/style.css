@@ -1,11 +1,12 @@
+/* ... (Variables & Reset same as before) ... */
 :root {
     --primary: #2c3e50;
-    --accent: #e67e22; /* Orange for energy/focus */
+    --accent: #e67e22;
     --bg: #fff8f0;
     --card-bg: #ffffff;
     --text-light: #7f8c8d;
     --border: #e0e0e0;
-    --highlight: #ffe0b2; /* Color for highlighted segment */
+    --highlight: #ffe0b2;
     --highlight-text: #d35400;
 }
 
@@ -34,7 +35,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .wheel-container-wrapper { display: flex; justify-content: center; margin-bottom: 30px; padding: 20px; overflow: visible; }
 .wheel-container {
     position: relative;
-    width: 320px; height: 320px; /* Fixed size for calculation */
+    width: 320px; height: 320px; 
 }
 @media (min-width: 600px) { .wheel-container { width: 500px; height: 500px; } }
 
@@ -44,7 +45,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     border-radius: 50%;
     position: relative;
     background-color: white;
-    /* Create 12 segments using gradients for spokes */
+    /* 12 segments gradients */
     background-image: 
         linear-gradient(0deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
         linear-gradient(30deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
@@ -53,8 +54,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
         linear-gradient(120deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
         linear-gradient(150deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%);
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy rotation */
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .center-circle {
@@ -73,7 +73,6 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     font-size: 1.2rem; font-weight: bold;
     z-index: 10;
     box-shadow: inset 0 0 20px rgba(230, 126, 34, 0.1);
-    /* IMPORTANT: We counter-rotate this in JS so text stays upright */
     transition: transform 0.5s ease; 
 }
 @media (min-width: 600px) { .center-circle { font-size: 1.5rem; } }
@@ -81,51 +80,41 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .segment-text {
     position: absolute;
     top: 50%; left: 50%;
+    /* FIX: Move UP by ~15px to sit ON TOP of the line, not through it */
+    margin-top: -20px; 
+    
     width: 130px; 
     text-align: center;
     font-size: 0.75rem; font-weight: 600;
     color: var(--primary);
     font-family: 'Dancing Script', cursive;
-    
-    /* Truncate long text */
     white-space: nowrap; 
     overflow: hidden; 
     text-overflow: ellipsis;
-    
     padding: 4px 8px;
     border-radius: 4px;
-    
-    /* Pivot from the left edge (center of wheel) */
-    transform-origin: left center; 
+    transform-origin: left center; /* Pivot from center */
     pointer-events: none; 
 }
 @media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; } }
 
-/* --- HIGHLIGHTED STATE --- */
 .segment-text.highlighted {
     background-color: var(--highlight);
     color: var(--highlight-text);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     z-index: 100; 
-    
-    /* Expand to show full text */
     width: auto; 
     max-width: 200px; 
     white-space: normal; 
     overflow: visible;
-    
-    /* Make it pop */
     border: 2px solid var(--accent);
-    /* Note: Rotation is handled in JS now to keep it aligned */
+    /* Ensure highlighted text is upright */
+    transform: rotate(0deg) translate(60px) !important; 
+}
+@media (min-width: 600px) { 
+    .segment-text.highlighted { transform: rotate(0deg) translate(90px) !important; }
 }
 
-/* Spin animation class */
-.spinning {
-    animation: spin-victory 3s cubic-bezier(0.25, 0.1, 0.25, 1);
-}
-@keyframes spin-victory {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(1080deg); }
-}
-
+.spinning { animation: spin-victory 3s cubic-bezier(0.25, 0.1, 0.25, 1); }
+@keyframes spin-victory { 0% { transform: rotate(0deg); } 100% { transform: rotate(1080deg); } }
 .hidden { display: none !important; }
