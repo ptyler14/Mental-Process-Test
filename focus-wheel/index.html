@@ -3,235 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Wellness Tools</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css"> 
+    <title>Focus Wheel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-    <div id="auth-container" class="auth-overlay">
-        <div class="auth-box">
-            <h2 id="auth-title">Welcome Back</h2>
-            <p id="auth-subtitle">Sign in to access your wellness tools.</p>
-            
-            <input type="email" id="email-input" placeholder="Email">
-            <input type="password" id="password-input" placeholder="Password">
-            
-            <button id="auth-action-btn" class="primary-btn full-width">Log In</button>
-            
-            <p class="toggle-text">
-                <span id="toggle-auth-prompt">Don't have an account?</span>
-                <button id="toggle-auth-btn" class="text-btn">Sign Up</button>
-            </p>
-
-            <p id="auth-message" class="error-text"></p>
-        </div>
-    </div>
-
-    <div id="dashboard-container" class="container hidden">
+    <div class="container">
         <header>
-            <div class="header-content">
-                <h1>My Wellness Tools</h1>
-                <button id="logout-btn" class="text-btn">Log Out</button>
-            </div>
-            <p class="subtitle">A collection of tools for growth and mindset.</p>
+            <a href="../index.html" class="home-link">🏠 Home</a>
+            <h1>Focus Wheel</h1>
+            <p class="subtitle">Bridge the gap from resistance to relief.</p>
         </header>
 
-        <div class="tools-grid">
-            
-            <div class="tool-card">
-                <span class="badge">Active</span>
-                <h2>The Mental Bank</h2>
-                <p>A nightly ledger ritual to reprogram your subconscious mind and increase prosperity consciousness.</p>
-                <div class="card-actions">
-                    <a href="mental-bank/index.html" class="primary-btn small-btn">Open Tool</a>
-                    <button class="text-btn info-btn" onclick="openModal('modal-mental-bank')">ⓘ Learn More</button>
+        <div id="step-center" class="card">
+            <h2>Step 1: Identify the Desire</h2>
+            <p class="intro-text">Focus on what is bothering you, then pivot. What do you <em>want</em> to feel?</p>
+            <label>My Desire (Center of the Wheel):</label>
+            <input type="text" id="center-input" placeholder="e.g., I am rich and abundant.">
+            <button id="start-wheel-btn" class="primary-btn">Start Wheel</button>
+        </div>
+
+        <div id="step-wheel" class="hidden">
+            <div class="wheel-container-wrapper">
+                <div class="wheel-container" id="wheel-input-container">
+                    <div class="wheel">
+                        <div class="center-circle">
+                            <p id="center-text-display">My Desire</p>
+                        </div>
+                        <div id="segments-container"></div>
+                    </div>
                 </div>
             </div>
 
-            <div class="tool-card">
-                <span class="badge" style="background:#f3e5f5; color:#8e44ad;">Active</span>
-                <h2>The Placemat</h2>
-                <p>Overwhelmed? Delegate tasks to the Universe and focus only on what you can do today.</p>
-                <div class="card-actions">
-                    <a href="placemat/index.html" class="primary-btn small-btn" style="background-color:#8e44ad;">Open Tool</a>
-                    <button class="text-btn info-btn" onclick="openModal('modal-placemat')">ⓘ Learn More</button>
+            <div class="input-area card">
+                <h3>Add a Believable Statement (<span id="statement-count">0</span>/12)</h3>
+                <p class="hint">Find a general thought that feels true and brings relief.</p>
+                <input type="text" id="statement-input" placeholder="e.g., My body knows how to be healthy...">
+                <div class="button-group">
+                     <button id="add-statement-btn" class="primary-btn">Add Statement</button>
                 </div>
             </div>
-            
-            <div class="tool-card">
-                <span class="badge" style="background:#e3f2fd; color:#2980b9;">New</span>
-                <h2>Segment Intending</h2>
-                <p>Master the art of pre-paving your day. Practice setting intentions before you act.</p>
-                <div class="card-actions">
-                    <a href="segment-intending/index.html" class="primary-btn small-btn" style="background-color:#2980b9;">Open Tool</a>
-                    <button class="text-btn info-btn" onclick="openModal('modal-segment')">ⓘ Learn More</button>
-                </div>
-            </div>
-
-            <div class="tool-card">
-                <span class="badge" style="background:#fff3e0; color:#e67e22;">New</span>
-                <h2>Focus Wheel</h2>
-                <p>Shift your vibration from negative to positive by finding thoughts that feel true and good.</p>
-                <div class="card-actions">
-                    <a href="focus-wheel/index.html" class="primary-btn small-btn" style="background-color:#e67e22;">Open Tool</a>
-                    <button class="text-btn info-btn" onclick="openModal('modal-focus-wheel')">ⓘ Learn More</button>
-                </div>
-            </div>
-
         </div>
-    </div>
-
-    <div id="modal-mental-bank" class="modal-overlay hidden">
-        <div class="modal-box">
-            <button class="close-modal" onclick="closeModal('modal-mental-bank')">&times;</button>
-            <h2>The Mental Bank Ledger</h2>
-            <div class="modal-content">
-                <h3>What is it?</h3>
-                <p>A nightly journaling practice where you "pay" yourself for positive habits.</p>
-                <h3>Why use it?</h3>
-                <p>To break through financial or success "ceilings" by reprogramming your inner script.</p>
-                <h3>How to do it?</h3>
-                <p>Every night before bed, log your daily "Value Events" and calculate your fantasy deposit.</p>
-            </div>
-            <button class="primary-btn full-width" onclick="window.location.href='mental-bank/index.html'">Start Now</button>
-        </div>
-    </div>
-
-    <div id="modal-placemat" class="modal-overlay hidden">
-        <div class="modal-box">
-            <button class="close-modal" onclick="closeModal('modal-placemat')">&times;</button>
-            <h2>The Placemat Process</h2>
-            <div class="modal-content">
-                <h3>What is it?</h3>
-                <p>A task management tool that splits your to-do list into two columns: things YOU will do, and things the UNIVERSE will handle.</p>
-                <h3>Why use it?</h3>
-                <p>To relieve overwhelm and anxiety by consciously delegating tasks.</p>
-                <h3>How to do it?</h3>
-                <p>List tasks you MUST do today in the "Me" column. Put everything else in the "Universe" column.</p>
-            </div>
-            <button class="primary-btn full-width" style="background-color:#8e44ad;" onclick="window.location.href='placemat/index.html'">Start Now</button>
-        </div>
-    </div>
-
-    <div id="modal-segment" class="modal-overlay hidden">
-        <div class="modal-box">
-            <button class="close-modal" onclick="closeModal('modal-segment')">&times;</button>
-            <h2>The Segment Intending Process</h2>
-            <div class="modal-content">
-                <h3>What is it?</h3>
-                <p>A practice of "pre-paving" your vibrational path by setting a clear intention before entering a new segment of time.</p>
-                <h3>Why use it?</h3>
-                <p>To reduce resistance and confusion, creating smoother, more enjoyable experiences.</p>
-                <h3>How to do it?</h3>
-                <p>Identify when you are changing activities. Pause. Ask yourself: "What do I want from this period?" State it clearly, then proceed.</p>
-            </div>
-            <button class="primary-btn full-width" style="background-color:#2980b9;" onclick="window.location.href='segment-intending/index.html'">Start Now</button>
-        </div>
-    </div>
-
-    <div id="modal-focus-wheel" class="modal-overlay hidden">
-        <div class="modal-box">
-            <button class="close-modal" onclick="closeModal('modal-focus-wheel')">&times;</button>
-            <h2>The Focus Wheel Process</h2>
-            <div class="modal-content">
-                <h3>What is it?</h3>
-                <p>A visual tool to bridge the gap between a negative thought and a positive desire.</p>
-                
-                <h3>Why use it?</h3>
-                <p>When you feel resistance or negative emotion (boredom to anger), this helps you "slow down the wheel" of negativity and gradually spin up positive momentum.</p>
-                
-                <h3>How to do it?</h3>
-                <p>Identify your desire in the center. Then, find 12 general, true statements that feel good to you. Place them around the wheel until you feel relief.</p>
-            </div>
-            <button class="primary-btn full-width" style="background-color:#e67e22;" onclick="window.location.href='focus-wheel/index.html'">Start Now</button>
-        </div>
-    </div>
-
-    <script>
-        // --- SUPABASE CONFIG ---
-        const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmcml3ZG93dXdqeGlmZXlwbGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTczMzIsImV4cCI6MjA3OTQ3MzMzMn0.AZa5GNVDRm1UXU-PiQx7KS0KxQqZ69JbV1Qn2DIlHq0';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // Elements
-        const authContainer = document.getElementById('auth-container');
-        const dashboardContainer = document.getElementById('dashboard-container');
-        const authActionBtn = document.getElementById('auth-action-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const emailInput = document.getElementById('email-input');
-        const passInput = document.getElementById('password-input');
-        const authMessage = document.getElementById('auth-message');
-        
-        const toggleAuthBtn = document.getElementById('toggle-auth-btn');
-        const authTitle = document.getElementById('auth-title');
-        const authSubtitle = document.getElementById('auth-subtitle');
-        const toggleAuthPrompt = document.getElementById('toggle-auth-prompt');
-
-        let isLoginMode = true;
-
-        // --- MODAL LOGIC ---
-        window.openModal = (id) => { document.getElementById(id).classList.remove('hidden'); }
-        window.closeModal = (id) => { document.getElementById(id).classList.add('hidden'); }
-
-        // Check User
-        async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                authContainer.classList.add('hidden');
-                dashboardContainer.classList.remove('hidden');
-            } else {
-                authContainer.classList.remove('hidden');
-                dashboardContainer.classList.add('hidden');
-            }
-        }
-        init();
-
-        // Toggle Login/Signup Mode
-        toggleAuthBtn.addEventListener('click', () => {
-            isLoginMode = !isLoginMode;
-            if (isLoginMode) {
-                authTitle.textContent = "Welcome Back";
-                authSubtitle.textContent = "Sign in to access your wellness tools.";
-                authActionBtn.textContent = "Log In";
-                toggleAuthPrompt.textContent = "Don't have an account?";
-                toggleAuthBtn.textContent = "Sign Up";
-            } else {
-                authTitle.textContent = "Create Account";
-                authSubtitle.textContent = "Start your journey today.";
-                authActionBtn.textContent = "Sign Up";
-                toggleAuthPrompt.textContent = "Already have an account?";
-                toggleAuthBtn.textContent = "Log In";
-            }
-            authMessage.textContent = "";
-        });
-
-        // Handle Auth Action
-        authActionBtn.addEventListener('click', async () => {
-            const email = emailInput.value;
-            const password = passInput.value;
-            if(!email || !password) return alert("Enter email and password");
+        <div id="step-complete" class="hidden" style="text-align:center;">
+            <div class="card">
+                <h2 style="color:var(--accent); font-family: 'Dancing Script', cursive; font-size: 2.5rem;">Alignment Achieved!</h2>
+                <p>You have slowed the wheel of resistance and spun up positive momentum.</p>
+            </div>
             
-            authMessage.textContent = isLoginMode ? "Logging in..." : "Creating account...";
+            <div class="wheel-container-wrapper">
+                <div class="wheel-container" id="wheel-complete-container">
+                    </div>
+            </div>
 
-            if (isLoginMode) {
-                let { error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) authMessage.textContent = error.message;
-                else location.reload();
-            } else {
-                let { error } = await supabase.auth.signUp({ email, password });
-                if (error) authMessage.textContent = error.message;
-                else { alert("Account created! Logging you in..."); location.reload(); }
-            }
-        });
+            <div class="card button-card">
+                <button id="rotate-btn" class="primary-btn" style="margin-bottom: 15px;">🔄 Rotate & Reflect</button>
+            </div>
 
-        // Logout Logic
-        logoutBtn.addEventListener('click', async () => {
-            await supabase.auth.signOut();
-            location.reload();
-        });
-    </script>
+            <div class="card" style="background-color: #fff8e1; border-color: #ffe082;">
+                <h3>🚀 Ready for a Rampage?</h3>
+                <p>Lock in this vibration with a 10-minute "Rampage of Appreciation" meditation.</p>
+                <audio controls style="width: 100%; margin-top: 15px;">
+                    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <button onclick="location.reload()" class="text-btn" style="color: var(--text-light);">Start New Wheel</button>
+                <a href="../index.html" class="text-btn" style="margin-left: 20px;">Back to Dashboard</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
