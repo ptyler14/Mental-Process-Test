@@ -7,8 +7,8 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // --- STATE ---
 let statements = [];
 let centerDesire = "";
-let wheelRotation = 0; 
-let currentFocusIndex = -1; 
+let currentWheelRotation = 0; 
+let currentHighlightIndex = -1;
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -40,6 +40,7 @@ function attachEventListeners() {
 function startWheel() {
     const input = document.getElementById('center-input');
     if (!input.value.trim()) return alert("Please enter your desire.");
+    
     centerDesire = input.value;
     document.getElementById('center-text-display').textContent = centerDesire;
     
@@ -54,53 +55,66 @@ function addStatement() {
     const text = input.value.trim();
     if (!text) return;
     
+    // 1. Add to array
     statements.push(text);
     input.value = '';
     document.getElementById('statement-count').textContent = statements.length;
 
-    // Rotate -30 BEFORE adding (for 2nd item onwards)
-    if (statements.length > 1) {
-        // We subtract 30 to move the previous item UP (counter-clockwise)
-        wheelRotation -= 30;
-        rotateWheel(wheelRotation);
-    }
+    // 2. Render the NEW segment
+    // We use index to determine the slot.
+    // Index 0 = 0 deg. Index 1 = -30 deg (Counter-clockwise filling).
+    // Wait, CSS rotation is clockwise. 
+    // Slot 0 = 0 deg. Slot 1 = 330 deg (-30). Slot 2 = 300 deg (-60).
+    // This fills the wheel "upwards" (counter-clockwise).
+    
+    const slotIndex = statements.length - 1;
+    
+    // Calculate angle for this slot: -30 * index
+    const slotAngle = slotIndex * -30;
+    
+    renderNewSegment(text, slotIndex, slotAngle);
 
-    renderNewSegment(text, statements.length - 1);
+    // 3. Rotate the WHOLE wheel to bring the NEXT slot to 3 o'clock.
+    // If we just filled Slot 0 (0 deg), we want Slot 1 (-30 deg) to be at 3 o'clock.
+    // To move -30 to 0, we must rotate +30.
+    // So we add +30 to current rotation.
+    
+    rotateWheel(30);
 
     if (statements.length >= 12) {
         completeWheel();
     }
 }
 
-function renderNewSegment(text, index) {
+function renderNewSegment(text, index, angle) {
     const container = document.getElementById('segments-container');
     const el = document.createElement('div');
     el.className = 'segment-text';
-    // Wrap text in span for the line-height fix in CSS
-    el.innerHTML = `<span>${text}</span>`;
+    el.textContent = text;
     el.id = `segment-${index}`;
-    
-    // Angle:
-    // Index 0 = 0 deg (relative to wheel).
-    // Index 1 = 30 deg (relative to wheel).
-    // Since wheel is rotated -30, Index 1 appears at 0 deg visual.
-    const segmentAngle = index * 30;
     
     const isMobile = window.innerWidth < 600;
     const radius = isMobile ? 60 : 90; 
     
-    el.style.transform = `rotate(${segmentAngle}deg) translate(${radius}px)`;
+    // Place it at its permanent home on the wheel
+    el.style.transform = `rotate(${angle}deg) translate(${radius}px)`;
+    
+    // Store for later restoration
     el.dataset.baseTransform = el.style.transform;
 
     container.appendChild(el);
 }
 
-function rotateWheel(targetRotation) {
+function rotateWheel(degreesToAdd) {
     const wheel = document.querySelector('.wheel');
     const centerText = document.querySelector('.center-circle p'); 
 
-    wheel.style.transform = `rotate(${targetRotation}deg)`;
-    centerText.style.transform = `rotate(${-targetRotation}deg)`; 
+    currentWheelRotation += degreesToAdd;
+    
+    wheel.style.transform = `rotate(${currentWheelRotation}deg)`;
+    
+    // Counter-rotate center text
+    centerText.style.transform = `rotate(${-currentWheelRotation}deg)`; 
     centerText.style.display = 'block'; 
 }
 
@@ -116,34 +130,44 @@ function completeWheel() {
         wheel.classList.add('spinning');
         document.querySelector('.center-circle').style.boxShadow = "0 0 25px #2980b9";
         
-        // Prepare for reflection
-        currentFocusIndex = -1; 
+        // Reset logic for reflection
+        currentHighlightIndex = -1; 
     }, 1000);
 }
 
 function rotateWheelForReflection() {
-    // 1. Clear old highlight
-    if (currentFocusIndex >= 0) {
-        const oldSeg = document.getElementById(`segment-${currentFocusIndex}`);
+    // 1. Un-highlight previous
+    if (currentHighlightIndex >= 0) {
+        const oldSeg = document.getElementById(`segment-${currentHighlightIndex}`);
         if (oldSeg) {
             oldSeg.classList.remove('highlighted');
             oldSeg.style.transform = oldSeg.dataset.baseTransform;
         }
     }
 
-    // 2. Advance Index
-    currentFocusIndex++;
-    if (currentFocusIndex >= statements.length) currentFocusIndex = 0;
+    // 2. Advance Index (0 -> 1 -> 2...)
+    currentHighlightIndex++;
+    if (currentHighlightIndex >= statements.length) currentHighlightIndex = 0;
 
-    // 3. SNAP Rotation
-    // We want the current item (index * 30 deg) to be at 0 deg visual.
-    // So Wheel Rotation must be -(index * 30).
-    // This guarantees perfect horizontal alignment every time.
-    wheelRotation = -(currentFocusIndex * 30);
-    rotateWheel(wheelRotation);
+    // 3. Rotate Wheel
+    // We want Item N to be at 3 o'clock (0 deg visual).
+    // Item N is at angle: N * -30.
+    // To bring (N * -30) to 0, we must rotate wheel by +(N * 30).
+    
+    // Calculate target absolute rotation
+    const targetRotation = currentHighlightIndex * 30;
+    
+    // Update state to match
+    currentWheelRotation = targetRotation;
+    
+    // Apply rotation
+    const wheel = document.querySelector('.wheel');
+    const centerText = document.querySelector('.center-circle p'); 
+    wheel.style.transform = `rotate(${currentWheelRotation}deg)`;
+    centerText.style.transform = `rotate(${-currentWheelRotation}deg)`;
 
     // 4. Highlight
-    const newSeg = document.getElementById(`segment-${currentFocusIndex}`);
+    const newSeg = document.getElementById(`segment-${currentHighlightIndex}`);
     if (newSeg) {
         newSeg.classList.add('highlighted');
     }
