@@ -7,7 +7,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // --- STATE ---
 let statements = [];
 let centerDesire = "";
-let currentHighlightIndex = -1;
+let currentRotation = 0; // Track total rotation of the wheel
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -31,10 +31,12 @@ function attachEventListeners() {
     document.getElementById('statement-input').addEventListener('keypress', (e) => {
         if(e.key === 'Enter') addStatement();
     });
-    document.getElementById('rotate-btn').addEventListener('click', rotateWheel);
+    
+    // Rotate Button (for reflection phase)
+    document.getElementById('rotate-btn').addEventListener('click', spinForReflection);
 }
 
-// --- STEP 1 & 2 LOGIC ---
+// --- LOGIC ---
 
 function startWheel() {
     const input = document.getElementById('center-input');
@@ -57,101 +59,100 @@ function addStatement() {
     statements.push(text);
     input.value = '';
     
-    renderStatementOnWheel(text, statements.length - 1);
+    renderNewSegment(text, statements.length - 1);
     document.getElementById('statement-count').textContent = statements.length;
 
+    // Rotate the wheel to make room for the next one
+    rotateWheelForNext();
+
     if (statements.length >= 12) {
-        startVictorySpin();
+        completeWheel();
     }
 }
 
-function renderStatementOnWheel(text, index) {
+function renderNewSegment(text, index) {
     const container = document.getElementById('segments-container');
     const el = document.createElement('div');
     el.className = 'segment-text';
     el.textContent = text;
     el.id = `segment-${index}`;
     
-    // Angle Calculation: -75 is first segment (between 12 and 1 o'clock)
-    const angleDeg = -75 + (index * 30);
+    // PLACEHOLDER: Always place at 3 o'clock (Right side)
+    // Then we rotate the text element itself to match the current wheel rotation
+    // so it stays upright relative to the spoke it's attached to.
     
-    // Radius settings
+    // Wait, actually: We want the text to be "attached" to the wheel.
+    // So we add it at 3 o'clock, but with a rotation equal to the CURRENT wheel rotation offset.
+    // That way, when the wheel spins, this text spins with it.
+    
+    // Angle for 3 o'clock relative to the start (12 o'clock is -90).
+    // We want the first item at 1 o'clock (-60 deg).
+    // But you want to write at 3 o'clock (0 deg visually) and spin the wheel back.
+    
+    // SIMPLIFIED APPROACH:
+    // We just place the text at the correct absolute angle for its index.
+    // Then we rotate the PARENT container (.wheel).
+    
+    const startAngle = -60; // 1 o'clock
+    const angleDeg = startAngle + (index * 30);
+    
     const isMobile = window.innerWidth < 600;
-    const radius = isMobile ? 55 : 85; 
+    const radius = isMobile ? 60 : 90; 
     
-    // The trick for left side text:
-    // 1. Base transform is always: Rotate to angle -> Move out -> Rotate 90 to align with spoke
-    // 2. If on left side, we FLIP the text (rotate 180) AND adjust alignment so it grows 'inward' towards the rim
-    //    instead of 'outward' from the center, which keeps it inside the circle.
-    
-    let transform = `rotate(${angleDeg}deg) translate(${radius}px) rotate(90deg)`;
-    
-    const normAngle = (angleDeg + 360) % 360;
-    
-    if (normAngle > 90 && normAngle < 270) {
-        // Left Side Fix
-        el.style.textAlign = 'right'; 
-        el.style.transformOrigin = 'right center'; // Pivot from the right side (outer edge)
-        // Move it out a bit further so the 'right' edge hits the radius point
-        const adjustRadius = radius + (isMobile ? 60 : 100); 
-        transform = `rotate(${angleDeg}deg) translate(${adjustRadius}px) rotate(270deg)`; 
-    } else {
-        // Right Side (Standard)
-        el.style.textAlign = 'left';
-        el.style.transformOrigin = 'left center';
-    }
-
-    el.style.transform = transform;
-    el.dataset.baseTransform = transform; // Store for later
+    el.style.transform = `rotate(${angleDeg}deg) translate(${radius}px) rotate(90deg)`;
+    el.style.textAlign = 'left';
+    el.style.transformOrigin = 'left center';
 
     container.appendChild(el);
 }
 
-// --- STEP 3 LOGIC ---
-
-function startVictorySpin() {
+function rotateWheelForNext() {
     const wheel = document.querySelector('.wheel');
+    // Spin counter-clockwise by 30 deg
+    currentRotation -= 30;
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
     
-    // 1. Disable inputs
-    document.querySelector('.input-area').classList.add('hidden');
-    
-    // 2. Add Spin Class
-    wheel.classList.add('spinning');
-    
-    // 3. Wait for spin to finish (3s), then show completion screen
-    setTimeout(() => {
-        wheel.classList.remove('spinning');
-        completeWheel();
-    }, 3000);
+    // We need to counter-rotate the center text so it stays upright!
+    const centerText = document.querySelector('.center-circle p');
+    centerText.style.transform = `rotate(${-currentRotation}deg)`;
 }
+
+// --- COMPLETION ---
 
 function completeWheel() {
-    const wheel = document.querySelector('.wheel');
-    document.getElementById('wheel-complete-container').appendChild(wheel);
-    document.getElementById('step-wheel').classList.add('hidden');
-    document.getElementById('step-complete').classList.remove('hidden');
-    document.querySelector('.center-circle').style.boxShadow = "0 0 25px #e67e22";
+    setTimeout(() => {
+        // Reset rotation to 0 for the final view? Or keep it?
+        // Let's spin it back to 0 for the 'Victory' spin.
+        const wheel = document.querySelector('.wheel');
+        const centerText = document.querySelector('.center-circle p');
+        
+        // 1. Move to final container
+        document.getElementById('wheel-complete-container').appendChild(wheel);
+        
+        // 2. Switch views
+        document.getElementById('step-wheel').classList.add('hidden');
+        document.getElementById('step-complete').classList.remove('hidden');
+        
+        // 3. Victory Spin
+        wheel.style.transition = "transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)";
+        wheel.style.transform = "rotate(1080deg)"; // 3 full spins
+        
+        // Counter-rotate center text so it stays readable during spin (optional, might be dizzying!)
+        // centerText.style.transition = "transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)";
+        // centerText.style.transform = "rotate(-1080deg)";
+
+    }, 1000);
 }
 
-function rotateWheel() {
-    if (currentHighlightIndex >= 0) {
-        const prevSeg = document.getElementById(`segment-${currentHighlightIndex}`);
-        if (prevSeg) {
-            prevSeg.classList.remove('highlighted');
-            prevSeg.style.transform = prevSeg.dataset.baseTransform;
-        }
-    } else {
-         document.querySelector('.center-circle').style.boxShadow = "inset 0 0 20px rgba(230, 126, 34, 0.1)";
-    }
-
-    currentHighlightIndex = (currentHighlightIndex + 1) % 12;
-    const newSeg = document.getElementById(`segment-${currentHighlightIndex}`);
+function spinForReflection() {
+    const wheel = document.querySelector('.wheel');
+    // Spin 30 degrees (1 segment)
+    currentRotation += 30; 
+    wheel.style.transition = "transform 0.5s ease";
+    wheel.style.transform = `rotate(${currentRotation}deg)`;
     
-    if (newSeg) {
-        newSeg.classList.add('highlighted');
-        // When highlighted, we remove the rotation to make it readable flat
-        // Or we can keep it rotated but scale it up. 
-        // Let's scale it up but keep rotation for visual consistency with the wheel.
-        // The CSS handles the scale.
-    }
+    // Keep center text upright
+    const centerText = document.querySelector('.center-circle p');
+    centerText.style.transition = "transform 0.5s ease";
+    centerText.style.transform = `rotate(${-currentRotation}deg)`;
 }
