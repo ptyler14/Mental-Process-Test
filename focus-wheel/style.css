@@ -1,4 +1,4 @@
-/* ... (Variables same as before) ... */
+/* ... (Variables & Reset same as before) ... */
 :root {
     --primary: #2c3e50;
     --accent: #2980b9; 
@@ -80,12 +80,12 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .segment-text {
     position: absolute;
     top: 50%; left: 50%;
-    /* Move text slightly ABOVE the spoke line (negative margin-top) */
-    margin-top: -15px; 
-    padding-left: 10px; /* Space from center circle */
+    /* Reset margins - we handle offset in JS transform now */
+    margin: 0; 
+    padding: 0;
     
-    width: 120px; 
-    text-align: left;
+    width: 130px; 
+    text-align: center;
     font-size: 0.75rem; font-weight: 600;
     color: var(--primary);
     font-family: 'Dancing Script', cursive;
@@ -94,11 +94,11 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     overflow: hidden; 
     text-overflow: ellipsis;
     
-    /* Pivot from left center */
+    /* Crucial: Pivot from center of wheel */
     transform-origin: left center; 
     pointer-events: none; 
 }
-@media (min-width: 600px) { .segment-text { width: 180px; font-size: 1rem; margin-top: -20px; } }
+@media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; } }
 
 .segment-text.highlighted {
     background-color: var(--highlight);
@@ -110,6 +110,8 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     white-space: normal; 
     overflow: visible;
     border: 2px solid var(--accent);
+    padding: 5px;
+    border-radius: 4px;
     /* Reset rotation to horizontal for reading */
     transform: rotate(0deg) translate(60px) !important; 
 }
