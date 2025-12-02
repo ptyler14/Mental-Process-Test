@@ -2,12 +2,14 @@
 const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmcml3ZG93dXdqeGlmZXlwbGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTczMzIsImV4cCI6MjA3OTQ3MzMzMn0.AZa5GNVDRm1UXU-PiQx7KS0KxQqZ69JbV1Qn2DIlHq0';
 
+
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- STATE ---
+// Tasks now have 3 owners: 'unsorted', 'me', 'universe'
 let tasks = JSON.parse(localStorage.getItem('placemat_tasks')) || [];
 
-// --- INITIALIZATION ---
+// --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
     await checkUser();
     renderTasks();
@@ -17,33 +19,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function checkUser() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-        // Redirect to Home if not logged in
         window.location.href = "../index.html"; 
     }
 }
 
-// --- EVENT LISTENERS ---
 function attachEventListeners() {
     const taskInput = document.getElementById('new-task-input');
-    const btnMe = document.getElementById('add-my-task');
-    const btnUniverse = document.getElementById('add-universe-task');
+    const addBtn = document.getElementById('add-to-dump-btn');
     const clearBtn = document.getElementById('clear-all-btn');
 
-    if (btnMe) btnMe.addEventListener('click', () => addTask('me'));
-    if (btnUniverse) btnUniverse.addEventListener('click', () => addTask('universe'));
+    if (addBtn) addBtn.addEventListener('click', () => addTask());
 
     if (taskInput) {
         taskInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                // Default to "Me" on Enter, user can click buttons otherwise
-                addTask('me'); 
-            }
+            if (e.key === 'Enter') addTask();
         });
     }
 
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
-            if(confirm("Clear the entire placemat?")) {
+            if(confirm("Clear everything?")) {
                 tasks = [];
                 saveAndRender();
             }
@@ -53,7 +48,7 @@ function attachEventListeners() {
 
 // --- LOGIC ---
 
-function addTask(owner) {
+function addTask() {
     const taskInput = document.getElementById('new-task-input');
     const text = taskInput.value.trim();
     if (!text) return;
@@ -61,7 +56,7 @@ function addTask(owner) {
     const newTask = {
         id: Date.now(),
         text: text,
-        owner: owner, // 'me' or 'universe'
+        owner: 'unsorted', // Start here!
         completed: false
     };
 
@@ -72,7 +67,15 @@ function addTask(owner) {
     taskInput.focus();
 }
 
-// Make removeTask global so onclick works
+// Move task to Me or Universe
+window.sortTask = (id, newOwner) => {
+    const task = tasks.find(t => t.id === id);
+    if (task) {
+        task.owner = newOwner;
+        saveAndRender();
+    }
+};
+
 window.removeTask = (id) => {
     tasks = tasks.filter(t => t.id !== id);
     saveAndRender();
@@ -84,39 +87,60 @@ function saveAndRender() {
 }
 
 function renderTasks() {
+    const dumpList = document.getElementById('brain-dump-list');
+    const dumpSection = document.getElementById('brain-dump-section');
+    const dumpCount = document.getElementById('dump-count');
+    
     const listMe = document.getElementById('me-list');
     const listUniverse = document.getElementById('universe-list');
     const countMe = document.getElementById('me-count');
     const countUniverse = document.getElementById('universe-count');
 
-    if (!listMe || !listUniverse) return;
-
+    // Clear lists
+    dumpList.innerHTML = '';
     listMe.innerHTML = '';
     listUniverse.innerHTML = '';
     
-    let countM = 0;
-    let countU = 0;
+    let counts = { unsorted: 0, me: 0, universe: 0 };
 
     tasks.forEach(task => {
-        const div = document.createElement('div');
-        div.className = 'task-item';
-        // Add a slight fade animation for new items
-        div.style.animation = 'popIn 0.3s ease-out';
-        
-        div.innerHTML = `
-            <span>${task.text}</span>
-            <button class="delete-btn" onclick="removeTask(${task.id})">&times;</button>
-        `;
+        counts[task.owner]++;
 
-        if (task.owner === 'me') {
-            listMe.appendChild(div);
-            countM++;
+        if (task.owner === 'unsorted') {
+            // Create Unsorted Item (With Sort Buttons)
+            const div = document.createElement('div');
+            div.className = 'unsorted-item';
+            div.innerHTML = `
+                <span>${task.text}</span>
+                <div class="sort-buttons">
+                    <button class="sort-btn sort-me" onclick="sortTask(${task.id}, 'me')">Me</button>
+                    <button class="sort-btn sort-universe" onclick="sortTask(${task.id}, 'universe')">Universe</button>
+                    <button class="delete-btn" onclick="removeTask(${task.id})" style="font-size:1rem">&times;</button>
+                </div>
+            `;
+            dumpList.appendChild(div);
         } else {
-            listUniverse.appendChild(div);
-            countU++;
+            // Create Sorted Item (Simple View)
+            const div = document.createElement('div');
+            div.className = 'task-item';
+            div.innerHTML = `
+                <span>${task.text}</span>
+                <button class="delete-btn" onclick="removeTask(${task.id})">&times;</button>
+            `;
+            if (task.owner === 'me') listMe.appendChild(div);
+            else listUniverse.appendChild(div);
         }
     });
 
-    if (countMe) countMe.textContent = countM;
-    if (countUniverse) countUniverse.textContent = countU;
+    // Update Counts
+    dumpCount.textContent = counts.unsorted;
+    countMe.textContent = counts.me;
+    countUniverse.textContent = counts.universe;
+
+    // Hide/Show Brain Dump Section based on content
+    if (counts.unsorted > 0) {
+        dumpSection.classList.remove('hidden');
+    } else {
+        dumpSection.classList.add('hidden');
+    }
 }
