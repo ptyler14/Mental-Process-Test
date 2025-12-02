@@ -2,11 +2,10 @@
 const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmcml3ZG93dXdqeGlmZXlwbGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTczMzIsImV4cCI6MjA3OTQ3MzMzMn0.AZa5GNVDRm1UXU-PiQx7KS0KxQqZ69JbV1Qn2DIlHq0';
 
-
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // --- STATE ---
-// Tasks now have 3 owners: 'unsorted', 'me', 'universe'
+// Tasks have 3 owners: 'unsorted', 'me', 'universe'
 let tasks = JSON.parse(localStorage.getItem('placemat_tasks')) || [];
 
 // --- INIT ---
@@ -28,8 +27,10 @@ function attachEventListeners() {
     const addBtn = document.getElementById('add-to-dump-btn');
     const clearBtn = document.getElementById('clear-all-btn');
 
+    // Click "Add" -> Goes to Unsorted
     if (addBtn) addBtn.addEventListener('click', () => addTask());
 
+    // Press Enter -> Goes to Unsorted
     if (taskInput) {
         taskInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addTask();
@@ -56,7 +57,7 @@ function addTask() {
     const newTask = {
         id: Date.now(),
         text: text,
-        owner: 'unsorted', // Start here!
+        owner: 'unsorted', // Defaults to Brain Dump list
         completed: false
     };
 
@@ -67,7 +68,7 @@ function addTask() {
     taskInput.focus();
 }
 
-// Move task to Me or Universe
+// Move task to a new owner ('me', 'universe', or back to 'unsorted')
 window.sortTask = (id, newOwner) => {
     const task = tasks.find(t => t.id === id);
     if (task) {
@@ -106,9 +107,10 @@ function renderTasks() {
     tasks.forEach(task => {
         counts[task.owner]++;
 
+        const div = document.createElement('div');
+        
         if (task.owner === 'unsorted') {
-            // Create Unsorted Item (With Sort Buttons)
-            const div = document.createElement('div');
+            // Unsorted Item (Has Me/Universe buttons)
             div.className = 'unsorted-item';
             div.innerHTML = `
                 <span>${task.text}</span>
@@ -120,13 +122,19 @@ function renderTasks() {
             `;
             dumpList.appendChild(div);
         } else {
-            // Create Sorted Item (Simple View)
-            const div = document.createElement('div');
+            // Sorted Item (Has "Move" button to swap columns)
             div.className = 'task-item';
+            const moveBtnText = task.owner === 'me' ? '➔ Universe' : '➔ Me';
+            const moveBtnAction = task.owner === 'me' ? 'universe' : 'me';
+            
             div.innerHTML = `
                 <span>${task.text}</span>
-                <button class="delete-btn" onclick="removeTask(${task.id})">&times;</button>
+                <div style="display:flex; align-items:center;">
+                    <button class="text-btn small-btn" style="margin:0; margin-right:10px; font-size:0.7rem;" onclick="sortTask(${task.id}, '${moveBtnAction}')">${moveBtnText}</button>
+                    <button class="delete-btn" onclick="removeTask(${task.id})">&times;</button>
+                </div>
             `;
+            
             if (task.owner === 'me') listMe.appendChild(div);
             else listUniverse.appendChild(div);
         }
@@ -137,7 +145,7 @@ function renderTasks() {
     countMe.textContent = counts.me;
     countUniverse.textContent = counts.universe;
 
-    // Hide/Show Brain Dump Section based on content
+    // Show Brain Dump section if it has items
     if (counts.unsorted > 0) {
         dumpSection.classList.remove('hidden');
     } else {
