@@ -1,7 +1,7 @@
-/* ... (Variables same as before) ... */
+/* --- VARIABLES & RESET --- */
 :root {
     --primary: #2c3e50;
-    --accent: #2980b9; 
+    --accent: #2980b9; /* Blue theme */
     --bg: #f4f6f8;
     --card-bg: #ffffff;
     --text-light: #7f8c8d;
@@ -45,7 +45,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     border-radius: 50%;
     position: relative;
     background-color: white;
-    /* Spoke lines - Adjusted to be perfectly centered on angles */
+    /* Spoke lines - Centered on angles */
     background-image: 
         linear-gradient(0deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
         linear-gradient(30deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
@@ -82,14 +82,12 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     top: 50%; left: 50%;
     
     /* ALIGNMENT FIX: 
-       We set height to 0 so the "center" is truly the line.
-       Then we use negative margin-top to lift the text block up.
-       (1.5em line-height usually means text is ~20px tall. -20px lifts it up).
+       Reset height/line-height so transform origin is precise.
+       Use negative margin-top to lift text above the line.
     */
     height: 0;
-    line-height: 0; /* Reset box height */
-    
-    margin-top: -18px; /* Lifts text above the 3 o'clock line */
+    line-height: 0; 
+    margin-top: -18px; 
     padding-left: 0;
     
     width: 130px; 
@@ -102,21 +100,21 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     overflow: hidden; 
     text-overflow: ellipsis;
     
-    /* Pivot from the exact center of the wheel */
+    /* Pivot from center of wheel */
     transform-origin: 0 0; 
     pointer-events: none; 
 }
 @media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; margin-top: -25px; } }
 
+/* Span inside text to give it body */
 .segment-text span {
-    /* Inner wrapper to give padding/background if needed */
     display: inline-block;
     padding: 2px 5px;
-    line-height: 1.2; /* Restore line height for text */
+    line-height: 1.2;
 }
 
 .segment-text.highlighted {
-    /* Reset margin so it centers */
+    /* Reset margin so it centers in the highlight box */
     margin-top: 0;
     
     z-index: 100; 
@@ -125,11 +123,9 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     white-space: normal; 
     overflow: visible;
     
-    /* Use flex to center content vertically */
     display: flex;
     align-items: center;
     
-    /* The highlight box style */
     background-color: var(--highlight);
     color: var(--highlight-text);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
@@ -137,7 +133,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     border-radius: 6px;
     padding: 10px;
 
-    /* Position it dead center horizontally on the right side */
+    /* Position it centered horizontally on the right side */
     transform: rotate(0deg) translate(60px, -50%) !important; 
 }
 @media (min-width: 600px) { 
