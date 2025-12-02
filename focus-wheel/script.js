@@ -7,6 +7,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // --- STATE ---
 let statements = [];
 let centerDesire = "";
+let currentHighlightIndex = -1;
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', async () => {
@@ -25,8 +26,10 @@ function attachEventListeners() {
     document.getElementById('statement-input').addEventListener('keypress', (e) => {
         if(e.key === 'Enter') addStatement();
     });
-    document.getElementById('reset-btn').addEventListener('click', () => location.reload());
+    document.getElementById('rotate-btn').addEventListener('click', rotateWheel);
 }
+
+// --- STEP 1 & 2 LOGIC ---
 
 function startWheel() {
     const input = document.getElementById('center-input');
@@ -60,27 +63,67 @@ function renderStatementOnWheel(text, index) {
     const el = document.createElement('div');
     el.className = 'segment-text';
     el.textContent = text;
+    el.id = `segment-${index}`;
     
-    // Math to position in a circle (12 positions)
-    // Start at 12 o'clock (-90 degrees)
-    const angleDeg = (index * 30) - 90; 
-    const angleRad = angleDeg * (Math.PI / 180);
+    // Math to position text along spokes
+    // Index 0 is at 1 o'clock position (~30 degrees)
+    const angleDeg = (index * 30) - 60; // -60 offset to align 0 with 1 o'clock
     
-    // Radius depends on screen size (rough estimate)
-    const radius = window.innerWidth > 600 ? 180 : 110; 
+    // Radius depends on screen size
+    const isMobile = window.innerWidth < 600;
+    // Offset from center to start of text
+    const radiusOffset = isMobile ? 55 : 85; 
     
-    const x = Math.cos(angleRad) * radius;
-    const y = Math.sin(angleRad) * radius;
+    // 1. Rotate to the spoke's angle
+    // 2. Translate outwards along that angle
+    // 3. Rotate 90deg to align text with the spoke
+    el.style.transform = `rotate(${angleDeg}deg) translate(${radiusOffset}px) rotate(90deg)`;
     
-    el.style.transform = `translate(${x}px, ${y}px)`;
-    
+    // Adjust text alignment based on position for readability
+    if (index >= 3 && index <= 8) {
+         el.style.textAlign = 'right';
+         // Flip text on left side so it's not upside down
+         el.style.transform += ' rotate(180deg)';
+    } else {
+         el.style.textAlign = 'left';
+    }
+
     container.appendChild(el);
 }
 
+// --- STEP 3 LOGIC ---
+
 function completeWheel() {
     setTimeout(() => {
+        // 1. Move the completed wheel to the final container
+        const wheel = document.querySelector('.wheel');
+        document.getElementById('wheel-complete-container').appendChild(wheel);
+
+        // 2. Switch views
         document.getElementById('step-wheel').classList.add('hidden');
         document.getElementById('step-complete').classList.remove('hidden');
-        // Here you could save to Supabase 'history' or 'entries' if you wanted
-    }, 1500);
+
+        // 3. Highlight center initially
+        document.querySelector('.center-circle').style.boxShadow = "0 0 25px #e67e22";
+
+        // Optional: Save to Supabase here
+    }, 1000);
+}
+
+function rotateWheel() {
+    // Remove highlight from previous
+    if (currentHighlightIndex >= 0) {
+        const prevSeg = document.getElementById(`segment-${currentHighlightIndex}`);
+        if (prevSeg) prevSeg.classList.remove('highlighted');
+    } else {
+         // Remove center initial highlight
+         document.querySelector('.center-circle').style.boxShadow = "inset 0 0 20px rgba(230, 126, 34, 0.1)";
+    }
+
+    // Increment index (loop back to 0 after 11)
+    currentHighlightIndex = (currentHighlightIndex + 1) % 12;
+
+    // Add highlight to new
+    const newSeg = document.getElementById(`segment-${currentHighlightIndex}`);
+    if (newSeg) newSeg.classList.add('highlighted');
 }
