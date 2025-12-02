@@ -1,4 +1,4 @@
-// --- SUPABASE CONFIG ---
+// --- SUPABASE CONFIGURATION ---
 const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmcml3ZG93dXdqeGlmZXlwbGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTczMzIsImV4cCI6MjA3OTQ3MzMzMn0.AZa5GNVDRm1UXU-PiQx7KS0KxQqZ69JbV1Qn2DIlHq0';
 
@@ -24,7 +24,6 @@ function attachEventListeners() {
     document.getElementById('start-wheel-btn').addEventListener('click', startWheel);
     document.getElementById('add-statement-btn').addEventListener('click', addStatement);
     
-    // Fix #1: Enable Enter key for Start Wheel
     document.getElementById('center-input').addEventListener('keypress', (e) => {
         if(e.key === 'Enter') startWheel();
     });
@@ -47,7 +46,6 @@ function startWheel() {
     document.getElementById('step-center').classList.add('hidden');
     document.getElementById('step-wheel').classList.remove('hidden');
     
-    // Auto-focus next input
     setTimeout(() => document.getElementById('statement-input').focus(), 100);
 }
 
@@ -74,47 +72,41 @@ function renderStatementOnWheel(text, index) {
     el.textContent = text;
     el.id = `segment-${index}`;
     
-    // Fix #2: Text Rotation Logic
-    // We want 12 segments. 360 / 12 = 30 degrees per segment.
-    // Position 0 starts at "1 o'clock". 
-    // 12 o'clock is -90deg in CSS (0 is usually 3 o'clock).
-    // So we start at -60deg for 1 o'clock.
-    
-    const startAngle = -60; 
+    // Angle Calculation:
+    // -90 is 12 o'clock.
+    // We want the first item (index 0) to be between 12 and 1.
+    // That is -75 degrees. Each subsequent item adds 30 degrees.
+    const startAngle = -75; 
     const angleDeg = startAngle + (index * 30);
     
     // Radius: Distance from center to start of text
     const isMobile = window.innerWidth < 600;
-    const radius = isMobile ? 60 : 100; 
+    const radius = isMobile ? 50 : 80; // Start text 50-80px from center
     
-    // CSS Magic:
-    // 1. Rotate the element to point in the right direction
-    // 2. Translate it outwards from the center
-    // 3. (Optional) Flip text on the left side so it's readable
+    // Apply Transform:
+    // 1. Rotate to the correct angle
+    // 2. Move outward (translate X)
+    // Note: We use transform-origin: left center in CSS, so it rotates like a clock hand
+    let transform = `rotate(${angleDeg}deg) translateX(${radius}px)`;
+
+    // FLIP LOGIC:
+    // Text on the left side (90 to 270 degrees) will be upside down.
+    // We need to flip it for readability.
+    // Normalized angle (0-360) helps check position.
+    const normAngle = (angleDeg + 360) % 360;
     
-    let rotation = angleDeg;
+    if (normAngle > 90 && normAngle < 270) {
+        // It's on the left. Flip it 180deg so it reads left-to-right
+        // We also need to adjust the text alignment so it "grows" inward
+        el.style.textAlign = 'right';
+        // Add 180 rotation to the end of the transform chain
+        transform += ` rotate(180deg)`;
+    }
+
+    el.style.transform = transform;
     
-    // Check if text is on the left side (90 to 270 degrees roughly)
-    // Normalize angle to 0-360 for easier checking
-    let normalizedAngle = (angleDeg + 360) % 360;
-    
-    // If text is on the left, we might want to flip it so it's not upside down?
-    // The user asked for "radiating out", so upside down might be intended for the bottom half.
-    // Let's stick to pure radiation first.
-    
-    el.style.transform = `rotate(${angleDeg}deg) translate(${radius}px)`;
-    
-    // Special tweak: If you want the text ON the line, we translate Y slightly.
-    // If you want it BETWEEN lines, we keep as is.
-    // Assuming "on the spoke" means centered on the angle.
-    
-    // Crucial CSS update: Text origin must be left-center for this transform to work
-    el.style.transformOrigin = "left center";
-    el.style.position = "absolute";
-    el.style.top = "50%";
-    el.style.left = "50%";
-    el.style.width = "150px"; // Limit width
-    el.style.textAlign = "left"; 
+    // Store the base transform so we can restore it after highlighting
+    el.dataset.baseTransform = transform;
 
     container.appendChild(el);
 }
@@ -132,13 +124,25 @@ function completeWheel() {
 }
 
 function rotateWheel() {
+    // Remove highlight from previous
     if (currentHighlightIndex >= 0) {
         const prevSeg = document.getElementById(`segment-${currentHighlightIndex}`);
-        if (prevSeg) prevSeg.classList.remove('highlighted');
+        if (prevSeg) {
+            prevSeg.classList.remove('highlighted');
+            // Restore original position
+            prevSeg.style.transform = prevSeg.dataset.baseTransform;
+        }
     } else {
          document.querySelector('.center-circle').style.boxShadow = "inset 0 0 20px rgba(230, 126, 34, 0.1)";
     }
+
     currentHighlightIndex = (currentHighlightIndex + 1) % 12;
     const newSeg = document.getElementById(`segment-${currentHighlightIndex}`);
-    if (newSeg) newSeg.classList.add('highlighted');
+    
+    if (newSeg) {
+        newSeg.classList.add('highlighted');
+        // Note: The CSS handles the 'scale' and 'z-index' pop-out effect
+        // We don't need to manually adjust transform here because CSS class adds properties
+        // However, if we want to ensure it stays rotated correctly, we just let the class apply styles
+    }
 }
