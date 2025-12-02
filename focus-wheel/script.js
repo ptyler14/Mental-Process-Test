@@ -61,7 +61,7 @@ function addStatement() {
     document.getElementById('statement-count').textContent = statements.length;
 
     if (statements.length >= 12) {
-        completeWheel();
+        startVictorySpin();
     }
 }
 
@@ -72,64 +72,72 @@ function renderStatementOnWheel(text, index) {
     el.textContent = text;
     el.id = `segment-${index}`;
     
-    // Angle Calculation:
-    // -90 is 12 o'clock.
-    // We want the first item (index 0) to be between 12 and 1.
-    // That is -75 degrees. Each subsequent item adds 30 degrees.
-    const startAngle = -75; 
-    const angleDeg = startAngle + (index * 30);
+    // Angle Calculation: -75 is first segment (between 12 and 1 o'clock)
+    const angleDeg = -75 + (index * 30);
     
-    // Radius: Distance from center to start of text
+    // Radius settings
     const isMobile = window.innerWidth < 600;
-    const radius = isMobile ? 50 : 80; // Start text 50-80px from center
+    const radius = isMobile ? 55 : 85; 
     
-    // Apply Transform:
-    // 1. Rotate to the correct angle
-    // 2. Move outward (translate X)
-    // Note: We use transform-origin: left center in CSS, so it rotates like a clock hand
-    let transform = `rotate(${angleDeg}deg) translateX(${radius}px)`;
-
-    // FLIP LOGIC:
-    // Text on the left side (90 to 270 degrees) will be upside down.
-    // We need to flip it for readability.
-    // Normalized angle (0-360) helps check position.
+    // The trick for left side text:
+    // 1. Base transform is always: Rotate to angle -> Move out -> Rotate 90 to align with spoke
+    // 2. If on left side, we FLIP the text (rotate 180) AND adjust alignment so it grows 'inward' towards the rim
+    //    instead of 'outward' from the center, which keeps it inside the circle.
+    
+    let transform = `rotate(${angleDeg}deg) translate(${radius}px) rotate(90deg)`;
+    
     const normAngle = (angleDeg + 360) % 360;
     
     if (normAngle > 90 && normAngle < 270) {
-        // It's on the left. Flip it 180deg so it reads left-to-right
-        // We also need to adjust the text alignment so it "grows" inward
-        el.style.textAlign = 'right';
-        // Add 180 rotation to the end of the transform chain
-        transform += ` rotate(180deg)`;
+        // Left Side Fix
+        el.style.textAlign = 'right'; 
+        el.style.transformOrigin = 'right center'; // Pivot from the right side (outer edge)
+        // Move it out a bit further so the 'right' edge hits the radius point
+        const adjustRadius = radius + (isMobile ? 60 : 100); 
+        transform = `rotate(${angleDeg}deg) translate(${adjustRadius}px) rotate(270deg)`; 
+    } else {
+        // Right Side (Standard)
+        el.style.textAlign = 'left';
+        el.style.transformOrigin = 'left center';
     }
 
     el.style.transform = transform;
-    
-    // Store the base transform so we can restore it after highlighting
-    el.dataset.baseTransform = transform;
+    el.dataset.baseTransform = transform; // Store for later
 
     container.appendChild(el);
 }
 
 // --- STEP 3 LOGIC ---
 
-function completeWheel() {
+function startVictorySpin() {
+    const wheel = document.querySelector('.wheel');
+    
+    // 1. Disable inputs
+    document.querySelector('.input-area').classList.add('hidden');
+    
+    // 2. Add Spin Class
+    wheel.classList.add('spinning');
+    
+    // 3. Wait for spin to finish (3s), then show completion screen
     setTimeout(() => {
-        const wheel = document.querySelector('.wheel');
-        document.getElementById('wheel-complete-container').appendChild(wheel);
-        document.getElementById('step-wheel').classList.add('hidden');
-        document.getElementById('step-complete').classList.remove('hidden');
-        document.querySelector('.center-circle').style.boxShadow = "0 0 25px #e67e22";
-    }, 1000);
+        wheel.classList.remove('spinning');
+        completeWheel();
+    }, 3000);
+}
+
+function completeWheel() {
+    const wheel = document.querySelector('.wheel');
+    document.getElementById('wheel-complete-container').appendChild(wheel);
+    document.getElementById('step-wheel').classList.add('hidden');
+    document.getElementById('step-complete').classList.remove('hidden');
+    document.querySelector('.center-circle').style.boxShadow = "0 0 25px #e67e22";
 }
 
 function rotateWheel() {
-    // Remove highlight from previous
     if (currentHighlightIndex >= 0) {
         const prevSeg = document.getElementById(`segment-${currentHighlightIndex}`);
         if (prevSeg) {
             prevSeg.classList.remove('highlighted');
-            // Restore original position
             prevSeg.style.transform = prevSeg.dataset.baseTransform;
         }
     } else {
@@ -141,8 +149,9 @@ function rotateWheel() {
     
     if (newSeg) {
         newSeg.classList.add('highlighted');
-        // Note: The CSS handles the 'scale' and 'z-index' pop-out effect
-        // We don't need to manually adjust transform here because CSS class adds properties
-        // However, if we want to ensure it stays rotated correctly, we just let the class apply styles
+        // When highlighted, we remove the rotation to make it readable flat
+        // Or we can keep it rotated but scale it up. 
+        // Let's scale it up but keep rotation for visual consistency with the wheel.
+        // The CSS handles the scale.
     }
 }
