@@ -1,13 +1,12 @@
-/* ... (Variables & Reset same as before) ... */
 :root {
     --primary: #2c3e50;
-    --accent: #e67e22;
-    --bg: #fff8f0;
+    --accent: #2980b9; /* Changed to Blue */
+    --bg: #f4f6f8; /* Changed to standard Blue-Grey BG */
     --card-bg: #ffffff;
     --text-light: #7f8c8d;
     --border: #e0e0e0;
-    --highlight: #ffe0b2;
-    --highlight-text: #d35400;
+    --highlight: #d6eaf8; /* Light Blue highlight */
+    --highlight-text: #154360; /* Dark Blue text */
 }
 
 * { box-sizing: border-box; }
@@ -27,7 +26,7 @@ input:focus { outline: none; border-color: var(--accent); }
 
 button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1rem; font-weight: 600; border: none; width: 100%; transition: background 0.2s; }
 .primary-btn { background-color: var(--accent); color: white; }
-.primary-btn:hover { background-color: #d35400; }
+.primary-btn:hover { background-color: #1a5276; } /* Darker blue hover */
 .text-btn { background: none; color: var(--text-light); text-decoration: underline; width: auto; padding: 10px; display: inline-block; }
 .hint { margin-top: -10px; margin-bottom: 15px; font-size: 0.9rem; color: #7f8c8d; }
 
@@ -45,7 +44,6 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     border-radius: 50%;
     position: relative;
     background-color: white;
-    /* 12 segments gradients */
     background-image: 
         linear-gradient(0deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
         linear-gradient(30deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
@@ -72,7 +70,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     font-family: 'Dancing Script', cursive;
     font-size: 1.2rem; font-weight: bold;
     z-index: 10;
-    box-shadow: inset 0 0 20px rgba(230, 126, 34, 0.1);
+    box-shadow: inset 0 0 20px rgba(41, 128, 185, 0.1); /* Blue shadow */
     transition: transform 0.5s ease; 
 }
 @media (min-width: 600px) { .center-circle { font-size: 1.5rem; } }
@@ -80,9 +78,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .segment-text {
     position: absolute;
     top: 50%; left: 50%;
-    /* FIX: Move UP by ~15px to sit ON TOP of the line, not through it */
     margin-top: -20px; 
-    
     width: 130px; 
     text-align: center;
     font-size: 0.75rem; font-weight: 600;
@@ -93,7 +89,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     text-overflow: ellipsis;
     padding: 4px 8px;
     border-radius: 4px;
-    transform-origin: left center; /* Pivot from center */
+    transform-origin: left center; 
     pointer-events: none; 
 }
 @media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; } }
@@ -108,7 +104,6 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     white-space: normal; 
     overflow: visible;
     border: 2px solid var(--accent);
-    /* Ensure highlighted text is upright */
     transform: rotate(0deg) translate(60px) !important; 
 }
 @media (min-width: 600px) { 
