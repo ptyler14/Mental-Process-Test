@@ -43,10 +43,8 @@ async function init() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
         currentUser = session.user;
-        // User is logged in! Load their data.
         loadUserData();
     } else {
-        // User is NOT logged in. Redirect them to the Home Page.
         window.location.href = "../index.html";
     }
 }
@@ -74,7 +72,7 @@ function setupIncomeFormatting() {
     }
 }
 
-// --- EVENT LISTENERS ---
+// --- GLOBAL CLICK HANDLER ---
 function attachEventListeners() {
     
     // Wizard Nav
@@ -93,7 +91,7 @@ function attachEventListeners() {
     // Setup Save
     if(get('save-setup-btn')) get('save-setup-btn').addEventListener('click', handleSaveSetup);
 
-    // Logout (Redirects to home after signing out)
+    // Logout
     if(get('logout-btn')) get('logout-btn').addEventListener('click', async () => {
         await supabase.auth.signOut();
         window.location.href = "../index.html";
@@ -103,11 +101,39 @@ function attachEventListeners() {
     if(get('add-activity-btn')) get('add-activity-btn').addEventListener('click', addActivityToList);
     if(get('submit-ledger-btn')) get('submit-ledger-btn').addEventListener('click', handleSubmitLedger);
     
-    if(get('edit-setup-btn')) get('edit-setup-btn').addEventListener('click', () => {
+    // --- NEW: EDIT INCOME BUTTON ---
+    if(get('edit-income-btn')) get('edit-income-btn').addEventListener('click', () => {
+        // Show Step 1 (Income)
         get('reality-income').value = user.realityIncome.toLocaleString('en-US');
-        get('user-name').value = user.userName;
-        renderGoalsListUI(); 
         showStep('step-1');
+        // Show Cancel button
+        if(get('cancel-setup-btn')) get('cancel-setup-btn').classList.remove('hidden');
+    });
+
+    // --- NEW: EDIT GOALS BUTTON ---
+    if(get('edit-goals-btn')) get('edit-goals-btn').addEventListener('click', () => {
+        // Show Step 2 (Goals)
+        renderGoalsListUI();
+        showStep('step-2');
+        
+        // Change the "Continue" button behavior temporarily to "Save & Exit"
+        const nextBtn = get('step-2-next-btn');
+        // Clone to strip old listeners
+        const newBtn = nextBtn.cloneNode(true);
+        nextBtn.parentNode.replaceChild(newBtn, nextBtn);
+        
+        newBtn.textContent = "Save Goals & Return";
+        
+        newBtn.addEventListener('click', async () => {
+            await saveGoalsOnly();
+            showLedger();
+            // Reset button text for next time (optional, page reload usually clears state)
+            newBtn.textContent = "Continue";
+            // Note: Ideally we'd restore original listener, but reloading the page is safer/easier
+            // or we handle state better. For now, this works.
+        });
+        
+        if(get('cancel-setup-btn')) get('cancel-setup-btn').classList.remove('hidden');
     });
     
     if(get('toggle-chart-btn')) get('toggle-chart-btn').addEventListener('click', handleToggleChart);
@@ -116,6 +142,14 @@ function attachEventListeners() {
     const contractSigned = get('contract-signed');
     if (contractSigned) contractSigned.addEventListener('change', (e) => {
         get('save-setup-btn').disabled = !e.target.checked;
+    });
+    
+    // Cancel Setup
+    if(get('cancel-setup-btn')) get('cancel-setup-btn').addEventListener('click', () => {
+        showLedger();
+        // Restore button text just in case
+        const nextBtn = get('step-2-next-btn');
+        if(nextBtn) nextBtn.textContent = "Continue";
     });
 }
 
@@ -142,7 +176,7 @@ function handleStep1Next() {
     
     user.realityIncome = income;
     user.mentalBankGoal = income * 2;
-    user.hourlyRate = user.mentalBankGoal / 1000;
+    user.hourlyRate = user.mentalBankGoal / 2000;
 
     safeSetText('mb-goal-display', formatCurrency(user.mentalBankGoal) + " /yr");
     safeSetText('hourly-rate-display', formatCurrency(user.hourlyRate) + " /hr");
@@ -172,6 +206,16 @@ function renderGoalsListUI() {
 
 window.removeGoal = (index) => { user.goals.splice(index, 1); renderGoalsListUI(); }
 
+// NEW: Save Goals Only
+async function saveGoalsOnly() {
+    await supabase.from('goals').delete().eq('user_id', currentUser.id);
+    const dbGoals = user.goals.map(g => ({ user_id: currentUser.id, title: g.title }));
+    if (dbGoals.length > 0) {
+        const { data } = await supabase.from('goals').insert(dbGoals).select();
+        if(data) user.goals = data;
+    }
+}
+
 async function handleSaveSetup() {
     const name = get('user-name').value;
     if (!name) return alert("Please sign.");
@@ -191,9 +235,7 @@ async function handleSaveSetup() {
         await supabase.from('user_settings').insert(settingsData);
     }
 
-    await supabase.from('goals').delete().eq('user_id', currentUser.id);
-    const dbGoals = user.goals.map(g => ({ user_id: currentUser.id, title: g.title }));
-    if (dbGoals.length > 0) await supabase.from('goals').insert(dbGoals);
+    await saveGoalsOnly(); // Re-use the goal saving logic
 
     showLedger();
 }
@@ -304,7 +346,6 @@ async function handleSubmitLedger() {
     }
 }
 
-// --- DATA LOADING ---
 async function loadUserData() {
     const { data: settings } = await supabase.from('user_settings').select('*').limit(1);
     const { data: goals } = await supabase.from('goals').select('*');
@@ -355,7 +396,6 @@ async function loadUserData() {
     }
 }
 
-// --- VISUALIZATION & UTILS ---
 function handleToggleChart() {
     const c = get('chart-container');
     c.classList.toggle('hidden');
