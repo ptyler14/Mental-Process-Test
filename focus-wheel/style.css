@@ -6,6 +6,7 @@
     --text-light: #7f8c8d;
     --border: #e0e0e0;
     --highlight: #ffe0b2; /* Color for highlighted segment */
+    --highlight-text: #d35400;
 }
 
 * { box-sizing: border-box; }
@@ -30,7 +31,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .hint { margin-top: -10px; margin-bottom: 15px; font-size: 0.9rem; color: #7f8c8d; }
 
 /* --- THE WHEEL VISUALIZATION --- */
-.wheel-container-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
+.wheel-container-wrapper { display: flex; justify-content: center; margin-bottom: 30px; padding: 20px; } /* Added padding for popouts */
 .wheel-container {
     position: relative;
     width: 320px; height: 320px; /* Fixed size for calculation */
@@ -76,28 +77,40 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .segment-text {
     position: absolute;
     top: 50%; left: 50%;
-    /* Position at center, then transform out */
-    width: 140px; /* Fixed width for text */
-    text-align: center;
-    font-size: 0.7rem; font-weight: 600;
+    /* Start with a small width so it fits */
+    width: 120px; 
+    text-align: left;
+    font-size: 0.75rem; font-weight: 600;
     color: var(--primary);
     font-family: 'Dancing Script', cursive;
-    white-space: nowrap;
+    white-space: nowrap; /* Force single line normally */
     overflow: hidden; text-overflow: ellipsis;
-    padding: 5px;
+    padding: 5px 10px;
     border-radius: 4px;
-    /* Transform origin is the center of the wheel */
-    transform-origin: 0 0;
+    
+    /* Pivot from the left-center (which we'll place at the wheel center) */
+    transform-origin: left center; 
     transition: all 0.3s ease;
+    pointer-events: none; /* Let clicks pass through */
 }
-@media (min-width: 600px) { .segment-text { width: 220px; font-size: 1rem; } }
+@media (min-width: 600px) { .segment-text { width: 180px; font-size: 1rem; } }
 
-/* Highlighted state for reflection */
+/* --- HIGHLIGHTED STATE (The Fix) --- */
 .segment-text.highlighted {
     background-color: var(--highlight);
-    box-shadow: 0 0 10px var(--highlight);
-    color: #d35400;
-    z-index: 5;
+    color: var(--highlight-text);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 100; /* Bring to very front */
+    
+    /* Allow text to expand */
+    width: auto; 
+    max-width: 200px; /* Cap width but let it wrap */
+    white-space: normal; /* Allow wrapping */
+    overflow: visible;
+    
+    /* Make it pop */
+    transform: scale(1.1) !important; /* We will re-apply the rotation in JS, but this adds pop */
+    border: 2px solid var(--accent);
 }
 
 .hidden { display: none !important; }
