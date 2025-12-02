@@ -31,7 +31,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .hint { margin-top: -10px; margin-bottom: 15px; font-size: 0.9rem; color: #7f8c8d; }
 
 /* --- THE WHEEL VISUALIZATION --- */
-.wheel-container-wrapper { display: flex; justify-content: center; margin-bottom: 30px; padding: 20px; } /* Added padding for popouts */
+.wheel-container-wrapper { display: flex; justify-content: center; margin-bottom: 30px; padding: 20px; overflow: visible; }
 .wheel-container {
     position: relative;
     width: 320px; height: 320px; /* Fixed size for calculation */
@@ -53,7 +53,8 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
         linear-gradient(120deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
         linear-gradient(150deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%);
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    transition: transform 0.5s ease;
+    
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy rotation */
 }
 
 .center-circle {
@@ -72,57 +73,59 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     font-size: 1.2rem; font-weight: bold;
     z-index: 10;
     box-shadow: inset 0 0 20px rgba(230, 126, 34, 0.1);
+    /* IMPORTANT: We counter-rotate this in JS so text stays upright */
+    transition: transform 0.5s ease; 
 }
 @media (min-width: 600px) { .center-circle { font-size: 1.5rem; } }
 
 .segment-text {
     position: absolute;
     top: 50%; left: 50%;
-    /* Start with a small width so it fits */
-    width: 120px; 
-    text-align: left;
+    width: 130px; 
+    text-align: center;
     font-size: 0.75rem; font-weight: 600;
     color: var(--primary);
     font-family: 'Dancing Script', cursive;
-    white-space: nowrap; /* Force single line normally */
-    overflow: hidden; text-overflow: ellipsis;
-    padding: 5px 10px;
+    
+    /* Truncate long text */
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    
+    padding: 4px 8px;
     border-radius: 4px;
     
-    /* Pivot from the left-center (which we'll place at the wheel center) */
+    /* Pivot from the left edge (center of wheel) */
     transform-origin: left center; 
-    transition: all 0.3s ease;
-    pointer-events: none; /* Let clicks pass through */
+    pointer-events: none; 
 }
-@media (min-width: 600px) { .segment-text { width: 180px; font-size: 1rem; } }
+@media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; } }
 
-/* --- HIGHLIGHTED STATE (The Fix) --- */
+/* --- HIGHLIGHTED STATE --- */
 .segment-text.highlighted {
     background-color: var(--highlight);
     color: var(--highlight-text);
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    z-index: 100; /* Bring to very front */
+    z-index: 100; 
     
-    /* Allow text to expand */
+    /* Expand to show full text */
     width: auto; 
-    max-width: 200px; /* Cap width but let it wrap */
-    white-space: normal; /* Allow wrapping */
+    max-width: 200px; 
+    white-space: normal; 
     overflow: visible;
     
     /* Make it pop */
-    transform: scale(1.1) !important; /* We will re-apply the rotation in JS, but this adds pop */
     border: 2px solid var(--accent);
+    /* Note: Rotation is handled in JS now to keep it aligned */
 }
 
-.hidden { display: none !important; }
-/* ... (Keep existing styles) ... */
-
-/* SPIN ANIMATION */
-@keyframes spin-victory {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(1080deg); } /* 3 full spins */
-}
-
+/* Spin animation class */
 .spinning {
     animation: spin-victory 3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
+@keyframes spin-victory {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(1080deg); }
+}
+
+.hidden { display: none !important; }
