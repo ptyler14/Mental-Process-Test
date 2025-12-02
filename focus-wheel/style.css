@@ -53,6 +53,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
         linear-gradient(120deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
         linear-gradient(150deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%);
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: transform 0.5s ease;
 }
 
 .center-circle {
