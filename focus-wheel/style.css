@@ -1,12 +1,13 @@
+/* ... (Variables same as before) ... */
 :root {
     --primary: #2c3e50;
-    --accent: #2980b9; /* Changed to Blue */
-    --bg: #f4f6f8; /* Changed to standard Blue-Grey BG */
+    --accent: #2980b9; 
+    --bg: #f4f6f8;
     --card-bg: #ffffff;
     --text-light: #7f8c8d;
     --border: #e0e0e0;
-    --highlight: #d6eaf8; /* Light Blue highlight */
-    --highlight-text: #154360; /* Dark Blue text */
+    --highlight: #d6eaf8; 
+    --highlight-text: #154360;
 }
 
 * { box-sizing: border-box; }
@@ -26,7 +27,7 @@ input:focus { outline: none; border-color: var(--accent); }
 
 button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1rem; font-weight: 600; border: none; width: 100%; transition: background 0.2s; }
 .primary-btn { background-color: var(--accent); color: white; }
-.primary-btn:hover { background-color: #1a5276; } /* Darker blue hover */
+.primary-btn:hover { background-color: #1a5276; }
 .text-btn { background: none; color: var(--text-light); text-decoration: underline; width: auto; padding: 10px; display: inline-block; }
 .hint { margin-top: -10px; margin-bottom: 15px; font-size: 0.9rem; color: #7f8c8d; }
 
@@ -40,17 +41,18 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 
 .wheel {
     width: 100%; height: 100%;
-    border: 3px solid var(--primary);
+    border: 2px solid var(--primary); /* Thinner border */
     border-radius: 50%;
     position: relative;
     background-color: white;
+    /* THINNER SPOKES (0.4% width instead of 1%) */
     background-image: 
-        linear-gradient(0deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
-        linear-gradient(30deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
-        linear-gradient(60deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
-        linear-gradient(90deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
-        linear-gradient(120deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
-        linear-gradient(150deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%);
+        linear-gradient(0deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
+        linear-gradient(30deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
+        linear-gradient(60deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
+        linear-gradient(90deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
+        linear-gradient(120deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%),
+        linear-gradient(150deg, transparent 49.8%, var(--primary) 49.8%, var(--primary) 50.2%, transparent 50.2%);
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -61,7 +63,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     transform: translate(-50%, -50%);
     width: 35%; height: 35%;
     background: white;
-    border: 3px solid var(--primary);
+    border: 2px solid var(--primary);
     color: var(--primary);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
@@ -70,7 +72,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     font-family: 'Dancing Script', cursive;
     font-size: 1.2rem; font-weight: bold;
     z-index: 10;
-    box-shadow: inset 0 0 20px rgba(41, 128, 185, 0.1); /* Blue shadow */
+    box-shadow: inset 0 0 20px rgba(41, 128, 185, 0.1);
     transition: transform 0.5s ease; 
 }
 @media (min-width: 600px) { .center-circle { font-size: 1.5rem; } }
@@ -78,21 +80,27 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
 .segment-text {
     position: absolute;
     top: 50%; left: 50%;
-    margin-top: -20px; 
+    
+    /* POSITIONING FIX: 
+       Start from center. Transform origin is LEFT CENTER.
+       Margin-top moves it UP to sit above the line. */
+    margin-top: -18px; 
+    padding-left: 5px; /* Push slightly away from center circle */
+    
     width: 130px; 
-    text-align: center;
+    text-align: left; /* Always align left (radiating out) */
     font-size: 0.75rem; font-weight: 600;
     color: var(--primary);
     font-family: 'Dancing Script', cursive;
+    
     white-space: nowrap; 
     overflow: hidden; 
     text-overflow: ellipsis;
-    padding: 4px 8px;
-    border-radius: 4px;
+    
     transform-origin: left center; 
     pointer-events: none; 
 }
-@media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; } }
+@media (min-width: 600px) { .segment-text { width: 200px; font-size: 1rem; margin-top: -22px; } }
 
 .segment-text.highlighted {
     background-color: var(--highlight);
@@ -104,6 +112,7 @@ button { cursor: pointer; padding: 12px 20px; border-radius: 6px; font-size: 1re
     white-space: normal; 
     overflow: visible;
     border: 2px solid var(--accent);
+    /* Reset to horizontal when highlighted */
     transform: rotate(0deg) translate(60px) !important; 
 }
 @media (min-width: 600px) { 
