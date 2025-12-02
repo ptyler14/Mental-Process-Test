@@ -23,6 +23,12 @@ async function checkUser() {
 function attachEventListeners() {
     document.getElementById('start-wheel-btn').addEventListener('click', startWheel);
     document.getElementById('add-statement-btn').addEventListener('click', addStatement);
+    
+    // Fix #1: Enable Enter key for Start Wheel
+    document.getElementById('center-input').addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') startWheel();
+    });
+
     document.getElementById('statement-input').addEventListener('keypress', (e) => {
         if(e.key === 'Enter') addStatement();
     });
@@ -40,6 +46,9 @@ function startWheel() {
     
     document.getElementById('step-center').classList.add('hidden');
     document.getElementById('step-wheel').classList.remove('hidden');
+    
+    // Auto-focus next input
+    setTimeout(() => document.getElementById('statement-input').focus(), 100);
 }
 
 function addStatement() {
@@ -65,28 +74,47 @@ function renderStatementOnWheel(text, index) {
     el.textContent = text;
     el.id = `segment-${index}`;
     
-    // Math to position text along spokes
-    // Index 0 is at 1 o'clock position (~30 degrees)
-    const angleDeg = (index * 30) - 60; // -60 offset to align 0 with 1 o'clock
+    // Fix #2: Text Rotation Logic
+    // We want 12 segments. 360 / 12 = 30 degrees per segment.
+    // Position 0 starts at "1 o'clock". 
+    // 12 o'clock is -90deg in CSS (0 is usually 3 o'clock).
+    // So we start at -60deg for 1 o'clock.
     
-    // Radius depends on screen size
+    const startAngle = -60; 
+    const angleDeg = startAngle + (index * 30);
+    
+    // Radius: Distance from center to start of text
     const isMobile = window.innerWidth < 600;
-    // Offset from center to start of text
-    const radiusOffset = isMobile ? 55 : 85; 
+    const radius = isMobile ? 60 : 100; 
     
-    // 1. Rotate to the spoke's angle
-    // 2. Translate outwards along that angle
-    // 3. Rotate 90deg to align text with the spoke
-    el.style.transform = `rotate(${angleDeg}deg) translate(${radiusOffset}px) rotate(90deg)`;
+    // CSS Magic:
+    // 1. Rotate the element to point in the right direction
+    // 2. Translate it outwards from the center
+    // 3. (Optional) Flip text on the left side so it's readable
     
-    // Adjust text alignment based on position for readability
-    if (index >= 3 && index <= 8) {
-         el.style.textAlign = 'right';
-         // Flip text on left side so it's not upside down
-         el.style.transform += ' rotate(180deg)';
-    } else {
-         el.style.textAlign = 'left';
-    }
+    let rotation = angleDeg;
+    
+    // Check if text is on the left side (90 to 270 degrees roughly)
+    // Normalize angle to 0-360 for easier checking
+    let normalizedAngle = (angleDeg + 360) % 360;
+    
+    // If text is on the left, we might want to flip it so it's not upside down?
+    // The user asked for "radiating out", so upside down might be intended for the bottom half.
+    // Let's stick to pure radiation first.
+    
+    el.style.transform = `rotate(${angleDeg}deg) translate(${radius}px)`;
+    
+    // Special tweak: If you want the text ON the line, we translate Y slightly.
+    // If you want it BETWEEN lines, we keep as is.
+    // Assuming "on the spoke" means centered on the angle.
+    
+    // Crucial CSS update: Text origin must be left-center for this transform to work
+    el.style.transformOrigin = "left center";
+    el.style.position = "absolute";
+    el.style.top = "50%";
+    el.style.left = "50%";
+    el.style.width = "150px"; // Limit width
+    el.style.textAlign = "left"; 
 
     container.appendChild(el);
 }
@@ -95,35 +123,22 @@ function renderStatementOnWheel(text, index) {
 
 function completeWheel() {
     setTimeout(() => {
-        // 1. Move the completed wheel to the final container
         const wheel = document.querySelector('.wheel');
         document.getElementById('wheel-complete-container').appendChild(wheel);
-
-        // 2. Switch views
         document.getElementById('step-wheel').classList.add('hidden');
         document.getElementById('step-complete').classList.remove('hidden');
-
-        // 3. Highlight center initially
         document.querySelector('.center-circle').style.boxShadow = "0 0 25px #e67e22";
-
-        // Optional: Save to Supabase here
     }, 1000);
 }
 
 function rotateWheel() {
-    // Remove highlight from previous
     if (currentHighlightIndex >= 0) {
         const prevSeg = document.getElementById(`segment-${currentHighlightIndex}`);
         if (prevSeg) prevSeg.classList.remove('highlighted');
     } else {
-         // Remove center initial highlight
          document.querySelector('.center-circle').style.boxShadow = "inset 0 0 20px rgba(230, 126, 34, 0.1)";
     }
-
-    // Increment index (loop back to 0 after 11)
     currentHighlightIndex = (currentHighlightIndex + 1) % 12;
-
-    // Add highlight to new
     const newSeg = document.getElementById(`segment-${currentHighlightIndex}`);
     if (newSeg) newSeg.classList.add('highlighted');
 }
