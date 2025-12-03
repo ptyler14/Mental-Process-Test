@@ -1,7 +1,4 @@
-/* -----------------------------
-   Focus Wheel — Updated Styles
-   Pastel rainbow + spokes + highlights
-   ----------------------------- */
+/* Focus Wheel — Updated Styles (replace existing style.css) */
 :root{
   --primary:#2c3e50;
   --accent:#2980b9;
@@ -50,7 +47,7 @@ button{cursor:pointer;padding:12px 20px;border-radius:6px;font-size:1rem;font-we
   );
 }
 
-/* Spokes: overlay thin dark lines every 30deg using multiple linear-gradients */
+/* Spokes overlay */
 .wheel::after{
   content:"";
   position:absolute;inset:0;border-radius:50%;pointer-events:none;
@@ -65,17 +62,25 @@ button{cursor:pointer;padding:12px 20px;border-radius:6px;font-size:1rem;font-we
 }
 
 /* wheel-center */
-.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:35%;height:35%;border-radius:50%;border:2px solid var(--primary);background:white;display:flex;align-items:center;justify-content:center;padding:12px;font-family:'Dancing Script',cursive;font-size:1.2rem;font-weight:700;z-index:10}
+.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:35%;height:35%;border-radius:50%;border:2px solid var(--primary);background:white;display:flex;align-items:center;justify-content:center;padding:12px;font-family:'Dancing Script',cursive;font-size:1.2rem;font-weight:700;z-index:20}
 @media(min-width:600px){.wheel-center{font-size:1.5rem}}
 
 /* segments container */
 #segments{position:absolute;inset:0;pointer-events:none}
-.segment{position:absolute;top:50%;left:50%;transform-origin:0 0;font-family:'Dancing Script',cursive;font-weight:600;color:var(--primary);white-space:nowrap;font-size:.85rem}
-@media(min-width:600px){.segment{font-size:1rem}}
+.segment{position:absolute;top:50%;left:50%;transform-origin:0 0;font-family:'Dancing Script',cursive;font-weight:600;color:var(--primary);white-space:nowrap;font-size:.85rem;pointer-events:none}
+.segment > span{display:inline-block;padding:2px 6px} /* default small padding */
 
-/* highlight */
-.segment.highlight{background:#fff8e6;border:2px solid var(--accent);border-radius:6px;padding:8px 10px;white-space:normal;max-width:240px;transform:translate(110px,-50%)!important;z-index:30;pointer-events:auto}
-@media(min-width:600px){.segment.highlight{transform:translate(150px,-50%)!important}}
+/* when active, style the inner span so it looks like a floating highlight at 3:00 */
+.segment.active > span{
+  background:#fff8e6;
+  border:2px solid var(--accent);
+  border-radius:8px;
+  padding:8px 12px;
+  max-width:260px;
+  white-space:normal;
+  box-shadow:0 6px 18px rgba(0,0,0,.15);
+  pointer-events:auto;
+}
 
 /* completion title centering */
 .complete-title{text-align:center;font-family:'Dancing Script',cursive;color:var(--accent);font-size:2.2rem}
@@ -85,8 +90,5 @@ button{cursor:pointer;padding:12px 20px;border-radius:6px;font-size:1rem;font-we
 @keyframes spin-fast{0%{transform:rotate(0deg)}100%{transform:rotate(1080deg)}}
 .spin-fast{animation:spin-fast 1.8s cubic-bezier(.2,.8,.2,1)}
 
-/* final wheel placeholder layout */
-.wheel-placeholder{display:flex;align-items:center;justify-content:center}
-
 /* ensure highlighted text readable */
-.segment.highlight{box-shadow:0 6px 18px rgba(0,0,0,.15)}
+.segment.active{z-index:30}
