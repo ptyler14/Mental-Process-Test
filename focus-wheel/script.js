@@ -130,4 +130,4 @@ window.addEventListener('resize', () => {
     s.dataset.base = s.style.transform;
   });
 });
-</script>
+
