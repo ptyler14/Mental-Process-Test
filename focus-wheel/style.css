@@ -1,4 +1,4 @@
-/* Focus Wheel — Updated Styles (replace existing style.css) */
+/* FULL UPDATED STYLE.CSS */
 :root{
   --primary:#2c3e50;
   --accent:#2980b9;
@@ -29,7 +29,7 @@ button{cursor:pointer;padding:12px 20px;border-radius:6px;font-size:1rem;font-we
 .wheel{width:320px;height:320px;border-radius:50%;border:2px solid var(--primary);position:relative;background:white;box-shadow:0 10px 30px rgba(0,0,0,.1);transition:transform .6s ease;overflow:visible}
 @media(min-width:600px){.wheel{width:500px;height:500px}}
 
-/* Pastel rainbow slices using conic-gradient (soft pastel colors) */
+/* Pastel rainbow slices */
 .wheel{background:
   conic-gradient(
     #ffd9e2 0deg 30deg,
@@ -44,10 +44,9 @@ button{cursor:pointer;padding:12px 20px;border-radius:6px;font-size:1rem;font-we
     #fff0d9 270deg 300deg,
     #e9ffd9 300deg 330deg,
     #d9f7ff 330deg 360deg
-  );
-}
+  );}
 
-/* Spokes overlay */
+/* Spokes */
 .wheel::after{
   content:"";
   position:absolute;inset:0;border-radius:50%;pointer-events:none;
@@ -58,37 +57,32 @@ button{cursor:pointer;padding:12px 20px;border-radius:6px;font-size:1rem;font-we
     linear-gradient(90deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
     linear-gradient(120deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%),
     linear-gradient(150deg, transparent 49.5%, var(--primary) 49.5%, var(--primary) 50.5%, transparent 50.5%);
-  mix-blend-mode:multiply;opacity:.65
+  mix-blend-mode:multiply;opacity:.65;
 }
 
-/* wheel-center */
-.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:35%;height:35%;border-radius:50%;border:2px solid var(--primary);background:white;display:flex;align-items:center;justify-content:center;padding:12px;font-family:'Dancing Script',cursive;font-size:1.2rem;font-weight:700;z-index:20}
-@media(min-width:600px){.wheel-center{font-size:1.5rem}}
+/* Center */
+.wheel-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:35%;height:35%;border-radius:50%;border:2px solid var(--primary);background:white;display:flex;align-items:center;justify-content:center;padding:12px;font-family:'Dancing Script',cursive;font-size:1.3rem;font-weight:700;z-index:20}
+@media(min-width:600px){.wheel-center{font-size:1.6rem}}
 
-/* segments container */
+/* Segments */
 #segments{position:absolute;inset:0;pointer-events:none}
-.segment{position:absolute;top:50%;left:50%;transform-origin:0 0;font-family:'Dancing Script',cursive;font-weight:600;color:var(--primary);white-space:nowrap;font-size:.85rem;pointer-events:none}
-.segment > span{display:inline-block;padding:2px 6px} /* default small padding */
+.segment{position:absolute;top:50%;left:50%;transform-origin:0 0;font-family:'Dancing Script',cursive;font-weight:600;color:var(--primary);white-space:nowrap;font-size:1rem;pointer-events:none}
+.segment span{display:inline-block;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* when active, style the inner span so it looks like a floating highlight at 3:00 */
-.segment.active > span{
-  background:#fff8e6;
+/* Highlight */
+.segment.active span{
+  background:#fff7e0;
   border:2px solid var(--accent);
-  border-radius:8px;
   padding:8px 12px;
+  border-radius:10px;
   max-width:260px;
   white-space:normal;
-  box-shadow:0 6px 18px rgba(0,0,0,.15);
-  pointer-events:auto;
+  box-shadow:0 5px 15px rgba(0,0,0,.15);
 }
 
-/* completion title centering */
 .complete-title{text-align:center;font-family:'Dancing Script',cursive;color:var(--accent);font-size:2.2rem}
 .complete-sub{text-align:center;color:var(--primary)}
 
-/* celebrations */
+/* Spin */
 @keyframes spin-fast{0%{transform:rotate(0deg)}100%{transform:rotate(1080deg)}}
 .spin-fast{animation:spin-fast 1.8s cubic-bezier(.2,.8,.2,1)}
-
-/* ensure highlighted text readable */
-.segment.active{z-index:30}
