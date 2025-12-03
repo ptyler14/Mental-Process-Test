@@ -1,4 +1,4 @@
-// DOM Elements
+// DOM Elements - Updated to match your HTML structure
 const desireInput = document.getElementById('desireInput');
 const statementInput = document.getElementById('statementInput');
 const addStatementBtn = document.getElementById('addStatementBtn');
@@ -16,7 +16,9 @@ const currentPosition = document.getElementById('currentPosition');
 const currentStatementText = document.getElementById('currentStatementText');
 const completedDesire = document.getElementById('completedDesire');
 const centerDesire = document.getElementById('centerDesire');
-const wheelOuter = document.getElementById('wheelOuter');
+
+// NEW: Add this - check if wheelOuter exists before using it
+let wheelOuter = document.getElementById('wheelOuter');
 
 // Step indicators
 const step1 = document.getElementById('step1');
@@ -31,8 +33,13 @@ let timerInterval = null;
 let timeLeft = 17;
 let isTimerRunning = false;
 
-// Initialize wheel lines
+// Initialize wheel lines - ONLY if wheelOuter exists
 function initializeWheel() {
+    if (!wheelOuter) {
+        console.log("wheelOuter element not found, skipping wheel initialization");
+        return;
+    }
+    
     wheelOuter.innerHTML = '';
     // Create 12 lines for the wheel
     for (let i = 0; i < 12; i++) {
@@ -58,17 +65,16 @@ function initializeWheel() {
     }
 }
 
-// Call initialization
-initializeWheel();
-
-// Update the wheel visualization
+// Update the wheel visualization - ONLY if wheelOuter exists
 function updateWheel() {
+    if (!wheelOuter) return;
+    
     // Reset all positions
     for (let i = 1; i <= 12; i++) {
         const posElement = document.getElementById(`pos${i}`);
         if (posElement) {
             posElement.style.backgroundColor = '';
-            posElement.style.color = '#4a6fa5';
+            posElement.style.color = '#667eea';
             posElement.style.borderRadius = '';
             posElement.style.padding = '';
         }
@@ -78,7 +84,7 @@ function updateWheel() {
     statements.forEach((stmt, index) => {
         const posElement = document.getElementById(`pos${index + 1}`);
         if (posElement) {
-            posElement.style.backgroundColor = '#4a6fa5';
+            posElement.style.backgroundColor = '#667eea';
             posElement.style.color = 'white';
             posElement.style.borderRadius = '50%';
             posElement.style.padding = '5px';
@@ -91,16 +97,20 @@ function updateWheel() {
     });
     
     // Update current position indicator
-    currentPosition.textContent = statements.length + 1;
+    if (currentPosition) {
+        currentPosition.textContent = statements.length + 1;
+    }
 }
 
 // Update step indicators
 function updateSteps() {
+    if (!step1 || !step2 || !step3 || !step4) return;
+    
     // Step 1 is always active
     step1.classList.add('active');
     
     // Step 2: Active if desire is set
-    if (desireInput.value.trim()) {
+    if (desireInput && desireInput.value.trim()) {
         step2.classList.add('active');
         step2.classList.add('completed');
     } else {
@@ -112,11 +122,11 @@ function updateSteps() {
     if (statements.length === 12) {
         step3.classList.add('active');
         step3.classList.add('completed');
-        startFocusBtn.disabled = false;
+        if (startFocusBtn) startFocusBtn.disabled = false;
     } else {
         step3.classList.remove('active');
         step3.classList.remove('completed');
-        startFocusBtn.disabled = true;
+        if (startFocusBtn) startFocusBtn.disabled = true;
     }
     
     // Step 4: Active when timer is complete
@@ -124,126 +134,151 @@ function updateSteps() {
 }
 
 // Update center desire text
-desireInput.addEventListener('input', function() {
-    const text = this.value.trim();
-    centerDesire.textContent = text || 'Your desire goes here';
-    updateSteps();
-});
+if (desireInput) {
+    desireInput.addEventListener('input', function() {
+        const text = this.value.trim();
+        if (centerDesire) {
+            centerDesire.textContent = text || 'Your desire goes here';
+        }
+        updateSteps();
+    });
+}
 
 // Add statement to the wheel
-addStatementBtn.addEventListener('click', function() {
-    const statement = statementInput.value.trim();
-    const desire = desireInput.value.trim();
-    
-    if (!desire) {
-        alert('Please enter your central desire first.');
-        desireInput.focus();
-        return;
-    }
-    
-    if (!statement) {
-        alert('Please enter a belief statement.');
-        statementInput.focus();
-        return;
-    }
-    
-    if (statements.length >= 12) {
-        alert('You can only add 12 statements to the Focus Wheel.');
-        return;
-    }
-    
-    // Add statement to array
-    statements.push(statement);
-    
-    // Add statement to the list
-    const statementItem = document.createElement('div');
-    statementItem.className = 'statement-item';
-    statementItem.id = `statement-${statements.length}`;
-    statementItem.innerHTML = `
-        <span class="number">${statements.length}</span>
-        <span class="statement-text">${statement}</span>
-    `;
-    statementsList.appendChild(statementItem);
-    
-    // Clear the input
-    statementInput.value = '';
-    
-    // Update wheel and UI
-    updateWheel();
-    updateSteps();
-    
-    // Scroll to new statement
-    statementItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    
-    // If we have 12 statements, show start focus button
-    if (statements.length === 12) {
-        startFocusBtn.disabled = false;
-        alert('Great! You have added all 12 statements. Now click "Start Focus Timer" to begin the 17-second focusing process.');
-    }
-    
-    // Update statement input label
-    currentPosition.textContent = statements.length + 1;
-    
-    // Focus back on statement input
-    statementInput.focus();
-});
+if (addStatementBtn) {
+    addStatementBtn.addEventListener('click', function() {
+        const statement = statementInput ? statementInput.value.trim() : '';
+        const desire = desireInput ? desireInput.value.trim() : '';
+        
+        if (!desire) {
+            alert('Please enter your central desire first.');
+            if (desireInput) desireInput.focus();
+            return;
+        }
+        
+        if (!statement) {
+            alert('Please enter a belief statement.');
+            if (statementInput) statementInput.focus();
+            return;
+        }
+        
+        if (statements.length >= 12) {
+            alert('You can only add 12 statements to the Focus Wheel.');
+            return;
+        }
+        
+        // Add statement to array
+        statements.push(statement);
+        
+        // Add statement to the list
+        if (statementsList) {
+            const statementItem = document.createElement('div');
+            statementItem.className = 'statement-item';
+            statementItem.id = `statement-${statements.length}`;
+            statementItem.innerHTML = `
+                <span class="number">${statements.length}</span>
+                <span class="statement-text">${statement}</span>
+            `;
+            statementsList.appendChild(statementItem);
+        }
+        
+        // Clear the input
+        if (statementInput) statementInput.value = '';
+        
+        // Update wheel and UI
+        updateWheel();
+        updateSteps();
+        
+        // Scroll to new statement
+        if (statementsList.lastChild) {
+            statementsList.lastChild.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        // If we have 12 statements, show start focus button
+        if (statements.length === 12 && startFocusBtn) {
+            startFocusBtn.disabled = false;
+            alert('Great! You have added all 12 statements. Now click "Start Focus Timer" to begin the 17-second focusing process.');
+        }
+        
+        // Update statement input label
+        if (currentPosition) {
+            currentPosition.textContent = statements.length + 1;
+        }
+        
+        // Focus back on statement input
+        if (statementInput) statementInput.focus();
+    });
+}
 
 // Also allow Enter key to add statement (but Shift+Enter for new line)
-statementInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        addStatementBtn.click();
-    }
-});
+if (statementInput) {
+    statementInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (addStatementBtn) addStatementBtn.click();
+        }
+    });
+}
 
 // Start the focus timer process
-startFocusBtn.addEventListener('click', function() {
-    if (statements.length !== 12) {
-        alert('Please add all 12 statements before starting the focus timer.');
-        return;
-    }
-    
-    // Show timer section
-    timerSection.style.display = 'block';
-    
-    // Start with first statement
-    currentStatementIndex = 0;
-    startFocusOnStatement(currentStatementIndex);
-    
-    // Update steps
-    step3.classList.add('active');
-    step3.classList.add('completed');
-    step4.classList.remove('active');
-    step4.classList.remove('completed');
-    
-    // Scroll to timer
-    timerSection.scrollIntoView({ behavior: 'smooth' });
-});
+if (startFocusBtn) {
+    startFocusBtn.addEventListener('click', function() {
+        if (statements.length !== 12) {
+            alert('Please add all 12 statements before starting the focus timer.');
+            return;
+        }
+        
+        // Show timer section
+        if (timerSection) timerSection.style.display = 'block';
+        
+        // Start with first statement
+        currentStatementIndex = 0;
+        startFocusOnStatement(currentStatementIndex);
+        
+        // Update steps
+        if (step3) {
+            step3.classList.add('active');
+            step3.classList.add('completed');
+        }
+        if (step4) {
+            step4.classList.remove('active');
+            step4.classList.remove('completed');
+        }
+        
+        // Scroll to timer
+        if (timerSection) timerSection.scrollIntoView({ behavior: 'smooth' });
+    });
+}
 
 // Start focusing on a specific statement
 function startFocusOnStatement(index) {
     // Reset timer
     timeLeft = 17;
-    timerDisplay.textContent = timeLeft;
-    currentStatementText.textContent = statements[index];
+    if (timerDisplay) timerDisplay.textContent = timeLeft;
+    if (currentStatementText && statements[index]) {
+        currentStatementText.textContent = statements[index];
+    }
     
     // Highlight current statement in list
     document.querySelectorAll('.statement-item').forEach(item => {
         item.classList.remove('active');
     });
-    document.getElementById(`statement-${index + 1}`).classList.add('active');
+    const currentStatementElement = document.getElementById(`statement-${index + 1}`);
+    if (currentStatementElement) currentStatementElement.classList.add('active');
     
     // Update wheel highlight
     updateWheel();
     const posElement = document.getElementById(`pos${index + 1}`);
     if (posElement) {
-        posElement.style.backgroundColor = '#6d5dfc';
+        posElement.style.backgroundColor = '#764ba2';
     }
     
     // Reset timer button states
-    startTimerBtn.disabled = false;
-    startTimerBtn.innerHTML = '<i class="fas fa-play"></i> Start Timer';
-    nextStatementBtn.disabled = true;
+    if (startTimerBtn) {
+        startTimerBtn.disabled = false;
+        startTimerBtn.innerHTML = '<i class="fas fa-play"></i> Start Timer';
+    }
+    if (nextStatementBtn) nextStatementBtn.disabled = true;
 }
 
 // Start the 17-second timer
@@ -251,13 +286,15 @@ function startTimer() {
     if (isTimerRunning) return;
     
     isTimerRunning = true;
-    startTimerBtn.disabled = true;
-    startTimerBtn.innerHTML = '<i class="fas fa-pause"></i> Timing...';
-    nextStatementBtn.disabled = true;
+    if (startTimerBtn) {
+        startTimerBtn.disabled = true;
+        startTimerBtn.innerHTML = '<i class="fas fa-pause"></i> Timing...';
+    }
+    if (nextStatementBtn) nextStatementBtn.disabled = true;
     
     timerInterval = setInterval(() => {
         timeLeft--;
-        timerDisplay.textContent = timeLeft;
+        if (timerDisplay) timerDisplay.textContent = timeLeft;
         
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
@@ -269,11 +306,12 @@ function startTimer() {
             audio.play().catch(e => console.log("Audio play failed:", e));
             
             // Enable next button
-            nextStatementBtn.disabled = false;
-            startTimerBtn.innerHTML = '<i class="fas fa-check"></i> Complete!';
+            if (nextStatementBtn) nextStatementBtn.disabled = false;
+            if (startTimerBtn) startTimerBtn.innerHTML = '<i class="fas fa-check"></i> Complete!';
             
             // Show completion for this statement
-            document.getElementById(`statement-${currentStatementIndex + 1}`).innerHTML += ' <i class="fas fa-check" style="color: #4CAF50;"></i>';
+            const completedStatement = document.getElementById(`statement-${currentStatementIndex + 1}`);
+            if (completedStatement) completedStatement.innerHTML += ' <i class="fas fa-check" style="color: #4CAF50;"></i>';
             
             // If this was the last statement, show completion message
             if (currentStatementIndex === 11) {
@@ -286,18 +324,20 @@ function startTimer() {
 // Show completion message
 function showCompletion() {
     // Hide timer section
-    timerSection.style.display = 'none';
+    if (timerSection) timerSection.style.display = 'none';
     
     // Show completion message
-    completedDesire.textContent = desireInput.value.trim();
-    completionMessage.classList.add('show');
+    if (completedDesire && desireInput) completedDesire.textContent = desireInput.value.trim();
+    if (completionMessage) completionMessage.classList.add('show');
     
     // Update steps
-    step4.classList.add('active');
-    step4.classList.add('completed');
+    if (step4) {
+        step4.classList.add('active');
+        step4.classList.add('completed');
+    }
     
     // Scroll to completion message
-    completionMessage.scrollIntoView({ behavior: 'smooth' });
+    if (completionMessage) completionMessage.scrollIntoView({ behavior: 'smooth' });
 }
 
 // Move to next statement
@@ -318,75 +358,97 @@ function resetTimer() {
 }
 
 // Event listeners for timer controls
-startTimerBtn.addEventListener('click', startTimer);
-nextStatementBtn.addEventListener('click', nextStatement);
-resetTimerBtn.addEventListener('click', resetTimer);
+if (startTimerBtn) startTimerBtn.addEventListener('click', startTimer);
+if (nextStatementBtn) nextStatementBtn.addEventListener('click', nextStatement);
+if (resetTimerBtn) resetTimerBtn.addEventListener('click', resetTimer);
 
 // Clear all button
-clearBtn.addEventListener('click', function() {
-    if (confirm('Are you sure you want to clear the entire Focus Wheel? This cannot be undone.')) {
+if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to clear the entire Focus Wheel? This cannot be undone.')) {
+            statements = [];
+            if (statementsList) statementsList.innerHTML = '';
+            if (desireInput) desireInput.value = '';
+            if (statementInput) statementInput.value = '';
+            if (centerDesire) centerDesire.textContent = 'Your desire goes here';
+            if (timerSection) timerSection.style.display = 'none';
+            if (completionMessage) completionMessage.classList.remove('show');
+            currentStatementIndex = 0;
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            updateWheel();
+            updateSteps();
+            if (startFocusBtn) startFocusBtn.disabled = true;
+            if (currentPosition) currentPosition.textContent = '1';
+            
+            // Reset steps
+            if (step2) {
+                step2.classList.remove('active');
+                step2.classList.remove('completed');
+            }
+            if (step3) {
+                step3.classList.remove('active');
+                step3.classList.remove('completed');
+            }
+            if (step4) {
+                step4.classList.remove('active');
+                step4.classList.remove('completed');
+            }
+        }
+    });
+}
+
+// New wheel button
+if (newWheelBtn) {
+    newWheelBtn.addEventListener('click', function() {
         statements = [];
-        statementsList.innerHTML = '';
-        desireInput.value = '';
-        statementInput.value = '';
-        centerDesire.textContent = 'Your desire goes here';
-        timerSection.style.display = 'none';
-        completionMessage.classList.remove('show');
+        if (statementsList) statementsList.innerHTML = '';
+        if (statementInput) statementInput.value = '';
+        if (timerSection) timerSection.style.display = 'none';
+        if (completionMessage) completionMessage.classList.remove('show');
         currentStatementIndex = 0;
         clearInterval(timerInterval);
         isTimerRunning = false;
         updateWheel();
         updateSteps();
-        startFocusBtn.disabled = true;
-        currentPosition.textContent = '1';
+        if (startFocusBtn) startFocusBtn.disabled = true;
+        if (currentPosition) currentPosition.textContent = '1';
+        
+        // Keep the desire but allow editing
+        if (desireInput) desireInput.focus();
         
         // Reset steps
-        step2.classList.remove('active');
-        step2.classList.remove('completed');
-        step3.classList.remove('active');
-        step3.classList.remove('completed');
-        step4.classList.remove('active');
-        step4.classList.remove('completed');
-    }
-});
+        if (step2) {
+            step2.classList.add('active');
+            step2.classList.add('completed');
+        }
+        if (step3) {
+            step3.classList.remove('active');
+            step3.classList.remove('completed');
+        }
+        if (step4) {
+            step4.classList.remove('active');
+            step4.classList.remove('completed');
+        }
+    });
+}
 
-// New wheel button
-newWheelBtn.addEventListener('click', function() {
-    statements = [];
-    statementsList.innerHTML = '';
-    statementInput.value = '';
-    timerSection.style.display = 'none';
-    completionMessage.classList.remove('show');
-    currentStatementIndex = 0;
-    clearInterval(timerInterval);
-    isTimerRunning = false;
-    updateWheel();
-    updateSteps();
-    startFocusBtn.disabled = true;
-    currentPosition.textContent = '1';
-    
-    // Keep the desire but allow editing
-    desireInput.focus();
-    
-    // Reset steps
-    step2.classList.add('active');
-    step2.classList.add('completed');
-    step3.classList.remove('active');
-    step3.classList.remove('completed');
-    step4.classList.remove('active');
-    step4.classList.remove('completed');
-});
-
-// Initialize steps
-updateSteps();
-
-// Add some example statements on first load (for demo purposes)
+// Initialize steps and wheel on load
 window.addEventListener('load', function() {
+    // Re-find elements in case they weren't available earlier
+    if (!wheelOuter) wheelOuter = document.getElementById('wheelOuter');
+    
+    // Initialize wheel
+    initializeWheel();
+    updateSteps();
+    
     // Check if this is the first visit to this page
     if (!localStorage.getItem('focusWheelVisited')) {
         // Set example desire
-        desireInput.value = "I want to feel my personal power";
-        centerDesire.textContent = desireInput.value;
+        if (desireInput) {
+            desireInput.value = "I want to feel my personal power";
+            if (centerDesire) centerDesire.textContent = desireInput.value;
+        }
         
         // Update localStorage so we don't show examples again
         localStorage.setItem('focusWheelVisited', 'true');
