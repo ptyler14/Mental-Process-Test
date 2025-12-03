@@ -1,11 +1,12 @@
-// Focus Wheel — Updated logic
-// No Supabase. Pastel rainbow, spokes, corrected reflection, CCW rotation, celebration spin
+// Focus Wheel — placement + CCW rotation + correct reflection highlight
 
 let centerText = '';
 let statements = [];
-let reflectIndex = -1; // which statement is highlighted in final wheel
+let currentRotation = 0; // degrees applied to wheel (CSS rotate)
+let reflectIndex = -1;
 
-// DOM refs
+const slice = 360 / 12;
+
 const stepCenter = document.getElementById('step-center');
 const stepWheel = document.getElementById('step-wheel');
 const stepComplete = document.getElementById('step-complete');
@@ -27,118 +28,126 @@ const reflectBtn = document.getElementById('reflect-btn');
 startBtn.addEventListener('click', startWheel);
 addBtn.addEventListener('click', addStatement);
 reflectBtn.addEventListener('click', reflectNext);
-centerInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') startWheel(); });
-statementInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') addStatement(); });
+centerInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') startWheel(); });
+statementInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addStatement(); });
 
-function startWheel(){
-  const val = centerInput.value.trim();
-  if(!val) return alert('Please enter a center desire.');
-  centerText = val;
+function startWheel() {
+  const v = centerInput.value.trim();
+  if (!v) return alert('Please enter a center desire.');
+  centerText = v;
   wheelCenter.textContent = centerText;
   stepCenter.classList.add('hidden');
   stepWheel.classList.remove('hidden');
   statementInput.focus();
 }
 
-function addStatement(){
+function addStatement() {
   const text = statementInput.value.trim();
-  if(!text) return;
-  if(statements.length >= 12) return; // safety
+  if (!text) return;
+  if (statements.length >= 12) return;
+  const index = statements.length; // 0-based
   statements.push(text);
   statementInput.value = '';
   countDisplay.textContent = statements.length;
-  drawSegments();
-  if(statements.length === 12){
-    // celebration spin on the original wheel, then show final
+  // create element at its absolute slot (angle = slice * index)
+  const radius = window.innerWidth < 600 ? 110 : 170;
+  const angle = slice * index;
+  const el = document.createElement('div');
+  el.className = 'segment';
+  el.id = `segment-${index}`;
+  // inner span used for highlight styling (so we don't need to override transform)
+  const span = document.createElement('span');
+  span.textContent = text;
+  el.appendChild(span);
+  el.style.transform = `rotate(${angle}deg) translate(${radius}px)`;
+  el.dataset.base = el.style.transform;
+  segmentsContainer.appendChild(el);
+
+  // AFTER adding, rotate the wheel CCW by one slice (negative rotation)
+  currentRotation += -slice;
+  wheel.style.transform = `rotate(${currentRotation}deg)`;
+  // keep center upright (counter-rotate)
+  wheelCenter.style.transform = `translate(-50%,-50%) rotate(${-currentRotation}deg)`;
+
+  // Celebrate when we hit 12
+  if (statements.length === 12) {
     wheel.classList.add('spin-fast');
-    setTimeout(()=>{
+    setTimeout(() => {
       wheel.classList.remove('spin-fast');
       completeWheel();
     }, 1800);
   }
 }
 
-function drawSegments(){
-  segmentsContainer.innerHTML = '';
-  const total = 12; // always 12 slots even if fewer filled
-  const radius = window.innerWidth < 600 ? 110 : 170;
-
-  for(let i=0;i<statements.length;i++){
-    const angle = (360/12)*i; // 0,30,60...
-    const el = document.createElement('div');
-    el.className = 'segment';
-    el.id = `segment-${i}`;
-    el.textContent = statements[i];
-    el.style.transform = `rotate(${angle}deg) translate(${radius}px)`;
-    el.dataset.base = el.style.transform;
-    segmentsContainer.appendChild(el);
-  }
-}
-
-function completeWheel(){
+function completeWheel() {
   stepWheel.classList.add('hidden');
   stepComplete.classList.remove('hidden');
 
-  // clone the wheel so layout remains stable — use the cloned copy for reflection/highlight
+  // clone current wheel to final area; ensure clone uses same transforms
   const clone = wheel.cloneNode(true);
   clone.id = 'wheel-final';
   clone.classList.remove('spin-fast');
-  clone.style.transform = 'rotate(0deg)';
-
-  // ensure center text inside clone is correct and upright
+  clone.style.transform = `rotate(${currentRotation}deg)`; // maintain last rotation state visually
+  // ensure center in clone is upright
   const cloneCenter = clone.querySelector('#wheel-center');
-  if(cloneCenter) cloneCenter.style.transform = 'translate(-50%,-50%) rotate(0deg)';
-
+  if (cloneCenter) cloneCenter.style.transform = `translate(-50%,-50%) rotate(${ -currentRotation }deg)`;
   finalWheelContainer.innerHTML = '';
   finalWheelContainer.appendChild(clone);
 
-  // reset reflect index so it begins before first
+  // Reset reflect index so first click brings index 0 into 3:00 visually
   reflectIndex = -1;
 }
 
-function reflectNext(){
+function reflectNext() {
   const total = statements.length;
-  if(total === 0) return;
-
+  if (!total) return;
   const finalWheel = document.getElementById('wheel-final');
-  if(!finalWheel) return;
+  if (!finalWheel) return;
 
-  // unhighlight previous inside final wheel
-  if(reflectIndex >= 0){
+  // remove active from previous (inside final wheel)
+  if (reflectIndex >= 0) {
     const prev = finalWheel.querySelector(`#segment-${reflectIndex}`);
-    if(prev){
-      prev.classList.remove('highlight');
-      prev.style.transform = prev.dataset.base || prev.style.transform;
+    if (prev) {
+      prev.classList.remove('active');
     }
   }
 
-  // advance index (we want 0 -> 1 -> 2 ...)
+  // advance index (0 -> 1 -> 2 ...)
   reflectIndex = (reflectIndex + 1) % total;
 
-  // compute counter-clockwise rotation so first statement added appears first
-  const slice = 360/12;
-  const targetRotation = -reflectIndex * slice; // negative for CCW
-
+  // compute target rotation so that selected item is at 3:00:
+  // item at angle = slice * reflectIndex; to bring it to 0deg, rotate wheel by -angle
+  const targetRotation = -reflectIndex * slice;
   finalWheel.style.transform = `rotate(${targetRotation}deg)`;
 
-  // counter-rotate the center text so it stays horizontal
+  // counter-rotate clone center to remain horizontal
   const cloneCenter = finalWheel.querySelector('#wheel-center');
-  if(cloneCenter){
+  if (cloneCenter) {
     cloneCenter.style.transform = `translate(-50%,-50%) rotate(${ -targetRotation }deg)`;
   }
 
-  // highlight selected element inside final wheel
-  const selected = finalWheel.querySelector(`#segment-${reflectIndex}`);
-  if(selected){
-    // set to highlighted layout
-    selected.classList.add('highlight');
-    // ensure it's positioned so the highlight sits to the right; override transform
-    selected.style.transform = `rotate(${reflectIndex * slice}deg) translate(${ (window.innerWidth<600?110:170) }px)`; // ensure anchor rotation
-    // then the .highlight CSS will translate it outward
-  }
+  // after rotation transition completes, mark active
+  // allow same duration as CSS transition (~600ms); use setTimeout to add class after rotation
+  setTimeout(() => {
+    const sel = finalWheel.querySelector(`#segment-${reflectIndex}`);
+    if (sel) {
+      sel.classList.add('active');
+      // keep its transform intact (it will be at 3:00 visually because the wheel rotated)
+    }
+  }, 620); // slightly longer than CSS transition for smoothness
 }
 
-// handle window resize to redraw with appropriate radius
-window.addEventListener('resize', ()=>{
-  if(statements.length>0) drawSegments();
+// redraw on resize with same placement logic (keeps currentRotation unchanged)
+window.addEventListener('resize', () => {
+  // update radius transforms for each segment
+  const radius = window.innerWidth < 600 ? 110 : 170;
+  const segs = document.querySelectorAll('.segment');
+  segs.forEach(s => {
+    const id = s.id;
+    if (!id) return;
+    const idx = parseInt(id.split('-')[1], 10);
+    if (isNaN(idx)) return;
+    s.style.transform = `rotate(${slice * idx}deg) translate(${radius}px)`;
+    s.dataset.base = s.style.transform;
+  });
 });
