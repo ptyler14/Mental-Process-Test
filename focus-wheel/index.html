@@ -1,71 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Focus Wheel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Focus Wheel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <header>
-            <a href="../index.html" class="home-link">🏠 Home</a>
-            <h1>Focus Wheel</h1>
-            <p class="subtitle">Bridge the gap from resistance to relief.</p>
-        </header>
+  <div class="container">
+    <header>
+      <a href="../index.html" class="home-link">🏠 Home</a>
+      <h1>Focus Wheel</h1>
+      <p class="subtitle">Bridge the gap from resistance to relief.</p>
+    </header>
 
-        <!-- STEP 1: DESIRE INPUT -->
-        <section id="step-center" class="card">
-            <h2>Step 1: Identify the Desire</h2>
-            <p class="intro-text">Focus gently on what you want to feel. Place the desire at the center of the wheel.</p>
+    <!-- Step 1 -->
+    <section id="step-center" class="card">
+      <h2>Step 1: Identify the Desire</h2>
+      <p class="intro-text">Focus gently on what you want to feel. Place the desire in the center.</p>
+      <label for="center-input">Center Statement</label>
+      <input id="center-input" type="text" placeholder="e.g., I am becoming more confident every day." autocomplete="off" />
+      <button id="start-wheel-btn" class="primary-btn">Start Wheel</button>
+    </section>
 
-            <label for="center-input">Center Statement:</label>
-            <input id="center-input" type="text" placeholder="e.g., I am becoming more confident every day." autocomplete="off" />
+    <!-- Step 2 -->
+    <section id="step-wheel" class="hidden">
+      <div class="wheel-wrapper">
+        <div id="wheel" class="wheel">
+          <div id="segments"></div>
+          <div id="wheel-center" class="wheel-center">My Desire</div>
+        </div>
+      </div>
 
-            <button id="start-wheel-btn" class="primary-btn">Start Wheel</button>
-        </section>
+      <div class="card">
+        <h3>Add a Believable Statement (<span id="count">0</span>/12)</h3>
+        <p class="hint">Choose thoughts that feel true and provide a small feeling of relief.</p>
+        <input id="statement-input" type="text" placeholder="e.g., Things are working out for me more than I realize." autocomplete="off" />
+        <button id="add-btn" class="primary-btn">Add Statement</button>
+      </div>
+    </section>
 
-        <!-- STEP 2: WHEEL INPUTS -->
-        <section id="step-wheel" class="hidden">
-            <div class="wheel-wrapper">
-                <div id="wheel" class="wheel">
-                    <div id="wheel-center" class="wheel-center"></div>
-                    <div id="segments"></div>
-                </div>
-            </div>
+    <!-- Step 3 -->
+    <section id="step-complete" class="hidden">
+      <div class="card">
+        <h2 class="complete-title">Alignment Achieved</h2>
+        <p class="complete-sub">You have softened resistance and built positive momentum.</p>
+      </div>
 
-            <div class="card">
-                <h3>Add a Believable Statement (<span id="count">0</span>/12)</h3>
-                <p class="hint">Choose thoughts that feel true and provide a small feeling of relief.</p>
+      <div class="wheel-wrapper">
+        <div id="final-wheel" class="wheel-placeholder"></div>
+      </div>
 
-                <input id="statement-input" type="text" placeholder="e.g., Things are working out for me more than I realize." autocomplete="off" />
-                <button id="add-btn" class="primary-btn">Add Statement</button>
-            </div>
-        </section>
+      <div class="card button-card">
+        <button id="reflect-btn" class="primary-btn">🔄 Rotate & Reflect</button>
+      </div>
 
-        <!-- STEP 3: COMPLETION + REFLECTION -->
-        <section id="step-complete" class="hidden">
-            <div class="card">
-                <h2 class="complete-title">Alignment Achieved</h2>
-                <p>You have softened resistance and built positive momentum.</p>
-            </div>
+      <div style="text-align:center; margin-top: 20px;">
+        <button onclick="location.reload()" class="text-btn">Start New Wheel</button>
+        <a href="../index.html" class="text-btn" style="margin-left: 15px;">Back to Dashboard</a>
+      </div>
+    </section>
+  </div>
 
-            <div class="wheel-wrapper">
-                <div id="final-wheel"></div>
-            </div>
-
-            <div class="card button-card">
-                <button id="reflect-btn" class="primary-btn">🔄 Rotate & Reflect</button>
-            </div>
-
-            <div style="text-align: center; margin-top: 20px;">
-                <button onclick="location.reload()" class="text-btn">Start New Wheel</button>
-                <a href="../index.html" class="text-btn" style="margin-left: 15px;">Back to Dashboard</a>
-            </div>
-        </section>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
