@@ -3,6 +3,8 @@
     --text: #e2e8f0;
     --accent: #38bdf8; /* Light Blue */
     --highlight: #fbbf24; /* Gold */
+    --success: #22c55e;
+    --error: #ef4444;
 }
 
 body {
@@ -25,6 +27,8 @@ body {
 }
 
 h1 { font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 10px; color: var(--accent); }
+h2 { font-family: 'Merriweather', serif; font-size: 1.8rem; margin-bottom: 20px; color: var(--text); }
+
 .subtitle { color: #94a3b8; margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem; }
 
 .instructions {
@@ -35,24 +39,52 @@ h1 { font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 10px;
     margin-bottom: 40px;
     line-height: 1.8;
 }
-.instructions ul { padding-left: 20px; }
-.key { background: #334155; padding: 2px 8px; border-radius: 4px; font-weight: bold; border-bottom: 2px solid #1e293b; }
+
+.key-display {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.key { 
+    background: #334155; 
+    padding: 4px 10px; 
+    border-radius: 4px; 
+    font-weight: bold; 
+    border-bottom: 2px solid #1e293b; 
+    color: var(--highlight);
+}
+
+.button-row { display: flex; gap: 15px; justify-content: center; }
 
 .primary-btn {
     background-color: var(--accent);
     color: #0f172a;
     border: none;
     padding: 15px 40px;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     border-radius: 50px;
     cursor: pointer;
     font-weight: bold;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: transform 0.2s;
 }
-.primary-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+.primary-btn:hover { transform: scale(1.05); }
+
+.secondary-btn {
+    background-color: transparent;
+    color: var(--text);
+    border: 1px solid var(--text);
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.secondary-btn:hover { background: rgba(255,255,255,0.1); }
 
 /* SESSION SCREEN */
-.hidden { display: none; }
+.hidden { display: none !important; }
 
 .pulse-circle {
     width: 100px; height: 100px;
@@ -65,11 +97,19 @@ h1 { font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 10px;
 
 .pulse-circle.speaking { animation: pulse 1.5s infinite ease-in-out; }
 .pulse-circle.listening { background-color: var(--highlight); opacity: 0.8; animation: pulse 1s infinite; }
+.pulse-circle.success { background-color: var(--success); opacity: 0.8; transform: scale(1.2); }
+.pulse-circle.error { background-color: var(--error); opacity: 0.8; animation: shake 0.4s ease-in-out; }
 
 @keyframes pulse {
     0% { transform: scale(0.95); opacity: 0.5; }
     50% { transform: scale(1.05); opacity: 0.8; }
     100% { transform: scale(0.95); opacity: 0.5; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
 }
 
 #status-text { font-size: 1.5rem; font-family: 'Merriweather', serif; height: 60px; }
@@ -79,4 +119,5 @@ h1 { font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 10px;
     color: #64748b;
     font-size: 0.9rem;
     font-style: italic;
+    min-height: 20px;
 }
