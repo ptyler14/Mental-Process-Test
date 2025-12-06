@@ -1,30 +1,29 @@
-// --- CONFIGURATION ---
-// Note: 'text' is what the robot says OR what the partner reads
+// --- SUPABASE CONFIG ---
+const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmcml3ZG93dXdqeGlmZXlwbGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTczMzIsImV4cCI6MjA3OTQ3MzMzMn0.AZa5GNVDRm1UXU-PiQx7KS0KxQqZ69JbV1Qn2DIlHq0';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// --- SCRIPT DATA ---
 const SESSION_SCRIPT = {
     start: {
-        text: "Welcome. Take a deep breath and close your eyes. We are beginning the induction.",
+        text: "Session starting. Please close your eyes and take a deep breath.",
+        next: "induction_1"
+    },
+    induction_1: {
+        text: "Relaxing your eyelids... Going deeper... 5... 4... 3... 2... 1...",
         next: "check_ready"
     },
     check_ready: {
         type: "question",
         text: "Are you ready to allow your mind to go as deep as needed? Signal Yes.",
-        yes: "induction_deepener",
-        no: "start"
+        yes: "suds_intro",
+        no: "induction_1"
     },
-    induction_deepener: {
-        text: "Relaxing your eyelids... Going deeper... 10... 9... 8... deeper and deeper.",
-        next: "establish_communication"
-    },
-    establish_communication: {
-        type: "question",
-        text: "Superconscious, are you present? Signal Yes.",
-        yes: "suds_check",
-        no: "induction_deepener"
-    },
-    suds_check: {
-        type: "speech", // In partner mode, this means Partner types the number
-        text: "On a scale of minus ten to plus ten, how does this issue feel right now? Speak the number.",
-        next: "process_suds" // In this demo, logic happens in handler
+    suds_intro: {
+        type: "speech", // Voice for this one!
+        text: "On a scale of minus ten to plus ten, how intense is the issue? Speak the number clearly.",
+        next: "finish"
     },
     finish: {
         text: "Thank you. Integrating changes. Wide awake, fully refreshed.",
@@ -33,23 +32,20 @@ const SESSION_SCRIPT = {
 };
 
 // --- STATE ---
-let currentStep = "start";
-let isPartnerMode = false;
-let sessionActive = false;
-let listenMode = 'idle';
-
 const synth = window.speechSynthesis;
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
+
 recognition.continuous = false; 
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
-let userKeys = JSON.parse(localStorage.getItem('sp_keys')) || { yes: 'Space', no: null }; 
-let isCalibrated = localStorage.getItem('sp_calibrated') === 'true';
+let userKeys = { yes: 'Space', no: 'KeyN' };
+let currentStep = 'start';
+let isPartnerMode = false;
 
-// --- DOM ---
+// --- DOM ELEMENTS (Safe Get) ---
 const get = (id) => document.getElementById(id);
 const screens = {
     mode: get('mode-select-screen'),
@@ -59,142 +55,299 @@ const screens = {
     practice: get('practice-screen'),
     session: get('session-screen')
 };
-const views = {
-    solo: get('solo-view'),
-    partner: get('partner-view')
-};
 
 // --- INIT ---
-get('mode-solo').addEventListener('click', () => {
-    isPartnerMode = false;
-    showScreen('soloStart');
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkUser();
+    attachEventListeners();
 });
 
-get('mode-partner').addEventListener('click', () => {
-    isPartnerMode = true;
-    showScreen('partnerStart');
-});
-
-get('solo-begin-btn').addEventListener('click', checkHistory);
-get('partner-begin-btn').addEventListener('click', startPartnerSession);
-
-// Keys Flow Listeners
-get('keep-keys-btn').addEventListener('click', startPracticeMode);
-get('change-keys-btn').addEventListener('click', startCalibration);
-
-// --- PARTNER MODE LOGIC ---
-function startPartnerSession() {
-    showScreen('session');
-    views.solo.classList.add('hidden');
-    views.partner.classList.remove('hidden');
-    
-    // Attach Partner Controls
-    get('partner-next-btn').addEventListener('click', () => {
-        const step = SESSION_SCRIPT[currentStep];
-        if (step.next) runStep(step.next);
-    });
-    
-    // Yes/No/Suds handlers attached dynamically in runStep
-    
-    runStep('start');
+async function checkUser() {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) window.location.href = "../index.html";
 }
 
-// --- SOLO FLOW LOGIC ---
+function attachEventListeners() {
+    // Mode Selection
+    const btnSolo = get('mode-solo');
+    if (btnSolo) btnSolo.addEventListener('click', () => {
+        isPartnerMode = false;
+        showScreen('soloStart');
+    });
+
+    const btnPartner = get('mode-partner');
+    if (btnPartner) btnPartner.addEventListener('click', () => {
+        isPartnerMode = true;
+        showScreen('partnerStart');
+    });
+
+    // Start Buttons
+    const btnSoloStart = get('solo-begin-btn');
+    if (btnSoloStart) btnSoloStart.addEventListener('click', checkHistory);
+    
+    const btnPartnerStart = get('partner-begin-btn');
+    if (btnPartnerStart) btnPartnerStart.addEventListener('click', startPartnerSession);
+
+    // Key Setup Flow
+    const btnKeep = get('keep-keys-btn');
+    if (btnKeep) btnKeep.addEventListener('click', startPracticeMode);
+    
+    const btnChange = get('change-keys-btn');
+    if (btnChange) btnChange.addEventListener('click', startCalibration);
+}
+
+// --- FLOW LOGIC ---
+
+function showScreen(name) {
+    Object.values(screens).forEach(s => { if(s) s.classList.add('hidden'); });
+    if (screens[name]) screens[name].classList.remove('hidden');
+}
+
 function checkHistory() {
-    if (localStorage.getItem('sp_keys')) {
-        userKeys = JSON.parse(localStorage.getItem('sp_keys'));
-        get('saved-yes-key').textContent = userKeys.yes;
-        get('saved-no-key').textContent = userKeys.no;
+    const saved = localStorage.getItem('sp_keys');
+    if (saved) {
+        userKeys = JSON.parse(saved);
+        if (get('saved-yes-key')) get('saved-yes-key').textContent = userKeys.yes;
+        if (get('saved-no-key')) get('saved-no-key').textContent = userKeys.no;
         showScreen('confirm');
     } else {
         startCalibration();
     }
 }
-// ... (Calibration and Practice functions same as before) ...
-// For brevity, I'm focusing on the runStep changes. 
-// Assume startCalibration and startPracticeMode are here as defined previously.
 
-// --- SHARED SESSION ENGINE ---
+// --- PARTNER SESSION ---
+function startPartnerSession() {
+    showScreen('session');
+    get('solo-view').classList.add('hidden');
+    get('partner-view').classList.remove('hidden');
+    runStep('start');
+}
+
+// --- SOLO SESSION / PRACTICE ---
+async function startCalibration() {
+    showScreen('practice');
+    updateStatus("Calibrating...");
+    
+    await speak("Press the key you want for YES.");
+    userKeys.yes = await waitForAnyKey();
+    log(`YES: ${userKeys.yes}`);
+    
+    await speak("Press the key you want for NO.");
+    userKeys.no = await waitForAnyKey();
+    log(`NO: ${userKeys.no}`);
+
+    localStorage.setItem('sp_keys', JSON.stringify(userKeys));
+    startPracticeMode();
+}
+
+async function startPracticeMode() {
+    showScreen('practice');
+    updateStatus("Practice Mode");
+    await speak("Let's practice. Signal YES.");
+    
+    let resp = await waitForKeyResponse();
+    if (resp === 'yes') {
+        playTone(440);
+        await speak("Good. Now say 'Five'.");
+    } else {
+        playTone(200);
+        await speak("That was No. Let's try voice.");
+    }
+    
+    // Voice Test
+    const micBtn = get('mic-activate-btn');
+    if (micBtn) micBtn.classList.remove('hidden');
+    
+    const voiceResult = await waitForVoice(micBtn);
+    if (micBtn) micBtn.classList.add('hidden');
+    
+    if (voiceResult) {
+        await speak(`Heard ${voiceResult}. Starting session.`);
+        startSoloSession();
+    } else {
+        await speak("I didn't hear you. Starting session anyway.");
+        startSoloSession();
+    }
+}
+
+function startSoloSession() {
+    showScreen('session');
+    get('solo-view').classList.remove('hidden');
+    get('partner-view').classList.add('hidden');
+    runStep('start');
+}
+
+// --- ENGINE ---
 
 async function runStep(stepId) {
-    const stepData = SESSION_SCRIPT[stepId];
-    if (!stepData) return endSession();
+    const step = SESSION_SCRIPT[stepId];
+    if (!step) return; // End
 
     currentStep = stepId;
-    
+
     if (isPartnerMode) {
-        // --- PARTNER MODE ---
-        // 1. Show Script
-        get('partner-script-text').textContent = stepData.text;
+        // --- PARTNER MODE UI ---
+        get('partner-script-text').textContent = step.text;
         
-        // 2. Show Controls based on Type
         const controls = get('partner-controls');
         const nextBtn = get('partner-next-btn');
         const yesBtn = get('partner-yes-btn');
         const noBtn = get('partner-no-btn');
-        const sudsBox = get('partner-suds-input');
-        
+        const sudsBox = get('partner-suds-wrapper');
+        const sudsBtn = get('partner-suds-btn');
+
         controls.classList.remove('hidden');
         nextBtn.classList.add('hidden');
         yesBtn.classList.add('hidden');
         noBtn.classList.add('hidden');
         sudsBox.classList.add('hidden');
 
-        if (stepData.type === "question") {
+        // Clone buttons to clear listeners
+        const replace = (el) => {
+            const newEl = el.cloneNode(true);
+            el.parentNode.replaceChild(newEl, el);
+            return newEl;
+        };
+
+        if (step.type === 'question') {
             yesBtn.classList.remove('hidden');
             noBtn.classList.remove('hidden');
-            
-            // Clear old listeners (simple clone hack)
-            const newYes = yesBtn.cloneNode(true);
-            const newNo = noBtn.cloneNode(true);
-            yesBtn.parentNode.replaceChild(newYes, yesBtn);
-            noBtn.parentNode.replaceChild(newNo, noBtn);
-            
-            newYes.addEventListener('click', () => runStep(stepData.yes));
-            newNo.addEventListener('click', () => runStep(stepData.no));
-            
-        } else if (stepData.type === "speech") {
+            const newYes = replace(yesBtn);
+            const newNo = replace(noBtn);
+            newYes.addEventListener('click', () => runStep(step.yes));
+            newNo.addEventListener('click', () => runStep(step.no));
+        } else if (step.type === 'speech') {
             sudsBox.classList.remove('hidden');
-            const submitSuds = get('partner-suds-btn');
-            
-            const newSubmit = submitSuds.cloneNode(true);
-            submitSuds.parentNode.replaceChild(newSubmit, submitSuds);
-            
-            newSubmit.addEventListener('click', () => {
+            const newSub = replace(sudsBtn);
+            newSub.addEventListener('click', () => {
                 const val = get('partner-suds-val').value;
-                console.log("Partner recorded SUDs:", val);
-                // In real app, save to DB
-                // Logic jump to finish for demo
-                runStep("finish"); 
+                console.log("Partner entered:", val);
+                if (step.next) runStep(step.next);
             });
-            
         } else {
-            // Text only
             nextBtn.classList.remove('hidden');
+            const newNext = replace(nextBtn);
+            newNext.addEventListener('click', () => {
+                if (step.next) runStep(step.next);
+            });
         }
 
     } else {
-        // --- SOLO MODE ---
+        // --- SOLO MODE UI ---
         updateStatus("Speaking...");
-        get('visual-indicator').className = "pulse-circle speaking";
-        
-        await speak(stepData.text);
-        
-        get('visual-indicator').className = "pulse-circle";
+        get('session-indicator').className = "pulse-circle speaking";
+        await speak(step.text);
+        get('session-indicator').className = "pulse-circle";
 
-        if (stepData.type === "question") {
+        if (step.type === 'question') {
             updateStatus("Waiting for Signal...");
-            waitForKeyResponse(stepData);
-        } else if (stepData.type === "speech") {
+            const resp = await waitForKeyResponse();
+            playTone(resp === 'yes' ? 440 : 330);
+            if (resp === 'yes') runStep(step.yes);
+            else runStep(step.no);
+        } 
+        else if (step.type === 'speech') {
             updateStatus("Listening...");
-            get('visual-indicator').className = "pulse-circle listening";
-            listenMode = 'suds'; // Start analyzing mic stream
-        } else {
-            if (stepData.next) setTimeout(() => runStep(stepData.next), 1000);
-            else endSession();
+            // Use Mic Button for reliability
+            const micBtn = document.createElement('button');
+            micBtn.textContent = "Tap to Speak";
+            micBtn.className = "primary-btn";
+            micBtn.style.marginTop = "20px";
+            // Insert into solo view temporarily
+            get('solo-view').appendChild(micBtn);
+            
+            const result = await waitForVoice(micBtn);
+            micBtn.remove();
+            
+            if (result) {
+                const num = parseSuds(result);
+                speak(`Heard ${num}.`);
+            }
+            if (step.next) runStep(step.next);
+        } 
+        else {
+            if (step.next) setTimeout(() => runStep(step.next), 1000);
         }
     }
 }
 
-// ... (Rest of existing helper functions: speak, waitForKeyResponse, etc.) ...
-// Ensure you include the full file content when you implement.
+// --- UTILS ---
+
+function waitForAnyKey() {
+    return new Promise(resolve => {
+        const handler = (e) => {
+            document.removeEventListener('keydown', handler);
+            resolve(e.code);
+        };
+        document.addEventListener('keydown', handler);
+    });
+}
+
+function waitForKeyResponse() {
+    return new Promise(resolve => {
+        const handler = (e) => {
+            if (e.code === userKeys.yes) {
+                document.removeEventListener('keydown', handler);
+                resolve('yes');
+            } else if (e.code === userKeys.no) {
+                document.removeEventListener('keydown', handler);
+                resolve('no');
+            }
+        };
+        document.addEventListener('keydown', handler);
+    });
+}
+
+function waitForVoice(btn) {
+    return new Promise(resolve => {
+        btn.onclick = () => {
+            btn.textContent = "Listening...";
+            recognition.start();
+        };
+        recognition.onresult = (e) => resolve(e.results[0][0].transcript);
+        recognition.onerror = () => resolve(null);
+    });
+}
+
+function speak(text) {
+    return new Promise(resolve => {
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.rate = 0.9;
+        u.onend = resolve;
+        synth.speak(u);
+    });
+}
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playTone(freq) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.5);
+}
+
+function updateStatus(msg) { 
+    const el = get('status-text') || get('session-status');
+    if(el) el.textContent = msg; 
+}
+function log(msg) { 
+    const p = document.createElement('p'); p.textContent = msg; 
+    const area = get('feedback-log');
+    if(area) area.appendChild(p); 
+}
+
+function parseSuds(text) {
+    // Simple parser
+    if (!text) return null;
+    const isNeg = text.includes('minus') || text.includes('negative');
+    const nums = text.match(/\d+/);
+    if(nums) return isNeg ? -parseInt(nums[0]) : parseInt(nums[0]);
+    return null;
+}
