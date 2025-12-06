@@ -14,13 +14,17 @@
         <div class="auth-box">
             <h2 id="auth-title">Welcome Back</h2>
             <p id="auth-subtitle">Sign in to access your wellness tools.</p>
+            
             <input type="email" id="email-input" placeholder="Email">
             <input type="password" id="password-input" placeholder="Password">
+            
             <button id="auth-action-btn" class="primary-btn full-width">Log In</button>
+            
             <p class="toggle-text">
                 <span id="toggle-auth-prompt">Don't have an account?</span>
                 <button id="toggle-auth-btn" class="text-btn">Sign Up</button>
             </p>
+
             <p id="auth-message" class="error-text"></p>
         </div>
     </div>
@@ -47,14 +51,13 @@
             </div>
 
             <div class="tool-card">
-                <span class="badge">Active</span>
+                <span class="badge" style="background:#f3e5f5; color:#8e44ad;">Active</span>
                 <h2>The Placemat</h2>
                 <p>Overwhelmed? Delegate tasks to the Universe and focus only on what you can do today.</p>
                 <div class="card-actions">
-                    <a href="placemat/index.html" class="primary-btn small-btn">Open Tool</a>
+                    <a href="placemat/index.html" class="primary-btn small-btn" style="background-color:#8e44ad;">Open Tool</a>
                     <button class="text-btn info-btn" onclick="openModal('modal-placemat')">ⓘ Learn More</button>
                 </div>
-            
             </div>
             
             <div class="tool-card">
@@ -62,17 +65,17 @@
                 <h2>Segment Intending</h2>
                 <p>Master the art of pre-paving your day. Practice setting intentions before you act.</p>
                 <div class="card-actions">
-                    <a href="segment-intending/index.html" class="primary-btn small-btn">Open Tool</a>
+                    <a href="segment-intending/index.html" class="primary-btn small-btn" style="background-color:#2980b9;">Open Tool</a>
                     <button class="text-btn info-btn" onclick="openModal('modal-segment')">ⓘ Learn More</button>
                 </div>
             </div>
-            
+
             <div class="tool-card">
-                <span class="badge" style="background:#e3f2fd; color:#2980b9;">New</span>
+                <span class="badge" style="background:#fff3e0; color:#e67e22;">New</span>
                 <h2>Focus Wheel</h2>
                 <p>Shift your vibration from negative to positive by finding thoughts that feel true and good.</p>
                 <div class="card-actions">
-                    <a href="focus-wheel/index.html" class="primary-btn small-btn" style="background-color:#2980b9;">Open Tool</a>
+                    <a href="focus-wheel/index.html" class="primary-btn small-btn" style="background-color:#e67e22;">Open Tool</a>
                     <button class="text-btn info-btn" onclick="openModal('modal-focus-wheel')">ⓘ Learn More</button>
                 </div>
             </div>
@@ -86,13 +89,11 @@
             <h2>The Mental Bank Ledger</h2>
             <div class="modal-content">
                 <h3>What is it?</h3>
-                <p>A nightly journaling practice where you "pay" yourself for positive habits, reinforcing your value to your subconscious.</p>
-                
+                <p>A nightly journaling practice where you "pay" yourself for positive habits.</p>
                 <h3>Why use it?</h3>
-                <p>To break through financial or success "ceilings" by reprogramming your inner script to accept higher levels of abundance.</p>
-                
+                <p>To break through financial or success "ceilings" by reprogramming your inner script.</p>
                 <h3>How to do it?</h3>
-                <p>Every night before bed (the "magic 30 minutes"), log your daily "Value Events" (gym, reading, work) and calculate your fantasy deposit. Watch your balance grow!</p>
+                <p>Every night before bed, log your daily "Value Events" and calculate your fantasy deposit.</p>
             </div>
             <button class="primary-btn full-width" onclick="window.location.href='mental-bank/index.html'">Start Now</button>
         </div>
@@ -105,33 +106,31 @@
             <div class="modal-content">
                 <h3>What is it?</h3>
                 <p>A task management tool that splits your to-do list into two columns: things YOU will do, and things the UNIVERSE will handle.</p>
-                
                 <h3>Why use it?</h3>
-                <p>To relieve overwhelm and anxiety. By consciously delegating tasks you can't control, you release resistance and allow solutions to come to you.</p>
-                
+                <p>To relieve overwhelm and anxiety by consciously delegating tasks.</p>
                 <h3>How to do it?</h3>
-                <p>List tasks you *must* do today in the "Me" column. Put everything else—worries, long-term goals, problems—in the "Universe" column. Then, let them go.</p>
+                <p>List tasks you MUST do today in the "Me" column. Put everything else in the "Universe" column.</p>
             </div>
             <button class="primary-btn full-width" style="background-color:#8e44ad;" onclick="window.location.href='placemat/index.html'">Start Now</button>
         </div>
     </div>
-<div id="modal-segment" class="modal-overlay hidden">
+
+    <div id="modal-segment" class="modal-overlay hidden">
         <div class="modal-box">
             <button class="close-modal" onclick="closeModal('modal-segment')">&times;</button>
             <h2>The Segment Intending Process</h2>
             <div class="modal-content">
                 <h3>What is it?</h3>
-                <p>A practice of "pre-paving" your vibrational path by setting a clear intention before entering a new segment of time (e.g., driving, a meeting, cooking).</p>
-                
+                <p>A practice of "pre-paving" your vibrational path by setting a clear intention before entering a new segment of time.</p>
                 <h3>Why use it?</h3>
-                <p>To stay ahead of momentum. By intending <em>before</em> you act, you reduce resistance and confusion, creating smoother, more enjoyable experiences.</p>
-                
+                <p>To reduce resistance and confusion, creating smoother, more enjoyable experiences.</p>
                 <h3>How to do it?</h3>
                 <p>Identify when you are changing activities. Pause. Ask yourself: "What do I want from this period?" State it clearly, then proceed.</p>
             </div>
-            <button class="primary-btn full-width" onclick="window.location.href='segment-intending/index.html'">Start Now</button>
+            <button class="primary-btn full-width" style="background-color:#2980b9;" onclick="window.location.href='segment-intending/index.html'">Start Now</button>
         </div>
     </div>
+
     <div id="modal-focus-wheel" class="modal-overlay hidden">
         <div class="modal-box">
             <button class="close-modal" onclick="closeModal('modal-focus-wheel')">&times;</button>
@@ -139,16 +138,15 @@
             <div class="modal-content">
                 <h3>What is it?</h3>
                 <p>A visual tool to bridge the gap between a negative thought and a positive desire.</p>
-                
                 <h3>Why use it?</h3>
-                <p>When you feel resistance or negative emotion (boredom to anger), this helps you "slow down the wheel" of negativity and gradually spin up positive momentum.</p>
-                
+                <p>When you feel resistance or negative emotion, this helps you "slow down the wheel" of negativity and spin up positive momentum.</p>
                 <h3>How to do it?</h3>
                 <p>Identify your desire in the center. Then, find 12 general, true statements that feel good to you. Place them around the wheel until you feel relief.</p>
             </div>
-            <button class="primary-btn full-width" style="background-color:#2980b9;" onclick="window.location.href='focus-wheel/index.html'">Start Now</button>
+            <button class="primary-btn full-width" style="background-color:#e67e22;" onclick="window.location.href='focus-wheel/index.html'">Start Now</button>
         </div>
     </div>
+
     <script>
         // --- SUPABASE CONFIG ---
         const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
@@ -173,12 +171,8 @@
         let isLoginMode = true;
 
         // --- MODAL LOGIC ---
-        window.openModal = (id) => {
-            document.getElementById(id).classList.remove('hidden');
-        }
-        window.closeModal = (id) => {
-            document.getElementById(id).classList.add('hidden');
-        }
+        window.openModal = (id) => { document.getElementById(id).classList.remove('hidden'); }
+        window.closeModal = (id) => { document.getElementById(id).classList.add('hidden'); }
 
         // Check User
         async function init() {
