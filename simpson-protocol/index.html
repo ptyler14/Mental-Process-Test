@@ -18,28 +18,36 @@
             <h1>Simpson Protocol</h1>
             <p class="subtitle">Self-Guided Session</p>
             <div class="instructions">
-                <p><strong>Instructions:</strong></p>
-                <ul>
-                    <li>Find a comfortable place to lie down.</li>
-                    <li>Keep your keyboard within reach of one hand.</li>
-                    <li><strong>YES Response:</strong> Tap the <span class="key">Spacebar</span></li>
-                    <li><strong>NO Response:</strong> Tap any other key (or wait)</li>
-                    <li><strong>Voice:</strong> Speak clearly when asked for a number.</li>
-                </ul>
+                <p>This session uses <strong>Ideomotor Responses</strong> (finger signals) and <strong>Voice</strong>.</p>
+                <p>Please find a place where you can relax completely.</p>
             </div>
-            <button id="start-btn" class="primary-btn">Begin Session</button>
+            <button id="begin-btn" class="primary-btn">Begin Setup</button>
         </div>
 
-        <div id="session-screen" class="screen hidden">
+        <div id="confirm-keys-screen" class="screen hidden">
+            <h2>Welcome Back</h2>
+            <p>Last time, you used these keys:</p>
+            <div class="key-display">
+                <p>YES: <span id="saved-yes-key" class="key">Space</span></p>
+                <p>NO: <span id="saved-no-key" class="key">N</span></p>
+            </div>
+            <p>Do you want to use these again?</p>
+            <div class="button-row">
+                <button id="change-keys-btn" class="secondary-btn">Change Keys</button>
+                <button id="keep-keys-btn" class="primary-btn">Use These Keys</button>
+            </div>
+        </div>
+
+        <div id="practice-screen" class="screen hidden">
             <div class="status-indicator">
                 <div id="visual-indicator" class="pulse-circle"></div>
-                <p id="status-text">Preparing...</p>
+                <p id="status-text">Calibrating...</p>
             </div>
-            
             <div id="feedback-log" class="log-area"></div>
+            <button id="mic-activate-btn" class="primary-btn hidden">Tap to Enable Mic</button>
         </div>
 
-    </div>
+        </div>
 
     <script src="script.js"></script>
 </body>
