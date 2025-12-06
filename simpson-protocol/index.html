@@ -14,14 +14,42 @@
             <a href="../index.html" class="home-link">🏠 Exit</a>
         </header>
 
-        <div id="start-screen" class="screen">
-            <h1>Simpson Protocol</h1>
-            <p class="subtitle">Self-Guided Session</p>
-            <div class="instructions">
-                <p>This session uses <strong>Ideomotor Responses</strong> (finger signals) and <strong>Voice</strong>.</p>
-                <p>Please find a place where you can relax completely.</p>
+        <div id="mode-select-screen" class="screen">
+            <h1>The Simpson Protocol</h1>
+            <p class="subtitle">Select Session Mode</p>
+            
+            <div class="mode-cards">
+                <div class="mode-card" id="mode-solo">
+                    <h3>Solo Session</h3>
+                    <p>I am alone. The app will guide me with audio.</p>
+                </div>
+                <div class="mode-card" id="mode-partner">
+                    <h3>Partner Session</h3>
+                    <p>A friend will read the script to me.</p>
+                </div>
             </div>
-            <button id="begin-btn" class="primary-btn">Begin Setup</button>
+        </div>
+
+        <div id="solo-start-screen" class="screen hidden">
+            <h2>Solo Session</h2>
+            <div class="instructions">
+                <p>This session uses <strong>Key Presses</strong> for Yes/No and <strong>Voice</strong> for numbers.</p>
+                <p>Please find a place where you can lie down comfortably with your hand resting on your keyboard.</p>
+            </div>
+            <button id="solo-begin-btn" class="primary-btn">Begin Setup</button>
+        </div>
+        
+        <div id="partner-start-screen" class="screen hidden">
+            <h2>Partner Session</h2>
+            <div class="instructions">
+                <p><strong>Instructions for the Partner:</strong></p>
+                <ul>
+                    <li>You will act as the Hypnotist.</li>
+                    <li>Read the script on the screen to the client slowly and calmly.</li>
+                    <li>When the client responds (with a finger signal or voice), click the corresponding button on the screen.</li>
+                </ul>
+            </div>
+            <button id="partner-begin-btn" class="primary-btn">Start Session</button>
         </div>
 
         <div id="confirm-keys-screen" class="screen hidden">
@@ -31,7 +59,6 @@
                 <p>YES: <span id="saved-yes-key" class="key">Space</span></p>
                 <p>NO: <span id="saved-no-key" class="key">N</span></p>
             </div>
-            <p>Do you want to use these again?</p>
             <div class="button-row">
                 <button id="change-keys-btn" class="secondary-btn">Change Keys</button>
                 <button id="keep-keys-btn" class="primary-btn">Use These Keys</button>
@@ -47,7 +74,36 @@
             <button id="mic-activate-btn" class="primary-btn hidden">Tap to Enable Mic</button>
         </div>
 
+        <div id="session-screen" class="screen hidden">
+            
+            <div id="solo-view" class="hidden">
+                <div class="pulse-circle" id="session-indicator"></div>
+                <p id="session-status" class="status-text">...</p>
+            </div>
+
+            <div id="partner-view" class="hidden">
+                <div class="script-box">
+                    <p class="script-label">READ THIS TO CLIENT:</p>
+                    <p id="partner-script-text" class="teleprompter">...</p>
+                </div>
+                
+                <div id="partner-controls" class="partner-controls hidden">
+                    <p class="control-label">Waiting for client response...</p>
+                    <div class="button-row">
+                        <button id="partner-yes-btn" class="control-btn yes">Client Signaled YES</button>
+                        <button id="partner-no-btn" class="control-btn no">Client Signaled NO</button>
+                    </div>
+                    <div id="partner-suds-input" class="hidden" style="margin-top: 20px;">
+                        <input type="number" id="partner-suds-val" placeholder="Score (-10 to 10)">
+                        <button id="partner-suds-btn" class="primary-btn">Submit Score</button>
+                    </div>
+                     <button id="partner-next-btn" class="primary-btn hidden" style="margin-top: 20px;">Next Step</button>
+                </div>
+            </div>
+
         </div>
+
+    </div>
 
     <script src="script.js"></script>
 </body>
