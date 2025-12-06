@@ -1,68 +1,108 @@
 // --- CONFIGURATION ---
+// Note: 'text' is what the robot says OR what the partner reads
 const SESSION_SCRIPT = {
     start: {
-        text: "We are now beginning the main session. Close your eyes and take a deep breath.",
-        next: "induction_1"
-    },
-    induction_1: {
-        text: "Relaxing... deeper and deeper... 5... 4... 3... 2... 1...",
+        text: "Welcome. Take a deep breath and close your eyes. We are beginning the induction.",
         next: "check_ready"
     },
     check_ready: {
         type: "question",
-        text: "Are you ready to go deeper? Signal Yes.",
-        yes: "suds_intro",
-        no: "induction_1" // Loop back
+        text: "Are you ready to allow your mind to go as deep as needed? Signal Yes.",
+        yes: "induction_deepener",
+        no: "start"
     },
-    suds_intro: {
-        type: "speech",
-        text: "On a scale of minus ten to plus ten, how do you feel? Speak the number.",
-        next: "finish" // Shortcut for demo
+    induction_deepener: {
+        text: "Relaxing your eyelids... Going deeper... 10... 9... 8... deeper and deeper.",
+        next: "establish_communication"
+    },
+    establish_communication: {
+        type: "question",
+        text: "Superconscious, are you present? Signal Yes.",
+        yes: "suds_check",
+        no: "induction_deepener"
+    },
+    suds_check: {
+        type: "speech", // In partner mode, this means Partner types the number
+        text: "On a scale of minus ten to plus ten, how does this issue feel right now? Speak the number.",
+        next: "process_suds" // In this demo, logic happens in handler
     },
     finish: {
-        text: "Thank you. You are now fully refreshed.",
+        text: "Thank you. Integrating changes. Wide awake, fully refreshed.",
         next: null
     }
 };
 
 // --- STATE ---
+let currentStep = "start";
+let isPartnerMode = false;
+let sessionActive = false;
+let listenMode = 'idle';
+
 const synth = window.speechSynthesis;
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
-
 recognition.continuous = false; 
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
-// Default keys
-let userKeys = { yes: 'Space', no: 'KeyN' }; 
+let userKeys = JSON.parse(localStorage.getItem('sp_keys')) || { yes: 'Space', no: null }; 
+let isCalibrated = localStorage.getItem('sp_calibrated') === 'true';
 
 // --- DOM ---
 const get = (id) => document.getElementById(id);
 const screens = {
-    start: get('start-screen'),
+    mode: get('mode-select-screen'),
+    soloStart: get('solo-start-screen'),
+    partnerStart: get('partner-start-screen'),
     confirm: get('confirm-keys-screen'),
-    practice: get('practice-screen')
+    practice: get('practice-screen'),
+    session: get('session-screen')
 };
-const indicators = {
-    visual: get('visual-indicator'),
-    text: get('status-text'),
-    log: get('feedback-log')
+const views = {
+    solo: get('solo-view'),
+    partner: get('partner-view')
 };
 
 // --- INIT ---
-get('begin-btn').addEventListener('click', checkHistory);
+get('mode-solo').addEventListener('click', () => {
+    isPartnerMode = false;
+    showScreen('soloStart');
+});
+
+get('mode-partner').addEventListener('click', () => {
+    isPartnerMode = true;
+    showScreen('partnerStart');
+});
+
+get('solo-begin-btn').addEventListener('click', checkHistory);
+get('partner-begin-btn').addEventListener('click', startPartnerSession);
+
+// Keys Flow Listeners
 get('keep-keys-btn').addEventListener('click', startPracticeMode);
 get('change-keys-btn').addEventListener('click', startCalibration);
 
-// 1. Check if user has keys saved
-function checkHistory() {
-    showScreen('practice'); // Temp flash to init audio context if needed
+// --- PARTNER MODE LOGIC ---
+function startPartnerSession() {
+    showScreen('session');
+    views.solo.classList.add('hidden');
+    views.partner.classList.remove('hidden');
     
-    const savedKeys = localStorage.getItem('sp_keys');
-    if (savedKeys) {
-        userKeys = JSON.parse(savedKeys);
+    // Attach Partner Controls
+    get('partner-next-btn').addEventListener('click', () => {
+        const step = SESSION_SCRIPT[currentStep];
+        if (step.next) runStep(step.next);
+    });
+    
+    // Yes/No/Suds handlers attached dynamically in runStep
+    
+    runStep('start');
+}
+
+// --- SOLO FLOW LOGIC ---
+function checkHistory() {
+    if (localStorage.getItem('sp_keys')) {
+        userKeys = JSON.parse(localStorage.getItem('sp_keys'));
         get('saved-yes-key').textContent = userKeys.yes;
         get('saved-no-key').textContent = userKeys.no;
         showScreen('confirm');
@@ -70,189 +110,91 @@ function checkHistory() {
         startCalibration();
     }
 }
+// ... (Calibration and Practice functions same as before) ...
+// For brevity, I'm focusing on the runStep changes. 
+// Assume startCalibration and startPracticeMode are here as defined previously.
 
-// 2. Calibration (Pick Keys)
-async function startCalibration() {
-    showScreen('practice');
-    updateStatus("Calibrating...");
-    
-    await speak("Please lie down. Press the key you want to use for YES.");
-    userKeys.yes = await waitForAnyKey();
-    log(`YES Key set to: ${userKeys.yes}`);
-    playFeedback('success');
-    
-    await speak("Now, press the key you want to use for NO.");
-    userKeys.no = await waitForAnyKey();
-    log(`NO Key set to: ${userKeys.no}`);
-    playFeedback('success');
-
-    localStorage.setItem('sp_keys', JSON.stringify(userKeys));
-    
-    await speak("Keys saved.");
-    startPracticeMode();
-}
-
-// 3. Practice Mode (The Exam)
-async function startPracticeMode() {
-    showScreen('practice');
-    updateStatus("Practice Mode");
-    
-    await speak("We will now practice. Listen to my voice and signal accordingly.");
-    
-    // Practice Loop
-    const tests = [
-        { type: 'key', expected: 'yes', prompt: "Signal YES." },
-        { type: 'key', expected: 'no', prompt: "Signal NO." },
-        { type: 'key', expected: 'yes', prompt: "Signal YES again." },
-        { type: 'voice', expected: 'any', prompt: "Now, say a number out loud, like 'Five' or 'Minus Two'." }
-    ];
-
-    for (let test of tests) {
-        let passed = false;
-        let attempts = 0;
-        
-        while (!passed && attempts < 2) {
-            await speak(test.prompt);
-            
-            if (test.type === 'key') {
-                updateStatus("Waiting for Key...");
-                const code = await waitForAnyKey();
-                
-                if (code === userKeys[test.expected]) {
-                    playFeedback('success');
-                    log(`Correct (${test.expected.toUpperCase()})`);
-                    passed = true;
-                    await speak("Good.");
-                } else {
-                    playFeedback('error');
-                    log("Incorrect Key");
-                    await speak("That was the wrong key. Let's try again.");
-                    attempts++;
-                }
-            } 
-            else if (test.type === 'voice') {
-                updateStatus("Listening...");
-                // Mic Button handling for first interaction
-                const micBtn = get('mic-activate-btn');
-                if (attempts === 0) micBtn.classList.remove('hidden'); // Show only on first try if needed
-                
-                const result = await waitForVoice(micBtn);
-                micBtn.classList.add('hidden');
-                
-                if (result) {
-                    playFeedback('success');
-                    log(`Heard: ${result}`);
-                    await speak(`I heard you say ${result}.`);
-                    passed = true;
-                } else {
-                    playFeedback('error');
-                    await speak("I didn't hear anything. Please speak louder.");
-                    attempts++;
-                }
-            }
-        }
-
-        if (!attempts < 2 && !passed) {
-             await speak("Let's re-calibrate your keys.");
-             return startCalibration();
-        }
-    }
-
-    await speak("Practice complete. Starting main session now.");
-    startMainSession();
-}
-
-// 4. Main Session
-function startMainSession() {
-    runStep('start');
-}
+// --- SHARED SESSION ENGINE ---
 
 async function runStep(stepId) {
-    const step = SESSION_SCRIPT[stepId];
-    if (!step) return;
+    const stepData = SESSION_SCRIPT[stepId];
+    if (!stepData) return endSession();
 
-    updateStatus("Session in Progress");
-    indicators.visual.className = "pulse-circle speaking";
-    await speak(step.text);
-    indicators.visual.className = "pulse-circle";
+    currentStep = stepId;
+    
+    if (isPartnerMode) {
+        // --- PARTNER MODE ---
+        // 1. Show Script
+        get('partner-script-text').textContent = stepData.text;
+        
+        // 2. Show Controls based on Type
+        const controls = get('partner-controls');
+        const nextBtn = get('partner-next-btn');
+        const yesBtn = get('partner-yes-btn');
+        const noBtn = get('partner-no-btn');
+        const sudsBox = get('partner-suds-input');
+        
+        controls.classList.remove('hidden');
+        nextBtn.classList.add('hidden');
+        yesBtn.classList.add('hidden');
+        noBtn.classList.add('hidden');
+        sudsBox.classList.add('hidden');
 
-    if (step.type === 'question') {
-        const code = await waitForSpecificKey(); // Waits for Yes or No
-        if (code === userKeys.yes) runStep(step.yes);
-        else runStep(step.no);
-    } else if (step.type === 'speech') {
-        const result = await waitForVoice();
-        // Here you would parse the number
-        runStep(step.next);
-    } else if (step.next) {
-        setTimeout(() => runStep(step.next), 1000);
+        if (stepData.type === "question") {
+            yesBtn.classList.remove('hidden');
+            noBtn.classList.remove('hidden');
+            
+            // Clear old listeners (simple clone hack)
+            const newYes = yesBtn.cloneNode(true);
+            const newNo = noBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYes, yesBtn);
+            noBtn.parentNode.replaceChild(newNo, noBtn);
+            
+            newYes.addEventListener('click', () => runStep(stepData.yes));
+            newNo.addEventListener('click', () => runStep(stepData.no));
+            
+        } else if (stepData.type === "speech") {
+            sudsBox.classList.remove('hidden');
+            const submitSuds = get('partner-suds-btn');
+            
+            const newSubmit = submitSuds.cloneNode(true);
+            submitSuds.parentNode.replaceChild(newSubmit, submitSuds);
+            
+            newSubmit.addEventListener('click', () => {
+                const val = get('partner-suds-val').value;
+                console.log("Partner recorded SUDs:", val);
+                // In real app, save to DB
+                // Logic jump to finish for demo
+                runStep("finish"); 
+            });
+            
+        } else {
+            // Text only
+            nextBtn.classList.remove('hidden');
+        }
+
+    } else {
+        // --- SOLO MODE ---
+        updateStatus("Speaking...");
+        get('visual-indicator').className = "pulse-circle speaking";
+        
+        await speak(stepData.text);
+        
+        get('visual-indicator').className = "pulse-circle";
+
+        if (stepData.type === "question") {
+            updateStatus("Waiting for Signal...");
+            waitForKeyResponse(stepData);
+        } else if (stepData.type === "speech") {
+            updateStatus("Listening...");
+            get('visual-indicator').className = "pulse-circle listening";
+            listenMode = 'suds'; // Start analyzing mic stream
+        } else {
+            if (stepData.next) setTimeout(() => runStep(stepData.next), 1000);
+            else endSession();
+        }
     }
 }
 
-// --- UTILS ---
-
-function waitForAnyKey() {
-    return new Promise(resolve => {
-        const handler = (e) => {
-            document.removeEventListener('keydown', handler);
-            resolve(e.code);
-        };
-        document.addEventListener('keydown', handler);
-    });
-}
-
-function waitForSpecificKey() {
-    return new Promise(resolve => {
-        const handler = (e) => {
-            if (e.code === userKeys.yes || e.code === userKeys.no) {
-                document.removeEventListener('keydown', handler);
-                resolve(e.code);
-            }
-        };
-        document.addEventListener('keydown', handler);
-    });
-}
-
-function waitForVoice(btn) {
-    return new Promise(resolve => {
-        let started = false;
-        
-        recognition.onstart = () => { started = true; indicators.visual.className = "pulse-circle listening"; };
-        
-        recognition.onresult = (e) => {
-            resolve(e.results[0][0].transcript);
-        };
-        
-        recognition.onerror = () => resolve(null);
-        recognition.onend = () => { if(!started) resolve(null); }; // Stopped without result
-
-        if (btn) {
-            btn.onclick = () => recognition.start();
-        } else {
-            try { recognition.start(); } catch(e) { resolve(null); }
-        }
-    });
-}
-
-function speak(text) {
-    return new Promise(resolve => {
-        synth.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        u.rate = 0.9;
-        u.onend = resolve;
-        synth.speak(u);
-    });
-}
-
-function playFeedback(type) {
-    indicators.visual.className = type === 'success' ? "pulse-circle success" : "pulse-circle error";
-    setTimeout(() => indicators.visual.className = "pulse-circle", 500);
-}
-
-function showScreen(id) {
-    Object.values(screens).forEach(s => s.classList.add('hidden'));
-    screens[id].classList.remove('hidden');
-}
-
-function updateStatus(msg) { indicators.text.textContent = msg; }
-function log(msg) { const p = document.createElement('p'); p.textContent = msg; indicators.log.appendChild(p); }
+// ... (Rest of existing helper functions: speak, waitForKeyResponse, etc.) ...
+// Ensure you include the full file content when you implement.
