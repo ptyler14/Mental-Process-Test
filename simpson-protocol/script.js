@@ -22,7 +22,7 @@ const SESSION_SCRIPT = {
     },
     suds_check: {
         type: "speech",
-        text: "On a scale of minus ten to plus ten, how does this issue feel right now? Click the mic button and speak the number.",
+        text: "On a scale of minus ten to plus ten, how does this issue feel right now? Speak the number.",
         next: "process_suds"
     },
     finish: {
@@ -33,12 +33,17 @@ const SESSION_SCRIPT = {
 
 // --- STATE ---
 let currentStep = "start";
+let sessionActive = false;
+let listenMode = 'idle'; // 'idle', 'suds', 'calibration'
+
+// SPEECH SYNTHESIS
 const synth = window.speechSynthesis;
+
+// SPEECH RECOGNITION
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
-// Settings
-recognition.continuous = false;
+recognition.continuous = false; // We will manually restart it to keep it "continuous"
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
@@ -46,7 +51,7 @@ recognition.maxAlternatives = 1;
 let userKeys = JSON.parse(localStorage.getItem('sp_keys')) || { yes: 'Space', no: null }; 
 let isCalibrated = localStorage.getItem('sp_calibrated') === 'true';
 
-// --- DOM ---
+// --- DOM ELEMENTS ---
 const startScreen = document.getElementById('start-screen');
 const sessionScreen = document.getElementById('session-screen');
 const startBtn = document.getElementById('start-btn');
@@ -54,16 +59,30 @@ const statusText = document.getElementById('status-text');
 const visualIndicator = document.getElementById('visual-indicator');
 const logArea = document.getElementById('feedback-log');
 
-// Add Mic Button dynamically if not in HTML
-let micBtn = document.getElementById('mic-btn');
-if (!micBtn) {
-    micBtn = document.createElement('button');
-    micBtn.id = 'mic-btn';
-    micBtn.textContent = '🎤 Tap to Speak';
-    micBtn.className = 'primary-btn hidden';
-    micBtn.style.marginTop = "20px";
-    sessionScreen.appendChild(micBtn);
-}
+// --- MIC KEEP-ALIVE LOGIC ---
+recognition.onend = () => {
+    if (sessionActive) {
+        // If session is running, restart mic immediately
+        // (This creates the "Always On" effect)
+        try {
+            recognition.start();
+        } catch(e) {
+            // Ignore 'already started' errors
+        }
+    }
+};
+
+recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript.toLowerCase();
+    
+    // Only process text if we are actively waiting for voice
+    if (listenMode === 'suds') {
+        handleSudsInput(transcript);
+    } else if (listenMode === 'calibration') {
+        handleCalibrationInput(transcript);
+    }
+    // If 'idle', we simply ignore what was said (e.g. background noise)
+};
 
 // --- INIT ---
 startBtn.addEventListener('click', startFlow);
@@ -71,12 +90,24 @@ startBtn.addEventListener('click', startFlow);
 function startFlow() {
     startScreen.classList.add('hidden');
     sessionScreen.classList.remove('hidden');
+    sessionActive = true;
     
-    // Always re-calibrate voice to ensure permissions
-    startCalibration(); 
+    // START MIC ONCE HERE
+    try {
+        recognition.start();
+    } catch(e) { console.log("Mic start error:", e); }
+
+    if (!isCalibrated) {
+        startCalibration();
+    } else {
+        runStep("start");
+    }
 }
 
 // --- CALIBRATION ---
+// We use a Promise resolver to pause script until input received
+let voiceResolver = null; 
+
 async function startCalibration() {
     updateStatus("Calibrating Keys...");
     visualIndicator.className = "pulse-circle";
@@ -93,22 +124,41 @@ async function startCalibration() {
     log(`NO: ${noKey}`);
     playFeedbackSound('no');
     
-    await speak("Now, click the button below and say 'Five'.");
-    micBtn.classList.remove('hidden'); // Show button
+    await speak("Now, say the number 'Five' out loud.");
+    visualIndicator.className = "pulse-circle listening";
+    listenMode = 'calibration'; // Enable voice processing
     
-    const heardText = await waitForSpecificVoice("five");
-    micBtn.classList.add('hidden'); // Hide button
+    const heardText = await waitForVoicePromise();
     
+    listenMode = 'idle'; // Disable voice processing
+    visualIndicator.className = "pulse-circle";
+
     if (heardText) {
         await speak("Heard Five. Starting session.");
         localStorage.setItem('sp_keys', JSON.stringify(userKeys));
         localStorage.setItem('sp_calibrated', 'true');
         setTimeout(() => runStep("start"), 1000);
     } else {
-        await speak("I couldn't hear you. Check microphone settings.");
-        // Retry calibration
-        setTimeout(() => startCalibration(), 2000);
+        await speak("I couldn't hear you. We will proceed with keys only.");
+        runStep("start");
     }
+}
+
+function handleCalibrationInput(text) {
+    log(`Calibration Heard: "${text}"`);
+    if (text.includes("five") || text.includes("5")) {
+        if (voiceResolver) voiceResolver(true);
+    }
+}
+
+function waitForVoicePromise() {
+    return new Promise(resolve => {
+        voiceResolver = resolve;
+        // Timeout after 8 seconds if nothing heard
+        setTimeout(() => {
+            if (voiceResolver) resolve(false);
+        }, 8000);
+    });
 }
 
 function waitForAnyKey() {
@@ -118,35 +168,6 @@ function waitForAnyKey() {
             resolve(e.code);
         };
         document.addEventListener('keydown', handler);
-    });
-}
-
-function waitForSpecificVoice(targetWord) {
-    return new Promise(resolve => {
-        // Wait for CLICK to start recognition
-        const clickHandler = () => {
-            micBtn.textContent = "Listening...";
-            recognition.start();
-        };
-        
-        micBtn.onclick = clickHandler;
-        
-        recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript.toLowerCase();
-            log(`Heard: "${transcript}"`);
-            micBtn.textContent = "🎤 Tap to Speak";
-            if (transcript.includes(targetWord) || transcript.includes("5")) {
-                resolve(true);
-            } else {
-                resolve(false); 
-            }
-        };
-        
-        recognition.onerror = (e) => {
-            console.error("Mic Error", e);
-            micBtn.textContent = "Error. Try Again.";
-            resolve(false);
-        };
     });
 }
 
@@ -169,9 +190,11 @@ async function runStep(stepId) {
         waitForKeyResponse(stepData);
     } 
     else if (stepData.type === "speech") {
-        updateStatus("Waiting for Voice...");
-        micBtn.classList.remove('hidden'); // Show button
-        waitForVoiceResponse(stepData);
+        updateStatus("Listening...");
+        visualIndicator.className = "pulse-circle listening";
+        listenMode = 'suds'; // Enable voice processing
+        // We don't need to 'start' the mic, it's already running
+        // We just wait for the onresult handler to trigger handleSudsInput
     } 
     else {
         if (stepData.next) {
@@ -179,6 +202,27 @@ async function runStep(stepId) {
         } else {
             endSession();
         }
+    }
+}
+
+function handleSudsInput(transcript) {
+    log(`Heard: "${transcript}"`);
+    const score = parseSuds(transcript);
+    
+    if (score !== null) {
+        listenMode = 'idle'; // Stop listening
+        visualIndicator.className = "pulse-circle";
+        log(`Recorded SUDs: ${score}`);
+        speak(`I heard ${score}. Moving on.`);
+        
+        // Find next step from current step data
+        const stepData = SESSION_SCRIPT[currentStep];
+        if (stepData && stepData.next) {
+            setTimeout(() => runStep(stepData.next), 2000);
+        }
+    } else {
+        // If we heard something but couldn't parse a number, we ignore it 
+        // and keep listening (or you could prompt "Say again")
     }
 }
 
@@ -198,39 +242,6 @@ function waitForKeyResponse(stepData) {
         }
     };
     document.addEventListener('keydown', handler);
-}
-
-function waitForVoiceResponse(stepData) {
-    // Wait for click
-    micBtn.onclick = () => {
-        micBtn.textContent = "Listening...";
-        visualIndicator.className = "pulse-circle listening";
-        recognition.start();
-    };
-
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.toLowerCase();
-        log(`Heard: "${transcript}"`);
-        micBtn.textContent = "🎤 Tap to Speak";
-        micBtn.classList.add('hidden'); // Hide after success
-        visualIndicator.className = "pulse-circle";
-        
-        const score = parseSuds(transcript);
-        
-        if (score !== null) {
-            log(`Recorded SUDs: ${score}`);
-            speak(`I heard ${score}. Moving on.`);
-            setTimeout(() => runStep("finish"), 2000); 
-        } else {
-            speak("I didn't catch that number. Tap and try again.");
-            micBtn.classList.remove('hidden'); // Show again for retry
-        }
-    };
-    
-    recognition.onerror = () => {
-        speak("Error. Tap to try again.");
-        micBtn.textContent = "🎤 Tap to Speak";
-    };
 }
 
 // --- HELPERS ---
@@ -260,12 +271,14 @@ function speak(text) {
 }
 
 function playFeedbackSound(type) {
-    // Beep logic here
+    // Beep logic
 }
 
 function updateStatus(msg) { statusText.textContent = msg; }
 function log(msg) { const p = document.createElement('p'); p.textContent = msg; logArea.appendChild(p); }
 function endSession() {
+    sessionActive = false; // Stop the mic loop
+    recognition.stop();
     updateStatus("Session Complete");
     visualIndicator.className = "pulse-circle";
     setTimeout(() => { window.location.href = "../index.html"; }, 3000);
