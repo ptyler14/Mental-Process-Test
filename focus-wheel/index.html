@@ -3,37 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Wheel | Wellness Tools</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../style.css">
+    <title>Focus Wheel</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="tool-page">
+<body>
     <div class="container">
-        <header class="tool-header">
-            <div class="header-content">
-                <h1><i class="fas fa-dharmachakra"></i> Focus Wheel</h1>
-                <a href="../index.html" class="back-btn">← Back to Tools</a>
-            </div>
-            <p class="subtitle">Bridge the gap from resistance to relief. Shift your vibration from negative to positive by finding thoughts that feel true and good.</p>
-        </header>
+        <h1>Focus Wheel</h1>
 
-        <!-- Rest of your existing focus-wheel HTML code remains the same -->
-        <!-- Just paste the entire body content from the previous focus-wheel/index.html here -->
-        <!-- Starting from the step-indicator div to the footer -->
-
-        <div class="step-indicator">
-            <div class="step active" id="step1">
-                <div class="step-circle">1</div>
-                <div class="step-label">Define Desire</div>
-            </div>
-            <!-- ... rest of your existing code ... -->
+        <!-- Step 1: Enter center statement -->
+        <div id="step-center">
+            <input type="text" id="center-input" placeholder="Enter center desire">
+            <button id="start-wheel-btn">Start Wheel</button>
         </div>
 
-        <!-- IMPORTANT: Paste ALL the rest of your existing focus-wheel HTML here -->
-        <!-- The entire content between the header and script tags -->
-        
+        <!-- Step 2: Add supporting statements -->
+        <div id="step-wheel" class="hidden">
+            <input type="text" id="statement-input" placeholder="Enter supporting statement">
+            <button id="add-btn">Add Statement</button>
+            <div>Statements added: <span id="count">0</span>/12</div>
+
+            <div class="wheel-container" id="wheel">
+                <div id="segments"></div>
+                <div id="wheel-center">Center</div>
+            </div>
+        </div>
+
+        <!-- Step 3: Final wheel and reflection -->
+        <div id="step-complete" class="hidden">
+            <div id="final-wheel"></div>
+            <button id="reflect-btn">Next Reflection</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
