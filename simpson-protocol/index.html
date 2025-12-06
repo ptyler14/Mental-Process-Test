@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simpson Protocol Session</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <a href="../index.html" class="home-link">🏠 Exit</a>
+        </header>
+
+        <div id="start-screen" class="screen">
+            <h1>Simpson Protocol</h1>
+            <p class="subtitle">Self-Guided Session</p>
+            <div class="instructions">
+                <p><strong>Instructions:</strong></p>
+                <ul>
+                    <li>Find a comfortable place to lie down.</li>
+                    <li>Keep your keyboard within reach of one hand.</li>
+                    <li><strong>YES Response:</strong> Tap the <span class="key">Spacebar</span></li>
+                    <li><strong>NO Response:</strong> Tap any other key (or wait)</li>
+                    <li><strong>Voice:</strong> Speak clearly when asked for a number.</li>
+                </ul>
+            </div>
+            <button id="start-btn" class="primary-btn">Begin Session</button>
+        </div>
+
+        <div id="session-screen" class="screen hidden">
+            <div class="status-indicator">
+                <div id="visual-indicator" class="pulse-circle"></div>
+                <p id="status-text">Preparing...</p>
+            </div>
+            
+            <div id="feedback-log" class="log-area"></div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
