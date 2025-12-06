@@ -22,7 +22,7 @@ const SESSION_SCRIPT = {
     },
     suds_check: {
         type: "speech",
-        text: "On a scale of minus ten to plus ten, how does this issue feel right now? Speak the number.",
+        text: "On a scale of minus ten to plus ten, how does this issue feel right now? Click the mic button and speak the number.",
         next: "process_suds"
     },
     finish: {
@@ -37,23 +37,33 @@ const synth = window.speechSynthesis;
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
-// Improved Recognition Settings
+// Settings
 recognition.continuous = false;
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
-// User Preferences (Loaded from storage or defaults)
-let userKeys = JSON.parse(localStorage.getItem('sp_keys')) || { yes: 'Space', no: null }; // Default Yes is Space, No is any other
+let userKeys = JSON.parse(localStorage.getItem('sp_keys')) || { yes: 'Space', no: null }; 
 let isCalibrated = localStorage.getItem('sp_calibrated') === 'true';
 
-// --- DOM ELEMENTS ---
+// --- DOM ---
 const startScreen = document.getElementById('start-screen');
 const sessionScreen = document.getElementById('session-screen');
 const startBtn = document.getElementById('start-btn');
 const statusText = document.getElementById('status-text');
 const visualIndicator = document.getElementById('visual-indicator');
 const logArea = document.getElementById('feedback-log');
+
+// Add Mic Button dynamically if not in HTML
+let micBtn = document.getElementById('mic-btn');
+if (!micBtn) {
+    micBtn = document.createElement('button');
+    micBtn.id = 'mic-btn';
+    micBtn.textContent = '🎤 Tap to Speak';
+    micBtn.className = 'primary-btn hidden';
+    micBtn.style.marginTop = "20px";
+    sessionScreen.appendChild(micBtn);
+}
 
 // --- INIT ---
 startBtn.addEventListener('click', startFlow);
@@ -62,48 +72,42 @@ function startFlow() {
     startScreen.classList.add('hidden');
     sessionScreen.classList.remove('hidden');
     
-    if (!isCalibrated) {
-        startCalibration();
-    } else {
-        runStep("start");
-    }
+    // Always re-calibrate voice to ensure permissions
+    startCalibration(); 
 }
 
 // --- CALIBRATION ---
-
 async function startCalibration() {
     updateStatus("Calibrating Keys...");
     visualIndicator.className = "pulse-circle";
     
-    // Step 1: YES Key
-    await speak("Please lie down comfortably. Place your hand on the keyboard. Tap the key you want to use for YES.");
+    await speak("Please lie down. Tap the key for YES.");
     const yesKey = await waitForAnyKey();
     userKeys.yes = yesKey;
-    log(`YES Key set to: ${yesKey}`);
+    log(`YES: ${yesKey}`);
     playFeedbackSound('yes');
     
-    // Step 2: NO Key
-    await speak("Good. Now, tap the key you want to use for NO.");
+    await speak("Now, tap the key for NO.");
     const noKey = await waitForAnyKey();
     userKeys.no = noKey;
-    log(`NO Key set to: ${noKey}`);
+    log(`NO: ${noKey}`);
     playFeedbackSound('no');
     
-    // Step 3: Voice Test
-    await speak("Great. Now let's test your voice. Please say the number 'Five' out loud.");
-    visualIndicator.className = "pulse-circle listening";
+    await speak("Now, click the button below and say 'Five'.");
+    micBtn.classList.remove('hidden'); // Show button
+    
     const heardText = await waitForSpecificVoice("five");
+    micBtn.classList.add('hidden'); // Hide button
     
     if (heardText) {
-        await speak("I heard you say Five. Calibration complete.");
-        isCalibrated = true;
+        await speak("Heard Five. Starting session.");
         localStorage.setItem('sp_keys', JSON.stringify(userKeys));
         localStorage.setItem('sp_calibrated', 'true');
-        
         setTimeout(() => runStep("start"), 1000);
     } else {
-        await speak("I had trouble hearing you. Please ensure your microphone is allowed. Let's try the session anyway.");
-        runStep("start");
+        await speak("I couldn't hear you. Check microphone settings.");
+        // Retry calibration
+        setTimeout(() => startCalibration(), 2000);
     }
 }
 
@@ -119,26 +123,29 @@ function waitForAnyKey() {
 
 function waitForSpecificVoice(targetWord) {
     return new Promise(resolve => {
-        recognition.start();
+        // Wait for CLICK to start recognition
+        const clickHandler = () => {
+            micBtn.textContent = "Listening...";
+            recognition.start();
+        };
+        
+        micBtn.onclick = clickHandler;
         
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript.toLowerCase();
-            log(`Calibration Heard: "${transcript}"`);
+            log(`Heard: "${transcript}"`);
+            micBtn.textContent = "🎤 Tap to Speak";
             if (transcript.includes(targetWord) || transcript.includes("5")) {
                 resolve(true);
             } else {
-                resolve(false); // Heard something else
+                resolve(false); 
             }
         };
         
         recognition.onerror = (e) => {
             console.error("Mic Error", e);
+            micBtn.textContent = "Error. Try Again.";
             resolve(false);
-        };
-        
-        recognition.onend = () => {
-            // If silence
-             // resolve(false) handled by logic above usually
         };
     });
 }
@@ -162,8 +169,8 @@ async function runStep(stepId) {
         waitForKeyResponse(stepData);
     } 
     else if (stepData.type === "speech") {
-        updateStatus("Listening...");
-        visualIndicator.className = "pulse-circle listening";
+        updateStatus("Waiting for Voice...");
+        micBtn.classList.remove('hidden'); // Show button
         waitForVoiceResponse(stepData);
     } 
     else {
@@ -180,19 +187,12 @@ async function runStep(stepId) {
 function waitForKeyResponse(stepData) {
     const handler = (e) => {
         document.removeEventListener('keydown', handler);
-        
         if (e.code === userKeys.yes) {
             log("Response: YES");
             playFeedbackSound('yes');
             runStep(stepData.yes);
-        } else if (e.code === userKeys.no) {
-            log("Response: NO");
-            playFeedbackSound('no');
-            runStep(stepData.no);
         } else {
-            // If they pressed a random key that wasn't Yes or No
-            // For now, treat as NO or ignore? Let's treat as NO for safety.
-            log("Response: OTHER (Treated as NO)");
+            log("Response: NO");
             playFeedbackSound('no');
             runStep(stepData.no);
         }
@@ -201,11 +201,19 @@ function waitForKeyResponse(stepData) {
 }
 
 function waitForVoiceResponse(stepData) {
-    recognition.start();
+    // Wait for click
+    micBtn.onclick = () => {
+        micBtn.textContent = "Listening...";
+        visualIndicator.className = "pulse-circle listening";
+        recognition.start();
+    };
 
     recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript.toLowerCase();
         log(`Heard: "${transcript}"`);
+        micBtn.textContent = "🎤 Tap to Speak";
+        micBtn.classList.add('hidden'); // Hide after success
+        visualIndicator.className = "pulse-circle";
         
         const score = parseSuds(transcript);
         
@@ -214,19 +222,18 @@ function waitForVoiceResponse(stepData) {
             speak(`I heard ${score}. Moving on.`);
             setTimeout(() => runStep("finish"), 2000); 
         } else {
-            speak("I didn't catch that number. Please try again.");
-            setTimeout(() => waitForVoiceResponse(stepData), 2000);
+            speak("I didn't catch that number. Tap and try again.");
+            micBtn.classList.remove('hidden'); // Show again for retry
         }
     };
-
-    recognition.onerror = (event) => {
-        console.error("Speech Error", event.error);
-        speak("I couldn't hear you. Please try again.");
-        setTimeout(() => waitForVoiceResponse(stepData), 2000);
+    
+    recognition.onerror = () => {
+        speak("Error. Tap to try again.");
+        micBtn.textContent = "🎤 Tap to Speak";
     };
 }
 
-// --- HELPERS --- (Same as before)
+// --- HELPERS ---
 
 function parseSuds(text) {
     const isNegative = text.includes('minus') || text.includes('negative');
@@ -244,7 +251,6 @@ function parseSuds(text) {
 
 function speak(text) {
     return new Promise((resolve) => {
-        // Stop any previous speech
         synth.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = 0.9; 
@@ -254,9 +260,7 @@ function speak(text) {
 }
 
 function playFeedbackSound(type) {
-    // Simple beep for now using AudioContext or just log
-    // Ideally use an MP3 here later
-    console.log(`Playing ${type} sound`);
+    // Beep logic here
 }
 
 function updateStatus(msg) { statusText.textContent = msg; }
