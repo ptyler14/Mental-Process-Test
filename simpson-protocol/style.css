@@ -1,123 +1,36 @@
-:root {
-    --bg: #0f172a; /* Deep Night Blue */
-    --text: #e2e8f0;
-    --accent: #38bdf8; /* Light Blue */
-    --highlight: #fbbf24; /* Gold */
-    --success: #22c55e;
-    --error: #ef4444;
-}
+/* ... Keep existing variables ... */
 
-body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
-
-.container { width: 100%; max-width: 600px; padding: 20px; text-align: center; }
-
-.home-link {
-    position: absolute; top: 20px; left: 20px;
-    color: #64748b; text-decoration: none; font-size: 0.9rem;
-}
-
-h1 { font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 10px; color: var(--accent); }
-h2 { font-family: 'Merriweather', serif; font-size: 1.8rem; margin-bottom: 20px; color: var(--text); }
-
-.subtitle { color: #94a3b8; margin-bottom: 40px; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem; }
-
-.instructions {
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
+/* MODE SELECTION */
+.mode-cards { display: flex; gap: 20px; justify-content: center; margin-top: 30px; }
+.mode-card {
+    background: rgba(255,255,255,0.1);
+    padding: 30px;
     border-radius: 12px;
+    border: 1px solid #334155;
+    cursor: pointer;
+    width: 45%;
+    transition: all 0.2s;
+}
+.mode-card:hover { background: rgba(255,255,255,0.15); border-color: var(--accent); transform: translateY(-5px); }
+.mode-card h3 { color: var(--accent); margin-top: 0; }
+
+/* PARTNER INTERFACE */
+.script-box {
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 12px;
+    border: 2px solid var(--accent);
+    margin-bottom: 30px;
     text-align: left;
-    margin-bottom: 40px;
-    line-height: 1.8;
 }
+.script-label { color: #94a3b8; font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold; }
+.teleprompter { font-size: 1.5rem; line-height: 1.6; color: #fff; font-family: 'Merriweather', serif; }
 
-.key-display {
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
-    border-radius: 12px;
-    margin: 20px 0;
+.control-label { color: #94a3b8; margin-bottom: 15px; }
+.control-btn {
+    padding: 20px; font-size: 1rem; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 45%;
 }
+.control-btn.yes { background-color: var(--success); color: #fff; }
+.control-btn.no { background-color: var(--error); color: #fff; }
 
-.key { 
-    background: #334155; 
-    padding: 4px 10px; 
-    border-radius: 4px; 
-    font-weight: bold; 
-    border-bottom: 2px solid #1e293b; 
-    color: var(--highlight);
-}
-
-.button-row { display: flex; gap: 15px; justify-content: center; }
-
-.primary-btn {
-    background-color: var(--accent);
-    color: #0f172a;
-    border: none;
-    padding: 15px 40px;
-    font-size: 1.1rem;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: transform 0.2s;
-}
-.primary-btn:hover { transform: scale(1.05); }
-
-.secondary-btn {
-    background-color: transparent;
-    color: var(--text);
-    border: 1px solid var(--text);
-    padding: 15px 30px;
-    font-size: 1.1rem;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.secondary-btn:hover { background: rgba(255,255,255,0.1); }
-
-/* SESSION SCREEN */
-.hidden { display: none !important; }
-
-.pulse-circle {
-    width: 100px; height: 100px;
-    background-color: var(--accent);
-    border-radius: 50%;
-    margin: 0 auto 30px auto;
-    opacity: 0.2;
-    transition: all 0.5s ease;
-}
-
-.pulse-circle.speaking { animation: pulse 1.5s infinite ease-in-out; }
-.pulse-circle.listening { background-color: var(--highlight); opacity: 0.8; animation: pulse 1s infinite; }
-.pulse-circle.success { background-color: var(--success); opacity: 0.8; transform: scale(1.2); }
-.pulse-circle.error { background-color: var(--error); opacity: 0.8; animation: shake 0.4s ease-in-out; }
-
-@keyframes pulse {
-    0% { transform: scale(0.95); opacity: 0.5; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-    100% { transform: scale(0.95); opacity: 0.5; }
-}
-
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
-}
-
-#status-text { font-size: 1.5rem; font-family: 'Merriweather', serif; height: 60px; }
-
-.log-area {
-    margin-top: 50px;
-    color: #64748b;
-    font-size: 0.9rem;
-    font-style: italic;
-    min-height: 20px;
-}
+/* ... Keep existing styles for keys, pulse circle, etc ... */
