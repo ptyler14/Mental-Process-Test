@@ -1,18 +1,104 @@
-/* ... Keep existing variables ... */
+:root {
+    --bg: #0f172a; /* Deep Night Blue */
+    --text: #e2e8f0;
+    --accent: #38bdf8; /* Cyan */
+    --highlight: #fbbf24; /* Amber */
+    --surface: rgba(255, 255, 255, 0.05);
+    --success: #22c55e;
+    --error: #ef4444;
+}
 
-/* MODE SELECTION */
-.mode-cards { display: flex; gap: 20px; justify-content: center; margin-top: 30px; }
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.container { width: 100%; max-width: 600px; padding: 20px; text-align: center; }
+
+.home-link {
+    position: absolute; top: 20px; left: 20px;
+    color: #64748b; text-decoration: none; font-size: 0.9rem;
+    opacity: 0.6; transition: opacity 0.2s;
+}
+.home-link:hover { opacity: 1; }
+
+h1 { font-family: 'Merriweather', serif; font-size: 2.5rem; margin-bottom: 10px; color: var(--accent); }
+h2 { font-family: 'Merriweather', serif; font-size: 1.8rem; margin-bottom: 20px; }
+.subtitle { color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 40px; }
+
+.instructions {
+    background: var(--surface);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: left;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+.instructions ul { padding-left: 20px; }
+.instructions li { margin-bottom: 10px; }
+
+/* MODE SELECTION CARDS */
+.mode-cards { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
 .mode-card {
-    background: rgba(255,255,255,0.1);
-    padding: 30px;
+    background: var(--surface);
+    padding: 20px;
     border-radius: 12px;
     border: 1px solid #334155;
     cursor: pointer;
-    width: 45%;
+    width: 48%;
     transition: all 0.2s;
 }
-.mode-card:hover { background: rgba(255,255,255,0.15); border-color: var(--accent); transform: translateY(-5px); }
-.mode-card h3 { color: var(--accent); margin-top: 0; }
+.mode-card:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); transform: translateY(-3px); }
+.mode-card h3 { color: var(--accent); margin-top: 0; font-size: 1.2rem; }
+.mode-card p { font-size: 0.9rem; color: #cbd5e1; }
+
+/* KEY DISPLAY */
+.key-display-area { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; }
+.key-box {
+    background: var(--surface);
+    padding: 15px;
+    border-radius: 8px;
+    min-width: 120px;
+    border: 1px solid #334155;
+}
+.key-box .label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px; }
+.key-box .value { display: block; font-size: 1.5rem; font-weight: bold; color: var(--highlight); }
+.key-box.active { border-color: var(--accent); box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); }
+
+/* BUTTONS */
+.button-row { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+
+.primary-btn {
+    background-color: var(--accent);
+    color: #0f172a;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.primary-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
+
+.secondary-btn {
+    background-color: transparent;
+    color: var(--text);
+    border: 1px solid var(--text);
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.secondary-btn:hover { background: rgba(255,255,255,0.1); }
 
 /* PARTNER INTERFACE */
 .script-box {
@@ -33,4 +119,24 @@
 .control-btn.yes { background-color: var(--success); color: #fff; }
 .control-btn.no { background-color: var(--error); color: #fff; }
 
-/* ... Keep existing styles for keys, pulse circle, etc ... */
+/* SESSION VISUALS */
+.pulse-circle {
+    width: 80px; height: 80px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    margin: 40px auto;
+    opacity: 0.3;
+    transition: all 0.3s ease;
+}
+.pulse-circle.speaking { animation: breathe 3s infinite ease-in-out; opacity: 0.6; }
+.pulse-circle.listening { background-color: var(--highlight); opacity: 0.8; animation: pulse-fast 1s infinite; }
+.pulse-circle.success { background-color: var(--success); opacity: 0.8; transform: scale(1.2); }
+.pulse-circle.error { background-color: var(--error); opacity: 0.8; animation: shake 0.4s ease-in-out; }
+
+@keyframes breathe { 0% { transform: scale(0.9); } 50% { transform: scale(1.1); } 100% { transform: scale(0.9); } }
+@keyframes pulse-fast { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+.status-text { font-size: 1.2rem; color: #cbd5e1; min-height: 1.5em; }
+.log-area { margin-top: 20px; color: #64748b; font-size: 0.9rem; font-style: italic; min-height: 20px; }
+.hidden { display: none !important; }
