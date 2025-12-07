@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simpson Protocol Session</title>
+    <title>Simpson Protocol</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -46,7 +47,7 @@
                 <ul>
                     <li>You will act as the Hypnotist.</li>
                     <li>Read the script on the screen to the client slowly and calmly.</li>
-                    <li>When the client responds (with a finger signal or voice), click the corresponding button on the screen.</li>
+                    <li>When the client responds, click the corresponding button on the screen.</li>
                 </ul>
             </div>
             <button id="partner-begin-btn" class="primary-btn">Start Session</button>
@@ -55,9 +56,15 @@
         <div id="confirm-keys-screen" class="screen hidden">
             <h2>Welcome Back</h2>
             <p>Last time, you used these keys:</p>
-            <div class="key-display">
-                <p>YES: <span id="saved-yes-key" class="key">Space</span></p>
-                <p>NO: <span id="saved-no-key" class="key">N</span></p>
+            <div class="key-display-area">
+                <div class="key-box">
+                    <span class="label">YES</span>
+                    <span id="saved-yes-key" class="value">Space</span>
+                </div>
+                <div class="key-box">
+                    <span class="label">NO</span>
+                    <span id="saved-no-key" class="value">N</span>
+                </div>
             </div>
             <div class="button-row">
                 <button id="change-keys-btn" class="secondary-btn">Change Keys</button>
@@ -71,7 +78,8 @@
                 <p id="status-text">Calibrating...</p>
             </div>
             <div id="feedback-log" class="log-area"></div>
-            <button id="mic-activate-btn" class="primary-btn hidden">Tap to Enable Mic</button>
+            
+            <button id="mic-activate-btn" class="primary-btn hidden" style="margin-top: 20px;">🎤 Tap to Speak</button>
         </div>
 
         <div id="session-screen" class="screen hidden">
@@ -93,18 +101,18 @@
                         <button id="partner-yes-btn" class="control-btn yes">Client Signaled YES</button>
                         <button id="partner-no-btn" class="control-btn no">Client Signaled NO</button>
                     </div>
-                    <div id="partner-suds-input" class="hidden" style="margin-top: 20px;">
-                        <input type="number" id="partner-suds-val" placeholder="Score (-10 to 10)">
-                        <button id="partner-suds-btn" class="primary-btn">Submit Score</button>
+                    
+                    <div id="partner-suds-wrapper" class="hidden" style="margin-top: 20px;">
+                        <input type="number" id="partner-suds-val" placeholder="Score (-10 to 10)" style="padding:15px; font-size:1.2rem; width:100px; text-align:center; border-radius:8px; border:none;">
+                        <button id="partner-suds-btn" class="primary-btn">Submit</button>
                     </div>
-                     <button id="partner-next-btn" class="primary-btn hidden" style="margin-top: 20px;">Next Step</button>
+                    
+                    <button id="partner-next-btn" class="primary-btn hidden" style="margin-top: 20px;">Next Step</button>
                 </div>
             </div>
-
         </div>
 
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
