@@ -44,8 +44,10 @@ recognition.maxAlternatives = 1;
 let userKeys = { yes: 'Space', no: 'KeyN' };
 let currentStep = 'start';
 let isPartnerMode = false;
+let sessionActive = false;
+let listenMode = 'idle'; // 'idle' or 'active'
 
-// --- DOM ELEMENTS (Safe Get) ---
+// --- DOM ELEMENTS ---
 const get = (id) => document.getElementById(id);
 const screens = {
     mode: get('mode-select-screen'),
@@ -54,6 +56,26 @@ const screens = {
     confirm: get('confirm-keys-screen'),
     practice: get('practice-screen'),
     session: get('session-screen')
+};
+
+// --- MIC KEEP-ALIVE ---
+recognition.onend = () => {
+    if (sessionActive) {
+        try { recognition.start(); } catch(e) {}
+    }
+};
+
+recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript.toLowerCase();
+    
+    // Only process if we are actively waiting for voice input
+    if (listenMode === 'active') {
+        const score = parseSuds(transcript);
+        if (score !== null) {
+            handleVoiceSuccess(score);
+        }
+    }
+    // If 'idle', we ignore background noise
 };
 
 // --- INIT ---
@@ -69,31 +91,38 @@ async function checkUser() {
 
 function attachEventListeners() {
     // Mode Selection
-    const btnSolo = get('mode-solo');
-    if (btnSolo) btnSolo.addEventListener('click', () => {
+    if (get('mode-solo')) get('mode-solo').addEventListener('click', () => {
         isPartnerMode = false;
         showScreen('soloStart');
     });
 
-    const btnPartner = get('mode-partner');
-    if (btnPartner) btnPartner.addEventListener('click', () => {
+    if (get('mode-partner')) get('mode-partner').addEventListener('click', () => {
         isPartnerMode = true;
         showScreen('partnerStart');
     });
 
-    // Start Buttons
-    const btnSoloStart = get('solo-begin-btn');
-    if (btnSoloStart) btnSoloStart.addEventListener('click', checkHistory);
+    // Start Buttons (These are the critical "User Gestures")
+    if (get('solo-begin-btn')) get('solo-begin-btn').addEventListener('click', () => {
+        // KICKSTART MIC HERE
+        startMicLoop();
+        checkHistory();
+    });
     
-    const btnPartnerStart = get('partner-begin-btn');
-    if (btnPartnerStart) btnPartnerStart.addEventListener('click', startPartnerSession);
+    if (get('partner-begin-btn')) get('partner-begin-btn').addEventListener('click', startPartnerSession);
 
     // Key Setup Flow
-    const btnKeep = get('keep-keys-btn');
-    if (btnKeep) btnKeep.addEventListener('click', startPracticeMode);
-    
-    const btnChange = get('change-keys-btn');
-    if (btnChange) btnChange.addEventListener('click', startCalibration);
+    if (get('keep-keys-btn')) get('keep-keys-btn').addEventListener('click', startPracticeMode);
+    if (get('change-keys-btn')) get('change-keys-btn').addEventListener('click', startCalibration);
+}
+
+function startMicLoop() {
+    sessionActive = true;
+    try {
+        recognition.start();
+        console.log("Mic started");
+    } catch(e) {
+        console.log("Mic start error (might be already running)", e);
+    }
 }
 
 // --- FLOW LOGIC ---
@@ -155,11 +184,12 @@ async function startPracticeMode() {
     }
     
     // Voice Test
-    const micBtn = get('mic-activate-btn');
-    if (micBtn) micBtn.classList.remove('hidden');
+    updateStatus("Listening...");
+    listenMode = 'active'; // Enable processing
     
-    const voiceResult = await waitForVoice(micBtn);
-    if (micBtn) micBtn.classList.add('hidden');
+    // We wait for the global onresult to trigger success
+    const voiceResult = await waitForVoiceResult();
+    listenMode = 'idle';
     
     if (voiceResult) {
         await speak(`Heard ${voiceResult}. Starting session.`);
@@ -181,14 +211,16 @@ function startSoloSession() {
 
 async function runStep(stepId) {
     const step = SESSION_SCRIPT[stepId];
-    if (!step) return; 
+    if (!step) {
+        endSession();
+        return;
+    }
 
     currentStep = stepId;
 
     if (isPartnerMode) {
-        // --- PARTNER MODE UI ---
+        // --- PARTNER MODE UI (Same as before) ---
         get('partner-script-text').textContent = step.text;
-        
         const controls = get('partner-controls');
         const nextBtn = get('partner-next-btn');
         const yesBtn = get('partner-yes-btn');
@@ -202,12 +234,7 @@ async function runStep(stepId) {
         noBtn.classList.add('hidden');
         sudsBox.classList.add('hidden');
 
-        // Clone buttons to clear listeners
-        const replace = (el) => {
-            const newEl = el.cloneNode(true);
-            el.parentNode.replaceChild(newEl, el);
-            return newEl;
-        };
+        const replace = (el) => { const newEl = el.cloneNode(true); el.parentNode.replaceChild(newEl, el); return newEl; };
 
         if (step.type === 'question') {
             yesBtn.classList.remove('hidden');
@@ -227,9 +254,7 @@ async function runStep(stepId) {
         } else {
             nextBtn.classList.remove('hidden');
             const newNext = replace(nextBtn);
-            newNext.addEventListener('click', () => {
-                if (step.next) runStep(step.next);
-            });
+            newNext.addEventListener('click', () => { if (step.next) runStep(step.next); });
         }
 
     } else {
@@ -251,28 +276,50 @@ async function runStep(stepId) {
         } 
         else if (step.type === 'speech') {
             updateStatus("Listening...");
-            const micBtn = document.createElement('button');
-            micBtn.textContent = "Tap to Speak";
-            micBtn.className = "primary-btn";
-            micBtn.style.marginTop = "20px";
-            get('solo-view').appendChild(micBtn);
+            if(ind) ind.className = "pulse-circle listening";
             
-            const result = await waitForVoice(micBtn);
-            micBtn.remove();
+            listenMode = 'active'; // Turn on "hearing"
             
-            if (result) {
-                const num = parseSuds(result);
+            // Wait for global handler to catch a number
+            const num = await waitForVoiceResult();
+            
+            listenMode = 'idle'; // Turn off "hearing"
+            
+            if (num !== null) {
                 speak(`Heard ${num}.`);
+                if (step.next) runStep(step.next);
+            } else {
+                // Timeout or error
+                speak("Moving on.");
+                if (step.next) runStep(step.next);
             }
-            if (step.next) runStep(step.next);
         } 
         else {
             if (step.next) setTimeout(() => runStep(step.next), 1000);
+            else endSession();
         }
     }
 }
 
 // --- UTILS ---
+
+function waitForVoiceResult() {
+    return new Promise(resolve => {
+        // Define a one-time success handler we can call from global scope
+        window.handleVoiceSuccess = (score) => {
+            window.handleVoiceSuccess = null; // Clear it
+            resolve(score);
+        };
+        
+        // Timeout after 10 seconds
+        setTimeout(() => {
+            if (window.handleVoiceSuccess) {
+                window.handleVoiceSuccess = null;
+                resolve(null);
+            }
+        }, 10000);
+    });
+}
 
 function waitForAnyKey() {
     return new Promise(resolve => {
@@ -296,17 +343,6 @@ function waitForKeyResponse() {
             }
         };
         document.addEventListener('keydown', handler);
-    });
-}
-
-function waitForVoice(btn) {
-    return new Promise(resolve => {
-        btn.onclick = () => {
-            btn.textContent = "Listening...";
-            recognition.start();
-        };
-        recognition.onresult = (e) => resolve(e.results[0][0].transcript);
-        recognition.onerror = () => resolve(null);
     });
 }
 
@@ -334,6 +370,10 @@ function playTone(freq) {
     osc.stop(audioCtx.currentTime + 0.5);
 }
 
+function playFeedback(type) {
+    playTone(type === 'success' ? 440 : 200);
+}
+
 function updateStatus(msg) { 
     const el = get('status-text') || get('session-status');
     if(el) el.textContent = msg; 
@@ -349,5 +389,18 @@ function parseSuds(text) {
     const isNeg = text.includes('minus') || text.includes('negative');
     const nums = text.match(/\d+/);
     if(nums) return isNeg ? -parseInt(nums[0]) : parseInt(nums[0]);
+    // Also check words
+    const words = { "zero":0, "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, "nine":9, "ten":10 };
+    for (const [word, num] of Object.entries(words)) {
+        if (text.includes(word)) return isNegative ? -num : num;
+    }
     return null;
+}
+
+function endSession() {
+    sessionActive = false;
+    recognition.stop();
+    updateStatus("Session Complete");
+    if(get('session-indicator')) get('session-indicator').className = "pulse-circle";
+    setTimeout(() => { window.location.href = "../index.html"; }, 3000);
 }
