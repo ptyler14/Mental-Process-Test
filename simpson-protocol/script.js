@@ -1,4 +1,4 @@
-// --- SUPABASE CONFIG ---
+// --- SUPABASE CONFIGURATION ---
 const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmcml3ZG93dXdqeGlmZXlwbGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTczMzIsImV4cCI6MjA3OTQ3MzMzMn0.AZa5GNVDRm1UXU-PiQx7KS0KxQqZ69JbV1Qn2DIlHq0';
 
@@ -21,8 +21,8 @@ const SESSION_SCRIPT = {
         no: "induction_1"
     },
     suds_intro: {
-        type: "speech", // Voice for this one!
-        text: "On a scale of minus ten to plus ten, how intense is the issue? Speak the number clearly.",
+        type: "speech",
+        text: "On a scale of minus ten to plus ten, how intense is the issue? Speak the number.",
         next: "finish"
     },
     finish: {
@@ -181,7 +181,7 @@ function startSoloSession() {
 
 async function runStep(stepId) {
     const step = SESSION_SCRIPT[stepId];
-    if (!step) return; // End
+    if (!step) return; 
 
     currentStep = stepId;
 
@@ -235,9 +235,12 @@ async function runStep(stepId) {
     } else {
         // --- SOLO MODE UI ---
         updateStatus("Speaking...");
-        get('session-indicator').className = "pulse-circle speaking";
+        const ind = get('session-indicator');
+        if(ind) ind.className = "pulse-circle speaking";
+        
         await speak(step.text);
-        get('session-indicator').className = "pulse-circle";
+        
+        if(ind) ind.className = "pulse-circle";
 
         if (step.type === 'question') {
             updateStatus("Waiting for Signal...");
@@ -248,12 +251,10 @@ async function runStep(stepId) {
         } 
         else if (step.type === 'speech') {
             updateStatus("Listening...");
-            // Use Mic Button for reliability
             const micBtn = document.createElement('button');
             micBtn.textContent = "Tap to Speak";
             micBtn.className = "primary-btn";
             micBtn.style.marginTop = "20px";
-            // Insert into solo view temporarily
             get('solo-view').appendChild(micBtn);
             
             const result = await waitForVoice(micBtn);
@@ -344,7 +345,6 @@ function log(msg) {
 }
 
 function parseSuds(text) {
-    // Simple parser
     if (!text) return null;
     const isNeg = text.includes('minus') || text.includes('negative');
     const nums = text.match(/\d+/);
