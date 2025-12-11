@@ -17,7 +17,6 @@ const AREAS = [
 
 // --- STATE ---
 let currentAreaIndex = 0;
-// We initialize the results array with empty objects so we can save/overwrite by index
 let results = new Array(AREAS.length).fill(null);
 
 // --- DOM ---
@@ -40,13 +39,19 @@ const valEff = get('val-effort');
 
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
+    // Navigation Listeners
     get('start-btn').addEventListener('click', startAssessment);
-    get('next-btn').addEventListener('click', () => saveAndMove(1)); // Forward
-    get('skip-btn').addEventListener('click', () => saveAndMove(1, true)); // Skip Forward
-    get('prev-btn').addEventListener('click', () => saveAndMove(-1)); // Backward
+    
+    // Assessment View Buttons
+    get('next-btn').addEventListener('click', () => saveAndMove(1)); 
+    get('skip-btn').addEventListener('click', () => saveAndMove(1, true)); 
+    get('prev-btn').addEventListener('click', () => saveAndMove(-1)); 
+    
+    // Resolution View Buttons
     get('finish-btn').addEventListener('click', finishAssessment);
+    get('res-back-btn').addEventListener('click', backToAssessment); // New Back logic
 
-    // Live update sliders
+    // Sliders
     const updateVal = (slider, display) => {
         slider.addEventListener('input', (e) => display.textContent = e.target.value);
     };
@@ -64,28 +69,19 @@ function startAssessment() {
 }
 
 function loadArea(index) {
-    // 1. Progress Bar
     const percent = ((index) / AREAS.length) * 100;
     get('progress-bar').style.width = `${percent}%`;
-
-    // 2. Title
     get('area-title').textContent = AREAS[index];
 
-    // 3. Button State
-    // Hide 'Previous' if we are at the start
-    if (index === 0) get('prev-btn').classList.add('hidden');
-    else get('prev-btn').classList.remove('hidden');
-
-    // 4. Load Existing Data (if we are going back) OR Reset
+    // Load Existing or Reset
     const savedData = results[index];
-    
     if (savedData && !savedData.skipped) {
         sliderSat.value = savedData.satisfaction; valSat.textContent = savedData.satisfaction;
         sliderImp.value = savedData.importance; valImp.textContent = savedData.importance;
         sliderEff.value = savedData.effort; valEff.textContent = savedData.effort;
         textReflect.value = savedData.reflection || "";
     } else {
-        // Reset to default 5
+        // Defaults
         sliderSat.value = 5; valSat.textContent = '5';
         sliderImp.value = 5; valImp.textContent = '5';
         sliderEff.value = 5; valEff.textContent = '5';
@@ -96,7 +92,8 @@ function loadArea(index) {
 }
 
 function saveAndMove(direction, isSkipped = false) {
-    // 1. Save current inputs to the current index
+    // 1. Save current state before moving
+    // (Even if skipping or going back, we preserve what was typed so far)
     const currentData = {
         area: AREAS[currentAreaIndex],
         satisfaction: sliderSat.value,
@@ -105,24 +102,35 @@ function saveAndMove(direction, isSkipped = false) {
         reflection: textReflect.value,
         skipped: isSkipped
     };
-    
     results[currentAreaIndex] = currentData;
 
     // 2. Move Index
     currentAreaIndex += direction;
 
-    // 3. Routing
+    // 3. Router
     if (currentAreaIndex < 0) {
-        currentAreaIndex = 0; // Safety clamp
+        // Back from first slide -> Go to Intro
+        currentAreaIndex = 0; 
+        showScreen('intro');
+        get('progress-container').classList.add('hidden');
     } 
     else if (currentAreaIndex < AREAS.length) {
+        // Normal Navigation
         loadArea(currentAreaIndex);
     } 
     else {
-        // Done with all areas
+        // Finished all areas -> Go to Resolution
         showScreen('resolution');
         get('progress-container').classList.add('hidden');
     }
+}
+
+function backToAssessment() {
+    // Go back to the very last area
+    currentAreaIndex = AREAS.length - 1;
+    showScreen('assessment');
+    get('progress-container').classList.remove('hidden');
+    loadArea(currentAreaIndex);
 }
 
 function finishAssessment() {
