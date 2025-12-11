@@ -1,5 +1,5 @@
 // --- STATE ---
-// Added 'step-action' to the flow
+// FIX: Added 'step-action' to this list so the code knows it exists
 const steps = [
     'step-intro', 'step-draft', 
     'step-s', 'step-m', 'step-a', 'step-r', 'step-t', 
@@ -18,13 +18,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- NAVIGATION ---
 function nextStep(targetId) {
+    // 1. Save data before moving
     saveCurrentStepData();
+
+    // 2. Hide current step
+    // Safety check: ensure current step exists
     const currentId = steps[currentStepIndex];
-    get(currentId).classList.add('hidden');
-    currentStepIndex = steps.indexOf(targetId);
+    if (currentId && get(currentId)) {
+        get(currentId).classList.add('hidden');
+    }
+
+    // 3. Find new index
+    const newIndex = steps.indexOf(targetId);
+    if (newIndex === -1) {
+        console.error(`Step '${targetId}' not found in configuration list.`);
+        return;
+    }
+    currentStepIndex = newIndex;
+
+    // 4. Show new step
     get(targetId).classList.remove('hidden');
     updateProgress();
 
+    // 5. Update Draft Reference if needed
     if (targetId.startsWith('step-s') || targetId.startsWith('step-m')) {
         updateDraftReference();
     }
@@ -32,7 +48,10 @@ function nextStep(targetId) {
 
 function prevStep(targetId) {
     const currentId = steps[currentStepIndex];
-    get(currentId).classList.add('hidden');
+    if (currentId && get(currentId)) {
+        get(currentId).classList.add('hidden');
+    }
+    
     currentStepIndex = steps.indexOf(targetId);
     get(targetId).classList.remove('hidden');
     updateProgress();
@@ -40,14 +59,15 @@ function prevStep(targetId) {
 
 function updateProgress() {
     const percent = ((currentStepIndex) / (steps.length - 1)) * 100;
-    get('progress-bar').style.width = `${percent}%`;
+    const bar = get('progress-bar');
+    if (bar) bar.style.width = `${percent}%`;
     window.scrollTo(0,0);
 }
 
 // --- LOGIC ---
 function saveCurrentStepData() {
-    const draft = get('draft-input').value;
-    if (draft) goalData.draft = draft;
+    const input = get('draft-input');
+    if (input && input.value) goalData.draft = input.value;
 }
 
 function updateDraftReference() {
@@ -63,16 +83,18 @@ function generateGoal() {
     goalData.r = get('input-r').value;
     goalData.t_date = get('input-t-date').value;
     goalData.t_desc = get('input-t-desc').value;
+    
     goalData.obstacle = get('input-obstacle').value;
     goalData.strategy = get('input-strategy').value;
     
-    // Capture Action Data
+    // Capture Action Data (The new step)
     goalData.actionName = get('action-name').value || "Work on Goal";
     goalData.actionDate = get('action-date').value;
     goalData.actionTime = get('action-time').value;
 
-    const term = document.querySelector('input[name="term"]:checked').value;
-    goalData.term = term;
+    // Capture Radio Button
+    const termInput = document.querySelector('input[name="term"]:checked');
+    if (termInput) goalData.term = termInput.value;
 
     buildSummary();
     nextStep('step-summary');
@@ -81,8 +103,10 @@ function generateGoal() {
 function buildSummary() {
     // 1. Text Summary
     get('final-type').textContent = goalData.term === 'long' ? "Long-Term Vision" : "Short-Term Target";
+    
     const statement = `I will ${goalData.s}. I will measure this by ${goalData.m}. This is relevant because ${goalData.r}.`;
     get('final-statement').textContent = statement;
+    
     get('final-deadline').textContent = `${goalData.t_desc} (${goalData.t_date})`;
     get('final-obstacle').textContent = goalData.obstacle;
     get('final-strategy').textContent = goalData.strategy;
@@ -100,16 +124,14 @@ function buildSummary() {
 }
 
 // --- CALENDAR LOGIC ---
-
 function setupCalendarButtons() {
     if (!goalData.actionDate || !goalData.actionTime) return;
 
     // Create Start/End Date objects
     const startDateTime = new Date(`${goalData.actionDate}T${goalData.actionTime}`);
-    const endDateTime = new Date(startDateTime.getTime() + (60 * 60 * 1000)); // Default 1 hour
+    const endDateTime = new Date(startDateTime.getTime() + (60 * 60 * 1000)); // Default 1 hour duration
 
-    // Format for Google (YYYYMMDDTHHMMSSZ) - Convert to UTC or keep local?
-    // Google works best with "YYYYMMDDTHHMMSS" format
+    // Format for Google (YYYYMMDDTHHMMSS)
     const formatGoogle = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
 
     const gTitle = encodeURIComponent(`Goal Action: ${goalData.actionName}`);
@@ -125,7 +147,6 @@ function setupCalendarButtons() {
 }
 
 function downloadICS(startDate, endDate, title, description) {
-    // Helper to format date for ICS
     const formatICS = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
     
     const icsContent = [
