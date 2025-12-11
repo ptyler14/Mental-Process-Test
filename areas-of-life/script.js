@@ -1,4 +1,4 @@
-// --- DATA CONFIGURATION ---
+// --- CONFIGURATION ---
 const AREAS = [
     "Work, job, or career",
     "School or education",
@@ -17,9 +17,10 @@ const AREAS = [
 
 // --- STATE ---
 let currentAreaIndex = 0;
-let results = []; // Stores the user data
+// We initialize the results array with empty objects so we can save/overwrite by index
+let results = new Array(AREAS.length).fill(null);
 
-// --- DOM ELEMENTS ---
+// --- DOM ---
 const get = (id) => document.getElementById(id);
 const screens = {
     intro: get('intro-view'),
@@ -28,13 +29,11 @@ const screens = {
     completion: get('completion-view')
 };
 
-// Inputs
 const sliderSat = get('input-satisfaction');
 const sliderImp = get('input-importance');
 const sliderEff = get('input-effort');
 const textReflect = get('input-reflection');
 
-// Value Displays
 const valSat = get('val-satisfaction');
 const valImp = get('val-importance');
 const valEff = get('val-effort');
@@ -42,17 +41,21 @@ const valEff = get('val-effort');
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
     get('start-btn').addEventListener('click', startAssessment);
-    get('next-btn').addEventListener('click', saveAndNext);
-    get('skip-btn').addEventListener('click', skipAndNext);
+    get('next-btn').addEventListener('click', () => saveAndMove(1)); // Forward
+    get('skip-btn').addEventListener('click', () => saveAndMove(1, true)); // Skip Forward
+    get('prev-btn').addEventListener('click', () => saveAndMove(-1)); // Backward
     get('finish-btn').addEventListener('click', finishAssessment);
 
-    // Attach slider listeners to update numbers in real-time
-    sliderSat.addEventListener('input', (e) => valSat.textContent = e.target.value);
-    sliderImp.addEventListener('input', (e) => valImp.textContent = e.target.value);
-    sliderEff.addEventListener('input', (e) => valEff.textContent = e.target.value);
+    // Live update sliders
+    const updateVal = (slider, display) => {
+        slider.addEventListener('input', (e) => display.textContent = e.target.value);
+    };
+    updateVal(sliderSat, valSat);
+    updateVal(sliderImp, valImp);
+    updateVal(sliderEff, valEff);
 });
 
-// --- NAVIGATION LOGIC ---
+// --- LOGIC ---
 
 function startAssessment() {
     showScreen('assessment');
@@ -61,58 +64,68 @@ function startAssessment() {
 }
 
 function loadArea(index) {
-    // 1. Update Progress Bar
+    // 1. Progress Bar
     const percent = ((index) / AREAS.length) * 100;
     get('progress-bar').style.width = `${percent}%`;
 
-    // 2. Update Title
+    // 2. Title
     get('area-title').textContent = AREAS[index];
 
-    // 3. Reset Inputs to Default
-    sliderSat.value = 5; valSat.textContent = '5';
-    sliderImp.value = 5; valImp.textContent = '5';
-    sliderEff.value = 5; valEff.textContent = '5';
-    textReflect.value = '';
+    // 3. Button State
+    // Hide 'Previous' if we are at the start
+    if (index === 0) get('prev-btn').classList.add('hidden');
+    else get('prev-btn').classList.remove('hidden');
+
+    // 4. Load Existing Data (if we are going back) OR Reset
+    const savedData = results[index];
     
-    // Scroll to top
+    if (savedData && !savedData.skipped) {
+        sliderSat.value = savedData.satisfaction; valSat.textContent = savedData.satisfaction;
+        sliderImp.value = savedData.importance; valImp.textContent = savedData.importance;
+        sliderEff.value = savedData.effort; valEff.textContent = savedData.effort;
+        textReflect.value = savedData.reflection || "";
+    } else {
+        // Reset to default 5
+        sliderSat.value = 5; valSat.textContent = '5';
+        sliderImp.value = 5; valImp.textContent = '5';
+        sliderEff.value = 5; valEff.textContent = '5';
+        textReflect.value = '';
+    }
+    
     window.scrollTo(0, 0);
 }
 
-function saveAndNext() {
-    // Save current data
-    const areaData = {
+function saveAndMove(direction, isSkipped = false) {
+    // 1. Save current inputs to the current index
+    const currentData = {
         area: AREAS[currentAreaIndex],
         satisfaction: sliderSat.value,
         importance: sliderImp.value,
         effort: sliderEff.value,
         reflection: textReflect.value,
-        skipped: false
+        skipped: isSkipped
     };
-    results.push(areaData);
-    advance();
-}
+    
+    results[currentAreaIndex] = currentData;
 
-function skipAndNext() {
-    const areaData = {
-        area: AREAS[currentAreaIndex],
-        skipped: true
-    };
-    results.push(areaData);
-    advance();
-}
+    // 2. Move Index
+    currentAreaIndex += direction;
 
-function advance() {
-    currentAreaIndex++;
-    if (currentAreaIndex < AREAS.length) {
+    // 3. Routing
+    if (currentAreaIndex < 0) {
+        currentAreaIndex = 0; // Safety clamp
+    } 
+    else if (currentAreaIndex < AREAS.length) {
         loadArea(currentAreaIndex);
-    } else {
+    } 
+    else {
+        // Done with all areas
         showScreen('resolution');
         get('progress-container').classList.add('hidden');
     }
 }
 
 function finishAssessment() {
-    // Capture resolution answers
     const finalData = {
         assessments: results,
         resolution: {
@@ -123,16 +136,11 @@ function finishAssessment() {
         date: new Date().toISOString()
     };
 
-    // Save to LocalStorage (Or Supabase later if you want)
     localStorage.setItem('areas_reflection_last', JSON.stringify(finalData));
-    
-    // Optional: Console log to verify data structure
-    console.log("Saved Data:", finalData);
-
+    console.log("Saved:", finalData);
     showScreen('completion');
 }
 
-// --- HELPER ---
 function showScreen(name) {
     Object.values(screens).forEach(s => s.classList.add('hidden'));
     screens[name].classList.remove('hidden');
