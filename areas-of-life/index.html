@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Areas of Life Reflection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <a href="../index.html" class="home-link">🏠 Exit</a>
+            <div class="progress-bar-container hidden" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </header>
+
+        <div id="intro-view" class="screen">
+            <h1>Areas of Life Reflection</h1>
+            <div class="card content-box">
+                <p>When we feel dissatisfied with our life, it may feel overwhelming to figure out where to start making changes to feel better. By assessing how satisfied we are with different areas of our lives, we can gather more information about what we may need to adjust or change.</p>
+                <p>This assessment can also help us start to consider our values and how we may want to show up to these areas our lives.</p>
+                <p><strong>Instructions:</strong> Complete this exercise to consider your satisfaction, importance, and effort in various life areas. Some areas may not apply to you—feel free to skip them.</p>
+            </div>
+            <button id="start-btn" class="primary-btn">Begin Reflection</button>
+        </div>
+
+        <div id="assessment-view" class="screen hidden">
+            <h2 id="area-title">Area Name</h2>
+            
+            <div class="card">
+                <div class="input-group">
+                    <label>1. How satisfied are you with this area? (<span id="val-satisfaction">5</span>/10)</label>
+                    <div class="range-container">
+                        <span>0</span>
+                        <input type="range" id="input-satisfaction" min="0" max="10" value="5">
+                        <span>10</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>2. How important is this area to you? (<span id="val-importance">5</span>/10)</label>
+                    <div class="range-container">
+                        <span>0</span>
+                        <input type="range" id="input-importance" min="0" max="10" value="5">
+                        <span>10</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>3. How much effort/time do you put in? (<span id="val-effort">5</span>/10)</label>
+                    <div class="range-container">
+                        <span>0</span>
+                        <input type="range" id="input-effort" min="0" max="10" value="5">
+                        <span>10</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>4. If this area could look different, what could it look like?</label>
+                    <textarea id="input-reflection" placeholder="Type your thoughts here..."></textarea>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button id="skip-btn" class="secondary-btn">Skip Area</button>
+                <button id="next-btn" class="primary-btn">Next Area</button>
+            </div>
+        </div>
+
+        <div id="resolution-view" class="screen hidden">
+            <h2>Final Reflections</h2>
+            <p class="subtitle">Reviewing your insights</p>
+
+            <div class="card">
+                <div class="input-group">
+                    <label>What is one specific area of your life you would like to focus on after completing this activity?</label>
+                    <textarea id="res-focus"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>What is one specific action you would like to take in this area?</label>
+                    <textarea id="res-action"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Do you have any other reflections?</label>
+                    <textarea id="res-other"></textarea>
+                </div>
+            </div>
+
+            <button id="finish-btn" class="primary-btn">Complete Exercise</button>
+        </div>
+
+        <div id="completion-view" class="screen hidden">
+            <h2>Reflection Complete</h2>
+            <div class="card content-box">
+                <p>You have taken a valuable step in assessing your life's balance. Your responses have been saved locally.</p>
+                <p>Take a deep breath and acknowledge the work you just did.</p>
+            </div>
+            <button onclick="location.href='../index.html'" class="primary-btn">Return to Dashboard</button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
