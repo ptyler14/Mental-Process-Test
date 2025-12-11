@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Resolution View Buttons
     get('finish-btn').addEventListener('click', finishAssessment);
-    get('res-back-btn').addEventListener('click', backToAssessment); // New Back logic
+    get('res-back-btn').addEventListener('click', backToAssessment); 
 
     // Sliders
     const updateVal = (slider, display) => {
@@ -73,6 +73,10 @@ function loadArea(index) {
     get('progress-bar').style.width = `${percent}%`;
     get('area-title').textContent = AREAS[index];
 
+    // Button State
+    if (index === 0) get('prev-btn').classList.add('hidden');
+    else get('prev-btn').classList.remove('hidden');
+
     // Load Existing or Reset
     const savedData = results[index];
     if (savedData && !savedData.skipped) {
@@ -81,10 +85,10 @@ function loadArea(index) {
         sliderEff.value = savedData.effort; valEff.textContent = savedData.effort;
         textReflect.value = savedData.reflection || "";
     } else {
-        // Defaults
-        sliderSat.value = 5; valSat.textContent = '5';
-        sliderImp.value = 5; valImp.textContent = '5';
-        sliderEff.value = 5; valEff.textContent = '5';
+        // Defaults reset to 0
+        sliderSat.value = 0; valSat.textContent = '0';
+        sliderImp.value = 0; valImp.textContent = '0';
+        sliderEff.value = 0; valEff.textContent = '0';
         textReflect.value = '';
     }
     
@@ -92,8 +96,6 @@ function loadArea(index) {
 }
 
 function saveAndMove(direction, isSkipped = false) {
-    // 1. Save current state before moving
-    // (Even if skipping or going back, we preserve what was typed so far)
     const currentData = {
         area: AREAS[currentAreaIndex],
         satisfaction: sliderSat.value,
@@ -104,29 +106,23 @@ function saveAndMove(direction, isSkipped = false) {
     };
     results[currentAreaIndex] = currentData;
 
-    // 2. Move Index
     currentAreaIndex += direction;
 
-    // 3. Router
     if (currentAreaIndex < 0) {
-        // Back from first slide -> Go to Intro
         currentAreaIndex = 0; 
         showScreen('intro');
         get('progress-container').classList.add('hidden');
     } 
     else if (currentAreaIndex < AREAS.length) {
-        // Normal Navigation
         loadArea(currentAreaIndex);
     } 
     else {
-        // Finished all areas -> Go to Resolution
         showScreen('resolution');
         get('progress-container').classList.add('hidden');
     }
 }
 
 function backToAssessment() {
-    // Go back to the very last area
     currentAreaIndex = AREAS.length - 1;
     showScreen('assessment');
     get('progress-container').classList.remove('hidden');
