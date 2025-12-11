@@ -1,7 +1,7 @@
 # 🛠️ Project Status Dashboard
 
 **Last Updated:** Dec 11, 2025
-**Current Focus:** Polishing UI and adding functionality to "Areas of Life" and "Simpson Protocol".
+**Current Focus:** Expanding toolset with Goal Setting and Reflection tools.
 
 ---
 
@@ -13,76 +13,80 @@
 | **The Placemat** | 🟢 Stable | Task Manager | Local Storage |
 | **Segment Intending** | 🟡 Needs Review | Intention Setting | Local Storage |
 | **Focus Wheel** | 🟢 Stable | Visual Shifting | Local Storage |
-| **Simpson Protocol** | 🟡 Beta | Interactive Hypnosis | Local Storage |
+| **Simpson Protocol** | 🟢 Stable | Interactive Hypnosis | Local Storage |
 | **Areas of Life** | 🟢 Stable | Assessment Form | Local Storage |
+| **SMART Goals** | 🟢 Stable | Goal Wizard | Local Storage |
 
 ---
 
 ## 📝 Detailed Status & Wishlist
 
 ### 1. The Mental Bank
-**Current State:** Fully functional. Calculates "Fantasy Value" and saves to Supabase database.
+**Current State:** Fully functional. Calculates "Fantasy Value" and saves to Supabase.
 * [x] Basic Input Fields
-* [x] Math Logic
-* [x] Supabase Connection
-* [x] Row Level Security (RLS)
+* [x] Math Logic & RLS Security
 
-**Wishlist / Future Features:**
-* [ ] Add a graph to show "Value Value" growth over time.
-* [ ] Add a calendar view of past entries.
+**Wishlist:**
+* [ ] Add a graph to show "Value Value" growth.
+* [ ] Calendar view of past entries.
 
 ### 2. The Placemat
 **Current State:** Functional. Tasks persist in browser memory.
 * [x] "Me" vs. "Universe" columns
-* [x] Clear items button
 
-**Wishlist / Future Features:**
-* [ ] Add animation when the Universe "takes" a task.
+**Wishlist:**
+* [ ] Animation when Universe "takes" a task.
 
 ### 3. Segment Intending
-**Current State:** Basic card exists. Need to verify full functionality.
+**Current State:** Basic card exists.
 * [x] Basic Input
 
-**Wishlist / Future Features:**
+**Wishlist:**
 * [ ] Add a timer for segments.
 
 ### 4. Focus Wheel
-**Current State:** Visuals fixed. Text now rotates and aligns correctly at 3 o'clock.
-* [x] Central Desire input
+**Current State:** Visuals fixed. Text aligns at 3 o'clock and rotates correctly.
 * [x] 12-spoke wheel logic
-* [x] "Spinning" animation on completion
-* [x] CSS Text Alignment fix
+* [x] "Spinning" animation
+* [x] Text alignment fixes
 
-**Wishlist / Future Features:**
+**Wishlist:**
 * [ ] Save completed wheels to a gallery.
 
 ### 5. Simpson Protocol
-**Current State:** Advanced Logic. Supports "Solo" (Audio/Keyboard) and "Partner" (Script reading) modes.
-* [x] Audio/Script Engine
-* [x] Keyboard Calibration (Yes/No)
-* [x] Partner Mode (Teleprompter)
-* [x] SUDs (0-10) via Voice (Solo) or Manual Input (Partner)
+**Current State:** Advanced logic with multiple modes.
+* [x] **Solo Mode:** Audio prompts + Keyboard (Yes/No) + Voice (SUDs).
+* [x] **Partner Mode:** Teleprompter for friend + Manual buttons.
+* [x] **Calibration:** Key setup and Mic test.
+* [x] **SUDs:** Tap-to-count or Voice input.
 
-**Known Issues / To-Do:**
-* [ ] **Review:** Ensure "Safe Mode" script is working correctly on all devices.
-* [ ] **Content:** Replace Robot voice with real recorded MP3s.
-
-**Wishlist / Future Features:**
-* [ ] Add Branching Logic (if SUDs score goes up, do X; if down, do Y).
+**Wishlist:**
+* [ ] **Audio:** Replace Robot voice with real recorded MP3s.
+* [ ] **Logic:** Add branching paths based on specific answers.
 
 ### 6. Areas of Life
-**Current State:** Multi-step form with 13 sections.
-* [x] Slider Inputs (0-10)
-* [x] Navigation (Next/Back/Skip)
-* [x] Resolution Screen
-* [x] Local Storage Saving
+**Current State:** Multi-step assessment form.
+* [x] 13 Life Areas with Sliders (0-10).
+* [x] Navigation (Next/Back/Skip).
+* [x] Resolution/Reflection screen.
 
-**Wishlist / Future Features:**
-* [ ] **Admin View:** Connect to Supabase so Admin can read client answers.
-* [ ] **Visuals:** Create a "Wheel of Life" chart at the end showing the balance visually.
+**Wishlist:**
+* [ ] **Visuals:** Add a "Wheel of Life" radar chart at the end.
+* [ ] **Admin:** Connect to Supabase to let Admin view client answers.
+
+### 7. SMART Goals (Goal Architect)
+**Current State:** Step-by-step Wizard.
+* [x] Draft -> Refinement (S.M.A.R.T.) flow.
+* [x] Obstacle planning.
+* [x] "First Step" scheduling.
+* [x] Calendar Integration (Google Link / Apple ICS download).
+
+**Wishlist:**
+* [ ] **Accountability:** Email the goal to a friend.
+* [ ] **Long-term:** Better breakdown of Long-term vision into milestones.
 
 ---
 
-## 🐛 General Bugs / Tech Debt
-* **Supabase RLS:** `goals` table needs RLS enabled (Fixed: Dec 11).
-* **Mobile Responsiveness:** Need to test "Focus Wheel" on smaller iPhone screens.
+## 🐛 Tech Debt / Maintenance
+* **Supabase:** RLS enabled on `goals` table (Security fix applied).
+* **Mobile:** Need to test "Focus Wheel" and "Simpson Protocol" buttons on iPhone screens.
