@@ -97,6 +97,15 @@
                     <button class="text-btn info-btn" onclick="openModal('modal-areas')">ⓘ Learn More</button>
                 </div>
             </div>
+            <div class="tool-card">
+                <span class="badge" style="background:#f0fdf4; color:#15803d;">Planning</span>
+                <h2>Goal Architect</h2>
+                <p>Turn your vague wishes into concrete, actionable SMART goals with a step-by-step wizard.</p>
+                <div class="card-actions">
+                    <a href="smart-goals/index.html" class="primary-btn small-btn" style="background-color:#16a34a;">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-goals')">ⓘ Learn More</button>
+                </div>
+            </div>
 
         </div>
     </div>
@@ -196,6 +205,21 @@
                 <p>Rate each area on Satisfaction, Importance, and Effort. Then, reflect on one specific change you want to make.</p>
             </div>
             <button class="primary-btn full-width" style="background-color:#0288d1;" onclick="window.location.href='areas-of-life/index.html'">Start Reflection</button>
+        </div>
+    </div>
+    <div id="modal-goals" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-goals')">&times;</button>
+            <h2>The Goal Architect</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A wizard that helps you build SMART goals (Specific, Measurable, Achievable, Relevant, Time-bound).</p>
+                <h3>Why use it?</h3>
+                <p>Vague goals ("I want to save money") rarely work. Specific plans ("I will save $500 by July") do.</p>
+                <h3>How to do it?</h3>
+                <p>Enter a rough draft, then answer the questions to refine it. Identify obstacles and create a backup plan.</p>
+            </div>
+            <button class="primary-btn full-width" style="background-color:#16a34a;" onclick="window.location.href='smart-goals/index.html'">Start Planning</button>
         </div>
     </div>
 
