@@ -88,6 +88,15 @@
                     <button class="text-btn info-btn" onclick="openModal('modal-sp')">ⓘ Learn More</button>
                 </div>
             </div>
+            <div class="tool-card">
+                <span class="badge" style="background:#e3f2fd; color:#0288d1;">Reflection</span>
+                <h2>Areas of Life</h2>
+                <p>Assess your satisfaction, importance, and effort across 13 key areas of life.</p>
+                <div class="card-actions">
+                    <a href="areas-of-life/index.html" class="primary-btn small-btn" style="background-color:#0288d1;">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-areas')">ⓘ Learn More</button>
+                </div>
+            </div>
 
         </div>
     </div>
@@ -171,6 +180,21 @@
             </div>
             <button class="primary-btn full-width" style="background-color:#00695c;" onclick="window.location.href='simpson-protocol/index.html'">Start Session</button>
         </div>
+        <div id="modal-areas" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-areas')">&times;</button>
+            <h2>Areas of Life Reflection</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A structured assessment to evaluate 13 different domains of your life (Career, Health, Relationships, etc.).</p>
+                <h3>Why use it?</h3>
+                <p>To identify where you are dissatisfied and where your values might be misaligned with your effort.</p>
+                <h3>How to do it?</h3>
+                <p>Rate each area on Satisfaction, Importance, and Effort. Then, reflect on one specific change you want to make.</p>
+            </div>
+            <button class="primary-btn full-width" style="background-color:#0288d1;" onclick="window.location.href='areas-of-life/index.html'">Start Reflection</button>
+        </div>
+    </div>
     </div>
 
     <script>
