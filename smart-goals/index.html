@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMART Goal Architect</title>
+    <title>SMART Goal Exercise</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,178 +12,161 @@
     <div class="container">
         <header>
             <a href="../index.html" class="home-link">🏠 Exit</a>
-            <div class="progress-bar-container">
+            <div class="progress-bar-container hidden" id="progress-container">
                 <div class="progress-bar" id="progress-bar"></div>
             </div>
         </header>
 
-        <div id="step-intro" class="screen">
-            <h1>The Goal Architect</h1>
-            <p class="subtitle">Vision &#8594; Milestones &#8594; SMART Goal</p>
+        <div id="view-education" class="screen">
+            <h1>Goal Setting 101</h1>
+            <p class="subtitle">Why SMART goals work.</p>
+            
             <div class="card info-box">
-                <p>Real achievement happens in layers.</p>
-                <ol class="smart-list" style="text-align:left; margin-top:10px;">
-                    <li><strong>Define the Vision:</strong> The big picture (Destination).</li>
-                    <li><strong>Map the Milestones:</strong> The stepping stones to get there.</li>
-                    <li><strong>Make it SMART:</strong> Refine one step into a concrete plan.</li>
-                </ol>
+                <div style="background:#e2e8f0; height:200px; display:flex; align-items:center; justify-content:center; border-radius:8px; margin-bottom:20px; color:#64748b;">
+                    [ Placeholder: Infographic or Video ]
+                </div>
+                <h3>What are SMART Goals?</h3>
+                <p>SMART goals help us turn vague wishes into concrete plans. By making a goal Specific, Measurable, Achievable, Relevant, and Time-bound, we drastically increase our chances of success.</p>
             </div>
-            <button class="primary-btn" onclick="nextStep('step-vision')">Start</button>
+            <button class="primary-btn" onclick="startExercise()">Start Exercise</button>
         </div>
 
-        <div id="step-vision" class="screen hidden">
-            <span class="badge" style="background:#e0f2fe; color:#0284c7;">The Destination</span>
-            <h2>What is the Vision?</h2>
-            <p>Don't worry about "how" yet. What does the ultimate success look like?</p>
-            <textarea id="vision-input" placeholder="e.g., I want to run a Marathon... or I want to be debt-free..."></textarea>
-            <button class="primary-btn" onclick="nextStep('step-milestones')">Map the Path &rarr;</button>
-        </div>
-
-        <div id="step-milestones" class="screen hidden">
-            <h2>The Stepping Stones</h2>
-            <p>To get to "<strong><span class="vision-ref">...</span></strong>", what are the major steps along the way? List 2 or 3 smaller goals.</p>
+        <div id="view-initial" class="screen hidden">
+            <h2>The Starting Point</h2>
+            <label class="label-accent">My Goal:</label>
+            <textarea id="inp-initial" placeholder="e.g. Improve my health"></textarea>
             
-            <div id="milestone-list">
-                <div class="input-group">
-                    <input type="text" class="milestone-input" placeholder="Milestone 1 (e.g., Run 5k)">
-                </div>
-                <div class="input-group">
-                    <input type="text" class="milestone-input" placeholder="Milestone 2 (e.g., Run 10k)">
-                </div>
-                <div class="input-group">
-                    <input type="text" class="milestone-input" placeholder="Milestone 3 (e.g., Run Half Marathon)">
+            <label class="label-accent">How confident are you that you can achieve this?</label>
+            <div class="range-wrapper">
+                <input type="range" id="inp-conf-1" min="0" max="10" value="5">
+                <div class="range-labels">
+                    <span>Not at all (0)</span>
+                    <span id="val-conf-1" style="font-weight:bold; color:var(--accent);">5</span>
+                    <span>Extremely (10)</span>
                 </div>
             </div>
             
-            <button class="secondary-btn" onclick="addMilestoneInput()">+ Add Another Step</button>
-            <div class="nav-row" style="margin-top:20px;">
-                <button class="secondary-btn" onclick="prevStep('step-vision')">Back</button>
-                <button class="primary-btn" onclick="processMilestones()">Next</button>
+            <button class="primary-btn" onclick="nextStep('view-smart-breakdown')">Next</button>
+        </div>
+
+        <div id="view-smart-breakdown" class="screen hidden">
+            <h2>Refine Your Goal</h2>
+            <p>Let's break "<strong><span class="ref-goal">...</span></strong>" down.</p>
+            
+            <div class="input-group">
+                <label><strong>S</strong>pecific: What exactly do you want to achieve?</label>
+                <textarea id="inp-s" class="small-area" placeholder="Be specific..."></textarea>
+            </div>
+            <div class="input-group">
+                <label><strong>M</strong>easurable: How will you track progress?</label>
+                <textarea id="inp-m" class="small-area" placeholder="How will you know when you've achieved it?"></textarea>
+            </div>
+            <div class="input-group">
+                <label><strong>A</strong>chievable: What steps will you take?</label>
+                <textarea id="inp-a" class="small-area" placeholder="Is this realistic?"></textarea>
+            </div>
+            <div class="input-group">
+                <label><strong>R</strong>elevant: Why is this important to you?</label>
+                <textarea id="inp-r" class="small-area" placeholder="How does it align with your values?"></textarea>
+            </div>
+            <div class="input-group">
+                <label><strong>T</strong>ime-bound: What is your target date?</label>
+                <textarea id="inp-t" class="small-area" placeholder="When will you reach this?"></textarea>
+            </div>
+
+            <div class="nav-row">
+                <button class="secondary-btn" onclick="prevStep('view-initial')">Back</button>
+                <button class="primary-btn" onclick="nextStep('view-rewrite')">Next</button>
             </div>
         </div>
 
-        <div id="step-select" class="screen hidden">
-            <h2>Pick Your Target</h2>
-            <p>You can't do them all at once. Which milestone will you focus on <strong>right now</strong>?</p>
+        <div id="view-rewrite" class="screen hidden">
+            <h2>Put it Together</h2>
+            <p>Now, rewrite your goal into one complete SMART statement.</p>
+            <div class="card highlight-card">
+                <p><strong>Specific:</strong> <span id="ref-s"></span></p>
+                <p><strong>Measurable:</strong> <span id="ref-m"></span></p>
+                <p><strong>Time:</strong> <span id="ref-t"></span></p>
+            </div>
             
-            <div id="selection-container" class="radio-group-vertical">
+            <label class="label-accent">My SMART Goal is:</label>
+            <textarea id="inp-smart-final" placeholder="To be healthier, I will..."></textarea>
+
+            <div class="nav-row">
+                <button class="secondary-btn" onclick="prevStep('view-smart-breakdown')">Back</button>
+                <button class="primary-btn" onclick="nextStep('view-breakdown')">Next</button>
+            </div>
+        </div>
+
+        <div id="view-breakdown" class="screen hidden">
+            <h2>Breaking it Down</h2>
+            
+            <label class="label-accent">What can you do THIS WEEK to move toward your goal?</label>
+            <textarea id="inp-this-week" placeholder="Be specific (e.g. Go for a 30 min walk tomorrow)"></textarea>
+            
+            <label class="label-accent">What are 1-3 intermediate goals?</label>
+            <textarea id="inp-intermediate" placeholder="e.g. Exercise once a week for 2 weeks..."></textarea>
+
+            <div class="nav-row">
+                <button class="secondary-btn" onclick="prevStep('view-rewrite')">Back</button>
+                <button class="primary-btn" onclick="nextStep('view-obstacles')">Next</button>
+            </div>
+        </div>
+
+        <div id="view-obstacles" class="screen hidden">
+            <h2>Plan for Obstacles</h2>
+            
+            <label class="label-accent">What challenges can you foresee?</label>
+            <textarea id="inp-obstacles" placeholder="e.g. Feeling tired after work..."></textarea>
+            
+            <label class="label-accent">How will you respond to them?</label>
+            <textarea id="inp-responses" placeholder="e.g. I will work out in the morning instead..."></textarea>
+
+            <div class="nav-row">
+                <button class="secondary-btn" onclick="prevStep('view-breakdown')">Back</button>
+                <button class="primary-btn" onclick="nextStep('view-resources')">Next</button>
+            </div>
+        </div>
+
+        <div id="view-resources" class="screen hidden">
+            <h2>Final Check</h2>
+            
+            <label class="label-accent">What resources or strengths do you have?</label>
+            <textarea id="inp-resources" placeholder="e.g. I have supportive friends..."></textarea>
+            
+            <hr>
+            
+            <label class="label-accent">After this exercise, how confident are you now?</label>
+            <div class="range-wrapper">
+                <input type="range" id="inp-conf-2" min="0" max="10" value="5">
+                <div class="range-labels">
+                    <span>Not at all (0)</span>
+                    <span id="val-conf-2" style="font-weight:bold; color:var(--accent);">5</span>
+                    <span>Extremely (10)</span>
                 </div>
+            </div>
 
             <div class="nav-row">
-                <button class="secondary-btn" onclick="prevStep('step-milestones')">Back</button>
-                <button class="primary-btn" onclick="confirmSelection()">Make it SMART &rarr;</button>
+                <button class="secondary-btn" onclick="prevStep('view-obstacles')">Back</button>
+                <button class="primary-btn" onclick="generateReview()">Review My Plan</button>
             </div>
         </div>
 
-        <div id="step-s" class="screen hidden">
-            <span class="badge">S - Specific</span>
-            <h2>Let's make it Specific.</h2>
-            <p class="draft-reference"><em>Target Milestone: "<span class="target-display">...</span>"</em></p>
-            <textarea id="input-s" placeholder="Be precise. Instead of 'Run 5k', try 'Complete the Downtown 5k Race'."></textarea>
-            <div class="nav-row">
-                <button class="secondary-btn" onclick="prevStep('step-select')">Back</button>
-                <button class="primary-btn" onclick="nextStep('step-m')">Next: Measurable</button>
-            </div>
-        </div>
-
-        <div id="step-m" class="screen hidden">
-            <span class="badge">M - Measurable</span>
-            <h2>How will you measure success?</h2>
-            <textarea id="input-m" placeholder="What numbers or evidence will prove you did it?"></textarea>
-            <div class="nav-row">
-                <button class="secondary-btn" onclick="prevStep('step-s')">Back</button>
-                <button class="primary-btn" onclick="nextStep('step-a')">Next: Achievable</button>
-            </div>
-        </div>
-
-        <div id="step-a" class="screen hidden">
-            <span class="badge">A - Achievable</span>
-            <h2>Is this realistic right now?</h2>
-            <textarea id="input-a" placeholder="Do you have the time/resources? Yes, because..."></textarea>
-            <div class="nav-row">
-                <button class="secondary-btn" onclick="prevStep('step-m')">Back</button>
-                <button class="primary-btn" onclick="nextStep('step-r')">Next: Relevant</button>
-            </div>
-        </div>
-
-        <div id="step-r" class="screen hidden">
-            <span class="badge">R - Relevant</span>
-            <h2>Why does this matter?</h2>
-            <p>How does this milestone help achieve the main Vision?</p>
-            <textarea id="input-r" placeholder="This helps me reach my Vision because..."></textarea>
-            <div class="nav-row">
-                <button class="secondary-btn" onclick="prevStep('step-a')">Back</button>
-                <button class="primary-btn" onclick="nextStep('step-t')">Next: Time-bound</button>
-            </div>
-        </div>
-
-        <div id="step-t" class="screen hidden">
-            <span class="badge">T - Time-bound</span>
-            <h2>When is the DEADLINE?</h2>
-            <p>This is the date you want to have this milestone <strong>completed</strong>.</p>
-            <input type="date" id="input-t-date" style="margin-bottom: 15px;">
-            <div class="nav-row">
-                <button class="secondary-btn" onclick="prevStep('step-r')">Back</button>
-                <button class="primary-btn" onclick="nextStep('step-obstacles')">Next: Obstacles</button>
-            </div>
-        </div>
-
-        <div id="step-obstacles" class="screen hidden">
-            <h2>The Reality Check</h2>
-            <label class="label-accent">What might stop you?</label>
-            <textarea id="input-obstacle" placeholder="e.g., Bad weather, busy schedule..."></textarea>
-            <label class="label-accent">What is your strategy?</label>
-            <textarea id="input-strategy" placeholder="e.g., I will run on the treadmill instead..."></textarea>
-            <div class="nav-row">
-                <button class="secondary-btn" onclick="prevStep('step-t')">Back</button>
-                <button class="primary-btn" onclick="nextStep('step-action')">Next: First Step</button>
-            </div>
-        </div>
-
-        <div id="step-action" class="screen hidden">
-            <span class="badge" style="background:#f59e0b;">Kickoff</span>
-            <h2>Schedule the First Action</h2>
-            <p>You have a deadline. Now, when do you <strong>start</strong>?</p>
-            
-            <label class="label-accent">What is the very first thing you will do?</label>
-            <input type="text" id="action-name" placeholder="e.g., Buy running shoes" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #e2e8f0; border-radius:8px;">
-            
-            <label class="label-accent">When will you do it?</label>
-            <div style="display:flex; gap:10px;">
-                <input type="date" id="action-date" style="flex:1;">
-                <input type="time" id="action-time" style="flex:1; padding:12px; border:1px solid #e2e8f0; border-radius:8px;">
-            </div>
-
-            <div class="nav-row" style="margin-top:30px;">
-                <button class="secondary-btn" onclick="prevStep('step-obstacles')">Back</button>
-                <button class="primary-btn" onclick="generateGoal()">Finalize Blueprint</button>
-            </div>
-        </div>
-
-        <div id="step-summary" class="screen hidden">
+        <div id="view-review" class="screen hidden">
             <h2>Your Goal Blueprint</h2>
             
-            <div class="card highlight-card" style="background:#f0f9ff; border-color:#0284c7; text-align:left;">
-                <p style="font-size:0.8rem; color:#0369a1; text-transform:uppercase; font-weight:bold;">The Destination (Vision)</p>
-                <p id="final-vision" style="font-size:1.1rem; margin-top:5px;">...</p>
-            </div>
-
             <div class="card summary-card">
-                <h3>Current Target: <span id="final-target-name">...</span></h3>
-                <p id="final-statement" class="final-text">...</p>
-                <hr style="border:0; border-top:1px solid #e2e8f0; margin:15px 0;">
-                <p><strong>Deadline:</strong> <span id="final-deadline">...</span></p>
-                <p><strong>If:</strong> <span id="final-obstacle">...</span></p>
-                <p><strong>Then:</strong> <span id="final-strategy">...</span></p>
+                <h3>My SMART Goal</h3>
+                <p id="out-smart-final" class="final-text">...</p>
+                <hr>
+                <p><strong>This Week:</strong> <span id="out-this-week">...</span></p>
+                <p><strong>Obstacles:</strong> <span id="out-obstacles">...</span></p>
+                <p><strong>Strategy:</strong> <span id="out-responses">...</span></p>
             </div>
 
             <div class="card highlight-card">
-                <h3>📅 Your Kickoff Event</h3>
-                <p>Action: <strong><span id="final-action-name">...</span></strong></p>
-                <div class="button-row" style="margin-top:15px; display:flex; flex-direction:column; gap:10px;">
-                    <button id="btn-google-cal" class="secondary-btn" style="background:#fff; border-color:#4285F4; color:#4285F4;">Add to Google Calendar</button>
-                    <button id="btn-apple-cal" class="secondary-btn">Download for Apple/Outlook</button>
-                </div>
+                <p><strong>Initial Confidence:</strong> <span id="out-conf-1"></span>/10</p>
+                <p><strong>Final Confidence:</strong> <span id="out-conf-2"></span>/10</p>
             </div>
 
             <button class="secondary-btn" onclick="location.href='../index.html'">Save & Exit</button>
