@@ -36,37 +36,51 @@
         <div id="step-draft" class="screen hidden">
             <h2>The Brain Dump</h2>
             <p>Don't worry about being perfect yet. What is the rough idea?</p>
-            <textarea id="draft-input" placeholder="e.g., I want to get in shape..."></textarea>
-            <div class="input-group">
-                <label>Is this a Long-Term Vision or a Short-Term Target?</label>
-                <div class="radio-group">
-                    <label class="radio-card">
-                        <input type="radio" name="term" value="short" checked>
-                        <div class="radio-content">
-                            <strong>Short-Term</strong>
-                            <span>(Weeks to Months)</span>
-                        </div>
-                    </label>
-                    <label class="radio-card">
-                        <input type="radio" name="term" value="long">
-                        <div class="radio-content">
-                            <strong>Long-Term</strong>
-                            <span>(1 Year +)</span>
-                        </div>
-                    </label>
+            <textarea id="draft-input" placeholder="e.g., I want to run a 5k... or Save $10,000..."></textarea>
+            <button class="primary-btn" onclick="nextStep('step-reality')">Next &rarr;</button>
+        </div>
+
+        <div id="step-reality" class="screen hidden">
+            <h2>The Reality Check</h2>
+            <p>On a scale of 0-10, how confident are you that you could achieve this goal <strong>fully within the next 7 days</strong>?</p>
+            
+            <div class="card" style="text-align:center;">
+                <h1 id="confidence-display" style="color:var(--accent); font-size:3rem; margin:10px 0;">5</h1>
+                <input type="range" id="confidence-slider" min="0" max="10" value="5" style="width:100%;">
+                <div style="display:flex; justify-content:space-between; margin-top:10px; color:#64748b; font-size:0.8rem;">
+                    <span>Impossible right now</span>
+                    <span>Easy / Done</span>
                 </div>
             </div>
-            <button class="primary-btn" onclick="nextStep('step-s')">Refine Goal &rarr;</button>
+
+            <div class="nav-row">
+                <button class="secondary-btn" onclick="prevStep('step-draft')">Back</button>
+                <button class="primary-btn" onclick="processRealityCheck()">Next</button>
+            </div>
+        </div>
+
+        <div id="step-breakdown" class="screen hidden">
+            <span class="badge" style="background:#e0f2fe; color:#0284c7;">Destination Identified</span>
+            <h2>That is a great Vision!</h2>
+            <div class="card highlight-card">
+                <p><strong>Vision:</strong> <span id="vision-display">...</span></p>
+                <p>Since this is a big climb, we need a <strong>Stepping Stone</strong>.</p>
+            </div>
+            
+            <label class="label-accent">What is one small step you can take THIS WEEK to get closer?</label>
+            <textarea id="breakdown-input" placeholder="e.g., Run 1 mile... or Save $100..."></textarea>
+            
+            <button class="primary-btn" onclick="confirmBreakdown()">Refine THIS Step &rarr;</button>
         </div>
 
         <div id="step-s" class="screen hidden">
             <span class="badge">S - Specific</span>
             <h2>Let's make it Specific.</h2>
-            <p>Who, what, where, and why? Vague goals produce vague results.</p>
-            <p class="draft-reference"><em>Your draft: "<span class="draft-display">...</span>"</em></p>
+            <p>Who, what, where, and why?</p>
+            <p class="draft-reference"><em>Working on: "<span class="draft-display">...</span>"</em></p>
             <textarea id="input-s" placeholder="Instead of 'Get fit', try 'Go to the gym 3 days a week'."></textarea>
             <div class="nav-row">
-                <button class="secondary-btn" onclick="prevStep('step-draft')">Back</button>
+                <button class="secondary-btn" onclick="prevStep('step-reality')">Back</button>
                 <button class="primary-btn" onclick="nextStep('step-m')">Next: Measurable</button>
             </div>
         </div>
@@ -86,7 +100,7 @@
             <span class="badge">A - Achievable</span>
             <h2>Is this realistic?</h2>
             <p>Do you have the time, money, and skills *right now*?</p>
-            <textarea id="input-a" placeholder="Yes, because I have a gym membership..."></textarea>
+            <textarea id="input-a" placeholder="Yes, because..."></textarea>
             <div class="nav-row">
                 <button class="secondary-btn" onclick="prevStep('step-m')">Back</button>
                 <button class="primary-btn" onclick="nextStep('step-r')">Next: Relevant</button>
@@ -107,9 +121,9 @@
         <div id="step-t" class="screen hidden">
             <span class="badge">T - Time-bound</span>
             <h2>When is the deadline?</h2>
-            <p>A goal without a deadline is just a dream.</p>
+            <p>Set a deadline for this specific stepping stone.</p>
             <input type="date" id="input-t-date" style="margin-bottom: 15px;">
-            <textarea id="input-t-desc" placeholder="Describe the timeline (e.g., By Dec 31st)"></textarea>
+            <textarea id="input-t-desc" placeholder="Describe the timeline"></textarea>
             <div class="nav-row">
                 <button class="secondary-btn" onclick="prevStep('step-r')">Back</button>
                 <button class="primary-btn" onclick="nextStep('step-obstacles')">Next: Obstacles</button>
@@ -151,6 +165,13 @@
 
         <div id="step-summary" class="screen hidden">
             <h2>Your Goal Blueprint</h2>
+            
+            <div id="vision-card" class="card highlight-card hidden" style="background:#f0f9ff; border-color:#0284c7;">
+                <h3>🔭 The Vision</h3>
+                <p id="final-vision" style="font-size:1.1rem; font-weight:bold;">...</p>
+                <p style="font-size:0.9rem; color:#0369a1;">This is your destination.</p>
+            </div>
+
             <div class="card summary-card">
                 <h3><span id="final-type">SMART Goal</span></h3>
                 <p id="final-statement" class="final-text">...</p>
@@ -167,12 +188,6 @@
                     <button id="btn-google-cal" class="secondary-btn" style="background:#fff; border-color:#4285F4; color:#4285F4;">Add to Google Calendar</button>
                     <button id="btn-apple-cal" class="secondary-btn">Download for Apple/Outlook</button>
                 </div>
-            </div>
-
-            <div id="long-term-prompt" class="card highlight-card hidden">
-                <h3>⛰️ Big Climb Ahead?</h3>
-                <p>This is a Long-Term Vision. Consider breaking it down further.</p>
-                <button class="primary-btn small-btn" onclick="location.reload()">Set a Short-Term Milestone</button>
             </div>
 
             <button class="secondary-btn" onclick="location.href='../index.html'">Save & Exit</button>
