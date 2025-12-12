@@ -108,3 +108,18 @@ input[type="date"] {
 
 .final-text { font-size: 1.2rem; font-weight: 500; color: #1e293b; line-height: 1.6; }
 .hidden { display: none !important; }
+.radio-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.radio-group-vertical .radio-card {
+    justify-content: flex-start;
+}
+.milestone-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
