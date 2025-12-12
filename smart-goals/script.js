@@ -1,12 +1,15 @@
 // --- STATE ---
-// FIX: Added 'step-action' to this list so the code knows it exists
 const steps = [
-    'step-intro', 'step-draft', 
+    'step-intro', 'step-draft', 'step-reality', 'step-breakdown',
     'step-s', 'step-m', 'step-a', 'step-r', 'step-t', 
     'step-obstacles', 'step-action', 'step-summary'
 ];
 let currentStepIndex = 0;
-let goalData = {};
+let goalData = {
+    draft: "",
+    vision: null, // Stores the big goal if we break it down
+    confidence: 5
+};
 
 // --- DOM ---
 const get = (id) => document.getElementById(id);
@@ -14,33 +17,37 @@ const get = (id) => document.getElementById(id);
 // --- INIT ---
 document.addEventListener('DOMContentLoaded', () => {
     updateProgress();
+    
+    // Live update for confidence slider
+    const slider = get('confidence-slider');
+    const display = get('confidence-display');
+    if (slider) {
+        slider.addEventListener('input', (e) => {
+            goalData.confidence = parseInt(e.target.value);
+            display.textContent = goalData.confidence;
+            
+            // Color change for feedback
+            if (goalData.confidence < 5) display.style.color = "#ef4444"; // Red
+            else if (goalData.confidence < 8) display.style.color = "#f59e0b"; // Orange
+            else display.style.color = "#10b981"; // Green
+        });
+    }
 });
 
 // --- NAVIGATION ---
 function nextStep(targetId) {
-    // 1. Save data before moving
     saveCurrentStepData();
-
-    // 2. Hide current step
-    // Safety check: ensure current step exists
     const currentId = steps[currentStepIndex];
-    if (currentId && get(currentId)) {
-        get(currentId).classList.add('hidden');
-    }
+    if (currentId && get(currentId)) get(currentId).classList.add('hidden');
 
-    // 3. Find new index
     const newIndex = steps.indexOf(targetId);
-    if (newIndex === -1) {
-        console.error(`Step '${targetId}' not found in configuration list.`);
-        return;
-    }
+    if (newIndex === -1) { console.error("Step not found:", targetId); return; }
+    
     currentStepIndex = newIndex;
-
-    // 4. Show new step
     get(targetId).classList.remove('hidden');
     updateProgress();
 
-    // 5. Update Draft Reference if needed
+    // Special: Update references
     if (targetId.startsWith('step-s') || targetId.startsWith('step-m')) {
         updateDraftReference();
     }
@@ -48,10 +55,7 @@ function nextStep(targetId) {
 
 function prevStep(targetId) {
     const currentId = steps[currentStepIndex];
-    if (currentId && get(currentId)) {
-        get(currentId).classList.add('hidden');
-    }
-    
+    if (currentId) get(currentId).classList.add('hidden');
     currentStepIndex = steps.indexOf(targetId);
     get(targetId).classList.remove('hidden');
     updateProgress();
@@ -60,14 +64,40 @@ function prevStep(targetId) {
 function updateProgress() {
     const percent = ((currentStepIndex) / (steps.length - 1)) * 100;
     const bar = get('progress-bar');
-    if (bar) bar.style.width = `${percent}%`;
+    if(bar) bar.style.width = `${percent}%`;
     window.scrollTo(0,0);
 }
 
 // --- LOGIC ---
+
 function saveCurrentStepData() {
-    const input = get('draft-input');
-    if (input && input.value) goalData.draft = input.value;
+    const draft = get('draft-input').value;
+    if (draft) goalData.draft = draft;
+}
+
+function processRealityCheck() {
+    // Decision Logic: Is this a Destination or an Action?
+    // Threshold: 8/10 confidence
+    if (goalData.confidence < 8) {
+        // Too hard -> Breakdown required
+        goalData.vision = goalData.draft; // Save original as Vision
+        get('vision-display').textContent = goalData.vision;
+        
+        nextStep('step-breakdown');
+    } else {
+        // Actionable -> Go straight to SMART
+        goalData.vision = null; // No vision needed, this IS the vision
+        nextStep('step-s');
+    }
+}
+
+function confirmBreakdown() {
+    const smallStep = get('breakdown-input').value;
+    if (!smallStep) return alert("Please enter a small step.");
+    
+    // Replace the 'draft' with this new small step for the refinement process
+    goalData.draft = smallStep;
+    nextStep('step-s');
 }
 
 function updateDraftReference() {
@@ -87,23 +117,27 @@ function generateGoal() {
     goalData.obstacle = get('input-obstacle').value;
     goalData.strategy = get('input-strategy').value;
     
-    // Capture Action Data (The new step)
     goalData.actionName = get('action-name').value || "Work on Goal";
     goalData.actionDate = get('action-date').value;
     goalData.actionTime = get('action-time').value;
-
-    // Capture Radio Button
-    const termInput = document.querySelector('input[name="term"]:checked');
-    if (termInput) goalData.term = termInput.value;
 
     buildSummary();
     nextStep('step-summary');
 }
 
 function buildSummary() {
-    // 1. Text Summary
-    get('final-type').textContent = goalData.term === 'long' ? "Long-Term Vision" : "Short-Term Target";
-    
+    // 1. Show Vision if exists
+    const visionCard = get('vision-card');
+    if (goalData.vision) {
+        visionCard.classList.remove('hidden');
+        get('final-vision').textContent = goalData.vision;
+        get('final-type').textContent = "Stepping Stone Goal";
+    } else {
+        visionCard.classList.add('hidden');
+        get('final-type').textContent = "SMART Goal";
+    }
+
+    // 2. Summary Text
     const statement = `I will ${goalData.s}. I will measure this by ${goalData.m}. This is relevant because ${goalData.r}.`;
     get('final-statement').textContent = statement;
     
@@ -112,14 +146,9 @@ function buildSummary() {
     get('final-strategy').textContent = goalData.strategy;
     get('final-action-name').textContent = goalData.actionName;
 
-    // 2. Long Term Prompt
-    if (goalData.term === 'long') get('long-term-prompt').classList.remove('hidden');
-    else get('long-term-prompt').classList.add('hidden');
-    
-    // 3. Setup Calendar Buttons
+    // 3. Calendar Buttons
     setupCalendarButtons();
 
-    // 4. Save
     localStorage.setItem('last_smart_goal', JSON.stringify(goalData));
 }
 
@@ -127,22 +156,18 @@ function buildSummary() {
 function setupCalendarButtons() {
     if (!goalData.actionDate || !goalData.actionTime) return;
 
-    // Create Start/End Date objects
     const startDateTime = new Date(`${goalData.actionDate}T${goalData.actionTime}`);
-    const endDateTime = new Date(startDateTime.getTime() + (60 * 60 * 1000)); // Default 1 hour duration
+    const endDateTime = new Date(startDateTime.getTime() + (60 * 60 * 1000)); 
 
-    // Format for Google (YYYYMMDDTHHMMSS)
     const formatGoogle = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
 
-    const gTitle = encodeURIComponent(`Goal Action: ${goalData.actionName}`);
-    const gDetails = encodeURIComponent(`Strategy: ${goalData.strategy}\nGoal: ${goalData.s}`);
+    const gTitle = encodeURIComponent(`Action: ${goalData.actionName}`);
+    const gDetails = encodeURIComponent(`Goal: ${goalData.s}\nStrategy: ${goalData.strategy}`);
     const gDates = `${formatGoogle(startDateTime)}/${formatGoogle(endDateTime)}`;
     
-    // Google Link
     const googleUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${gTitle}&dates=${gDates}&details=${gDetails}`;
     get('btn-google-cal').onclick = () => window.open(googleUrl, '_blank');
 
-    // Apple/Outlook (.ics file)
     get('btn-apple-cal').onclick = () => downloadICS(startDateTime, endDateTime, goalData.actionName, goalData.strategy);
 }
 
@@ -155,7 +180,7 @@ function downloadICS(startDate, endDate, title, description) {
         "BEGIN:VEVENT",
         `DTSTART:${formatICS(startDate)}`,
         `DTEND:${formatICS(endDate)}`,
-        `SUMMARY:Goal Action: ${title}`,
+        `SUMMARY:Action: ${title}`,
         `DESCRIPTION:${description}`,
         "END:VEVENT",
         "END:VCALENDAR"
