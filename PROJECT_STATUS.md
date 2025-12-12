@@ -1,7 +1,7 @@
 # 🛠️ Project Status Dashboard
 
-**Last Updated:** Dec 11, 2025
-**Current Focus:** Testing new "Goal Hierarchy" flow and finalizing "Areas of Life" navigation.
+**Last Updated:** Dec 12, 2025
+**Current Focus:** Refining the "SMART Goal" UX and styling.
 
 ---
 
@@ -15,7 +15,7 @@
 | **Focus Wheel** | 🟢 Stable | Visual Shifting | Local Storage |
 | **Simpson Protocol** | 🟢 Stable | Interactive Hypnosis | Local Storage |
 | **Areas of Life** | 🟢 Stable | Assessment Form | Local Storage |
-| **SMART Goals** | 🟡 Needs Testing | Goal Wizard | Local Storage |
+| **SMART Goals** | 🟡 Beta / Polish | Goal Wizard | Local Storage |
 
 ---
 
@@ -56,8 +56,7 @@
 
 ### 5. Simpson Protocol
 **Current State:** Advanced logic with multiple modes.
-* [x] **Solo Mode:** Audio prompts + Keyboard (Yes/No) + Voice (SUDs).
-* [x] **Partner Mode:** Teleprompter for friend + Manual buttons.
+* [x] **Solo/Partner Modes:** Audio/Keyboard vs. Teleprompter/Mouse.
 * [x] **Calibration:** Key setup and Mic test.
 * [x] **SUDs:** Tap-to-count or Voice input.
 
@@ -68,23 +67,23 @@
 ### 6. Areas of Life
 **Current State:** Multi-step assessment form.
 * [x] 13 Life Areas with Sliders (0-10).
-* [x] **UX Polish:** Sliders default to 0 (forcing choice), Blue thumb style.
+* [x] **UX Polish:** Sliders default to 0, Blue thumb style.
 * [x] **Navigation:** Full "Back" support to review previous answers.
-* [x] Resolution/Reflection screen.
 
 **Wishlist:**
 * [ ] **Visuals:** Add a "Wheel of Life" radar chart at the end.
 * [ ] **Admin:** Connect to Supabase to let Admin view client answers.
 
 ### 7. SMART Goals (Goal Architect)
-**Current State:** **New "Hierarchy" Flow implemented but untested.**
-* [x] **Flow:** Vision (Destination) -> Brainstorm Milestones -> Select Target -> SMART Refinement.
-* [x] **Calendar:** Google/Apple Calendar integration for the "First Action".
-* [ ] **TESTING:** Need to verify the new Vision/Milestone screens work correctly.
+**Current State:** Refactored "Therapeutic" Flow (matches Google Doc).
+* [x] **Education:** Intro screen with placeholder for video.
+* [x] **Logic:** Draft -> Confidence Check -> Deconstruction -> Breakdown -> Obstacles -> Resources.
+* [x] **Calendar:** Integration added to "Breaking it Down" step.
 
-**Wishlist:**
-* [ ] **Logic:** Ensure "Time-bound" deadline is distinct from "Action Date".
-* [ ] **Accountability:** Email the goal to a friend.
+**To-Do / Wishlist:**
+* [ ] **UI Polish:** **Redesign the Date/Time Picker** (Current browser default is ugly/hard to use).
+* [ ] **Content:** Add the real infographic/video to Step 1.
+* [ ] **Accountability:** Option to email the goal summary to a friend.
 
 ---
 
