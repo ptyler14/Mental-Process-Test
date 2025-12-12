@@ -1,7 +1,7 @@
 # 🛠️ Project Status Dashboard
 
 **Last Updated:** Dec 11, 2025
-**Current Focus:** Expanding toolset with Goal Setting and Reflection tools.
+**Current Focus:** Testing new "Goal Hierarchy" flow and finalizing "Areas of Life" navigation.
 
 ---
 
@@ -15,7 +15,7 @@
 | **Focus Wheel** | 🟢 Stable | Visual Shifting | Local Storage |
 | **Simpson Protocol** | 🟢 Stable | Interactive Hypnosis | Local Storage |
 | **Areas of Life** | 🟢 Stable | Assessment Form | Local Storage |
-| **SMART Goals** | 🟢 Stable | Goal Wizard | Local Storage |
+| **SMART Goals** | 🟡 Needs Testing | Goal Wizard | Local Storage |
 
 ---
 
@@ -29,6 +29,7 @@
 **Wishlist:**
 * [ ] Add a graph to show "Value Value" growth.
 * [ ] Calendar view of past entries.
+* [ ] **Integration:** Link completed SMART Goal actions here as "Value Events".
 
 ### 2. The Placemat
 **Current State:** Functional. Tasks persist in browser memory.
@@ -67,7 +68,8 @@
 ### 6. Areas of Life
 **Current State:** Multi-step assessment form.
 * [x] 13 Life Areas with Sliders (0-10).
-* [x] Navigation (Next/Back/Skip).
+* [x] **UX Polish:** Sliders default to 0 (forcing choice), Blue thumb style.
+* [x] **Navigation:** Full "Back" support to review previous answers.
 * [x] Resolution/Reflection screen.
 
 **Wishlist:**
@@ -75,15 +77,14 @@
 * [ ] **Admin:** Connect to Supabase to let Admin view client answers.
 
 ### 7. SMART Goals (Goal Architect)
-**Current State:** Step-by-step Wizard.
-* [x] Draft -> Refinement (S.M.A.R.T.) flow.
-* [x] Obstacle planning.
-* [x] "First Step" scheduling.
-* [x] Calendar Integration (Google Link / Apple ICS download).
+**Current State:** **New "Hierarchy" Flow implemented but untested.**
+* [x] **Flow:** Vision (Destination) -> Brainstorm Milestones -> Select Target -> SMART Refinement.
+* [x] **Calendar:** Google/Apple Calendar integration for the "First Action".
+* [ ] **TESTING:** Need to verify the new Vision/Milestone screens work correctly.
 
 **Wishlist:**
+* [ ] **Logic:** Ensure "Time-bound" deadline is distinct from "Action Date".
 * [ ] **Accountability:** Email the goal to a friend.
-* [ ] **Long-term:** Better breakdown of Long-term vision into milestones.
 
 ---
 
