@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#5 The Prosperity Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="process-nav">
+            <a href="index.html" class="back-link">&larr; Back to Hub</a>
+            <span class="process-number">Process #5</span>
+        </nav>
+
+        <header>
+            <h1>The Prosperity Game</h1>
+            <p>Expand your mental capacity for abundance. Spend freely!</p>
+        </header>
+
+        <div class="bank-dashboard">
+            <div class="day-display" id="game-day">Day 1</div>
+            <div class="balance-display" id="game-balance">$1,000</div>
+            <p>Allowance Today: <span id="game-allowance">$1,000</span></p>
+            <button class="btn-primary" style="background:#4ade80; color:#064e3b;" onclick="nextDay()">Start Next Day (Deposit)</button>
+        </div>
+
+        <div class="process-card">
+            <h3>Write a Check</h3>
+            <div class="input-group">
+                <input type="text" id="item-desc" placeholder="What are you buying? (e.g. Leather Jacket)">
+            </div>
+            <div class="input-group">
+                <input type="number" id="item-cost" placeholder="Cost ($)">
+            </div>
+            <button class="btn-primary" onclick="spendMoney()">Buy Item</button>
+        </div>
+
+        <ul id="transaction-log" class="dynamic-list">
+            </ul>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Simple Game State logic
+        let day = 1;
+        let balance = 1000;
+        
+        // Load state (Mockup for now, resets on reload unless we save to localStorage)
+        // For simplicity in this batch, we won't persist past refresh yet.
+        
+        function updateDisplay() {
+            document.getElementById('game-day').textContent = `Day ${day}`;
+            document.getElementById('game-balance').textContent = `$${balance.toLocaleString()}`;
+            document.getElementById('game-allowance').textContent = `$${(day * 1000).toLocaleString()}`;
+        }
+
+        function nextDay() {
+            day++;
+            const deposit = day * 1000;
+            balance += deposit;
+            alert(`Good Morning! Day ${day}. You received $${deposit.toLocaleString()}.`);
+            updateDisplay();
+        }
+
+        function spendMoney() {
+            const desc = document.getElementById('item-desc');
+            const costInput = document.getElementById('item-cost');
+            const cost = parseInt(costInput.value);
+
+            if(!cost || cost > balance) return alert("Insufficient imaginary funds!");
+
+            balance -= cost;
+            
+            // Add log
+            const list = document.getElementById('transaction-log');
+            const li = document.createElement('li');
+            li.className = 'list-item';
+            li.innerHTML = `<span>Purchased: ${desc.value}</span> <span style="color:#ef4444; font-weight:bold;">-$${cost.toLocaleString()}</span>`;
+            list.prepend(li);
+
+            desc.value = '';
+            costInput.value = '';
+            updateDisplay();
+        }
+        
+        updateDisplay(); // Init
+    </script>
+</body>
+</html>
