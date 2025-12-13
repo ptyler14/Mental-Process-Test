@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#1 Rampage of Appreciation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <nav class="process-nav">
+            <a href="index.html" class="back-link">&larr; Back to Hub</a>
+            <span class="process-number">Process #1</span>
+        </nav>
+
+        <header>
+            <h1>Rampage of Appreciation</h1>
+            <p>Look around your environment. Gently notice something that pleases you. Hold your attention on it until the good feeling increases. </p>
+        </header>
+
+        <div class="process-card" style="margin-top: 20px;">
+            <div class="input-group">
+                <label>I appreciate...</label>
+                <input type="text" id="appreciation-input" placeholder="e.g., The sunlight coming through the window...">
+            </div>
+            <button class="btn-primary" onclick="addAppreciation()">Add to Stream</button>
+        </div>
+
+        <ul id="appreciation-list" class="dynamic-list">
+            </ul>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Inline script for specific page logic (or can be moved to shared script later)
+        function addAppreciation() {
+            const input = document.getElementById('appreciation-input');
+            const list = document.getElementById('appreciation-list');
+            if(input.value.trim() === "") return;
+
+            const li = document.createElement('li');
+            li.className = 'list-item';
+            li.innerHTML = `<span>✨ ${input.value}</span>`;
+            
+            // Insert at the top
+            list.prepend(li);
+            input.value = "";
+            input.focus();
+        }
+    </script>
+</body>
+</html>
