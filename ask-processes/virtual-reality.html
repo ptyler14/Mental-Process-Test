@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#4 Virtual Reality</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="process-nav">
+            <a href="index.html" class="back-link">&larr; Back to Hub</a>
+            <span class="process-number">Process #4</span>
+        </nav>
+
+        <header>
+            <h1>Virtual Reality</h1>
+            <p>Set the scene. Feel the emotion. Stay for just 30 seconds.</p>
+        </header>
+
+        <div class="process-card" id="scene-setup">
+            <div class="input-group">
+                <label>Where are you?</label>
+                <input type="text" id="vr-where" placeholder="e.g., A quiet beach at sunset...">
+            </div>
+            <div class="input-group">
+                <label>Who is there?</label>
+                <input type="text" id="vr-who" placeholder="e.g., Just me, or a good friend...">
+            </div>
+            <div class="input-group">
+                <label>What is the mood?</label>
+                <input type="text" id="vr-mood" placeholder="e.g., Relaxed, laughing, peaceful...">
+            </div>
+            <button class="btn-primary" onclick="startVR()">Enter Scene (30s)</button>
+        </div>
+
+        <div class="process-card" id="vr-active" style="display:none; text-align:center;">
+            <h3>Close your eyes and visualize...</h3>
+            <p id="scene-prompt" style="font-style:italic; margin-bottom:20px;"></p>
+            <div class="timer-display" id="vr-timer">00:30</div>
+            <p>Feel the good feelings only. No fixing problems.</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function startVR() {
+            const where = document.getElementById('vr-where').value;
+            const who = document.getElementById('vr-who').value;
+            const mood = document.getElementById('vr-mood').value;
+
+            if(!where) return alert("Please set the scene first.");
+
+            // Switch screens
+            document.getElementById('scene-setup').style.display = 'none';
+            document.getElementById('vr-active').style.display = 'block';
+            document.getElementById('scene-prompt').innerText = `You are at ${where}, with ${who}, feeling ${mood}.`;
+
+            // Start Timer
+            let timeLeft = 30;
+            const timerEl = document.getElementById('vr-timer');
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    timerEl.textContent = "Done!";
+                    alert("Great job! You practiced the vibration.");
+                    location.reload(); // Reset
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
