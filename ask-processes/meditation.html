@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#6 Process of Meditation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="process-nav">
+            <a href="index.html" class="back-link">&larr; Back to Hub</a>
+            <span class="process-number">Process #6</span>
+        </nav>
+
+        <header>
+            <h1>Meditation</h1>
+            <p>Quiet the mind to release resistance. Breathe with the circle.</p>
+        </header>
+
+        <div class="process-card" style="text-align:center;">
+            <div class="breathing-circle"></div>
+            
+            <div class="timer-display" id="meditation-timer">15:00</div>
+            
+            <button class="btn-primary" onclick="startMeditation()" id="start-btn">Start 15 Minutes</button>
+            <p style="margin-top:20px; font-size:0.9rem; color:#64748b;">
+                Focus on the circle. Inhale as it expands, exhale as it shrinks.
+            </p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function startMeditation() {
+            document.getElementById('start-btn').style.display = 'none';
+            let duration = 15 * 60; // 15 minutes
+            
+            const display = document.getElementById('meditation-timer');
+            
+            const timer = setInterval(() => {
+                let minutes = parseInt(duration / 60, 10);
+                let seconds = parseInt(duration % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--duration < 0) {
+                    clearInterval(timer);
+                    display.textContent = "Complete";
+                    // Play a soft chime sound here in future
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
