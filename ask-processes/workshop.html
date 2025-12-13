@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#3 The Creative Workshop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <nav class="process-nav">
+            <a href="index.html" class="back-link">&larr; Back to Hub</a>
+            <span class="process-number">Process #3</span>
+        </nav>
+
+        <header>
+            <h1>The Creative Workshop</h1>
+            <p>Focus on the "what" and the "why" of your desires in four key areas. </p>
+        </header>
+
+        <div class="process-card">
+            <div class="input-group">
+                <label>Select Area of Life:</label>
+                <select id="area-select">
+                    <option value="My Body">My Body</option>
+                    <option value="My Home">My Home</option>
+                    <option value="My Relationships">My Relationships</option>
+                    <option value="My Work">My Work</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>What do you desire?</label>
+                <input type="text" id="desire-input" placeholder="e.g., I want to return to my ideal weight...">
+            </div>
+
+            <div class="input-group">
+                <label>Why do you want it?</label>
+                <textarea id="why-input" placeholder="e.g., Because I feel best at that weight, because I'll be able to wear my favorite clothes..."></textarea>
+            </div>
+
+            <button class="btn-primary" onclick="addWorkshopItem()">Clarify Desire</button>
+        </div>
+
+        <div id="workshop-results">
+            </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function addWorkshopItem() {
+            const area = document.getElementById('area-select').value;
+            const desire = document.getElementById('desire-input').value;
+            const why = document.getElementById('why-input').value;
+
+            if(!desire || !why) return alert("Please fill out both fields.");
+
+            const results = document.getElementById('workshop-results');
+            
+            const card = document.createElement('div');
+            card.className = 'list-item';
+            card.style.display = 'block'; // Override flex
+            card.innerHTML = `
+                <div style="font-size:0.8rem; text-transform:uppercase; color:#6366f1; font-weight:bold; margin-bottom:5px;">${area}</div>
+                <div style="font-weight:bold; margin-bottom:5px;">${desire}</div>
+                <div style="color:#64748b; font-style:italic;">"Because ${why}"</div>
+            `;
+            
+            results.prepend(card);
+            
+            // Clear inputs but keep area selected
+            document.getElementById('desire-input').value = "";
+            document.getElementById('why-input').value = "";
+        }
+    </script>
+</body>
+</html>
