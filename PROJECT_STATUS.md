@@ -1,7 +1,7 @@
 # 🛠️ Project Status Dashboard
 
 **Last Updated:** Dec 12, 2025
-**Current Focus:** Refining the "SMART Goal" UX and styling.
+**Current Focus:** Polishing SMART Goals and planning the Habit Tracker.
 
 ---
 
@@ -15,7 +15,7 @@
 | **Focus Wheel** | 🟢 Stable | Visual Shifting | Local Storage |
 | **Simpson Protocol** | 🟢 Stable | Interactive Hypnosis | Local Storage |
 | **Areas of Life** | 🟢 Stable | Assessment Form | Local Storage |
-| **SMART Goals** | 🟡 Beta / Polish | Goal Wizard | Local Storage |
+| **SMART Goals** | 🟢 Beta | Goal Wizard | Local Storage |
 
 ---
 
@@ -27,16 +27,12 @@
 * [x] Math Logic & RLS Security
 
 **Wishlist:**
-* [ ] Add a graph to show "Value Value" growth.
-* [ ] Calendar view of past entries.
 * [ ] **Integration:** Link completed SMART Goal actions here as "Value Events".
+* [ ] **Visuals:** Add a graph to show "Value Value" growth.
 
 ### 2. The Placemat
 **Current State:** Functional. Tasks persist in browser memory.
 * [x] "Me" vs. "Universe" columns
-
-**Wishlist:**
-* [ ] Animation when Universe "takes" a task.
 
 ### 3. Segment Intending
 **Current State:** Basic card exists.
@@ -49,7 +45,6 @@
 **Current State:** Visuals fixed. Text aligns at 3 o'clock and rotates correctly.
 * [x] 12-spoke wheel logic
 * [x] "Spinning" animation
-* [x] Text alignment fixes
 
 **Wishlist:**
 * [ ] Save completed wheels to a gallery.
@@ -68,22 +63,35 @@
 **Current State:** Multi-step assessment form.
 * [x] 13 Life Areas with Sliders (0-10).
 * [x] **UX Polish:** Sliders default to 0, Blue thumb style.
-* [x] **Navigation:** Full "Back" support to review previous answers.
 
 **Wishlist:**
 * [ ] **Visuals:** Add a "Wheel of Life" radar chart at the end.
 * [ ] **Admin:** Connect to Supabase to let Admin view client answers.
 
 ### 7. SMART Goals (Goal Architect)
-**Current State:** Refactored "Therapeutic" Flow (matches Google Doc).
+**Current State:** "Therapeutic" Flow (matches Google Doc).
 * [x] **Education:** Intro screen with placeholder for video.
-* [x] **Logic:** Draft -> Confidence Check -> Deconstruction -> Breakdown -> Obstacles -> Resources.
-* [x] **Calendar:** Integration added to "Breaking it Down" step.
+* [x] **Flow:** Draft -> Confidence -> Breakdown -> Obstacles -> Resources.
+* [x] **Calendar:** Google/Apple Calendar integration for the "First Action".
+* [x] **UX:** Custom "Hour : Min : AM/PM" dropdowns implemented.
 
-**To-Do / Wishlist:**
-* [ ] **UI Polish:** **Redesign the Date/Time Picker** (Current browser default is ugly/hard to use).
+**Wishlist:**
 * [ ] **Content:** Add the real infographic/video to Step 1.
 * [ ] **Accountability:** Option to email the goal summary to a friend.
+
+---
+
+## 🚀 Future Feature: Habit Tracker & Automation
+**Concept:** A dashboard to track daily habits and integrate with iPhone Health data.
+
+**Technical Plan:**
+1.  **Database:** Create `habit_logs` table in Supabase.
+2.  **Web Interface:** A visual "Streak Counter" or Calendar view on the dashboard.
+3.  **Automation (Apple Shortcuts):**
+    * Create an iOS Shortcut that triggers "When Workout Ends".
+    * Shortcut sends a Webhook (POST request) to our Supabase database.
+    * **Action:** Log the workout automatically.
+    * **Action:** Send a text/notification to the user (Positive Reinforcement).
 
 ---
 
