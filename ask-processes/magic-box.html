@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#2 Magic Creation Box</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <nav class="process-nav">
+            <a href="index.html" class="back-link">&larr; Back to Hub</a>
+            <span class="process-number">Process #2</span>
+        </nav>
+
+        <header>
+            <h1>The Magic Creation Box</h1>
+            <p>Collect desires. Whatever is contained in this box—IS! </p>
+        </header>
+
+        <div class="process-card">
+            <div class="input-group">
+                <label>What do you want to drop in the box?</label>
+                <textarea id="box-input" placeholder="Describe a desire, an image you saw, or a feeling you want..."></textarea>
+            </div>
+            <button class="btn-primary" onclick="dropInBox()">Put in Box</button>
+        </div>
+
+        <div class="magic-box-container" id="magic-box">
+            <h3>🎁 The Creation Box</h3>
+            <p style="font-size:0.9rem; opacity:0.7;">Your desires are held here.</p>
+            <div id="box-contents" style="margin-top:20px; text-align:left;"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        function dropInBox() {
+            const input = document.getElementById('box-input');
+            const container = document.getElementById('box-contents');
+            if(!input.value) return;
+
+            const div = document.createElement('div');
+            div.className = 'list-item';
+            div.style.background = "rgba(255,255,255,0.8)";
+            div.innerHTML = `<strong>Desire:</strong> ${input.value}`;
+            
+            container.prepend(div);
+            input.value = "";
+            
+            // Visual feedback
+            const box = document.getElementById('magic-box');
+            box.style.transform = "scale(1.02)";
+            setTimeout(() => box.style.transform = "scale(1)", 200);
+        }
+    </script>
+</body>
+</html>
