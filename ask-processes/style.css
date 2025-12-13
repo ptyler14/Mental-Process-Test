@@ -141,3 +141,42 @@ textarea { resize: vertical; min-height: 100px; }
     margin-top: 20px;
     min-height: 200px;
 }
+/* --- BATCH 2 STYLES --- */
+
+/* Meditation Breathing Circle */
+.breathing-circle {
+    width: 150px;
+    height: 150px;
+    background: #a5b4fc;
+    border-radius: 50%;
+    margin: 40px auto;
+    opacity: 0.8;
+    animation: breathe 8s infinite ease-in-out;
+}
+
+@keyframes breathe {
+    0% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.5); opacity: 1; } /* Inhale */
+    100% { transform: scale(1); opacity: 0.6; } /* Exhale */
+}
+
+/* Prosperity Game Dashboard */
+.bank-dashboard {
+    background: #1e293b;
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.balance-display { font-size: 2.5rem; font-weight: bold; color: #4ade80; }
+.day-display { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; }
+
+/* Timer Display */
+.timer-display {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--accent);
+    text-align: center;
+    margin: 20px 0;
+}
