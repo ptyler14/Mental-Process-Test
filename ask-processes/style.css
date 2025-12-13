@@ -180,3 +180,33 @@ textarea { resize: vertical; min-height: 100px; }
     text-align: center;
     margin: 20px 0;
 }
+/* --- EDIT & DELETE ACTIONS --- */
+.item-content {
+    flex-grow: 1; /* Pushes buttons to the right */
+    margin-right: 10px;
+}
+
+.item-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background 0.2s;
+    opacity: 0.6;
+}
+
+.btn-icon:hover {
+    opacity: 1;
+    background: #f1f5f9;
+}
+
+.btn-icon.delete:hover { color: #ef4444; background: #fee2e2; }
+.btn-icon.edit:hover { color: #3b82f6; background: #dbeafe; }
