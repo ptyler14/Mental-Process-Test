@@ -41,3 +41,51 @@ input[type=range] { width: 100%; }
 .highlight-card { background: #ecfdf5; border-color: var(--accent); }
 .final-text { font-size: 1.2rem; line-height: 1.6; }
 .hidden { display: none !important; }
+/* Date & Time Layout */
+.datetime-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.date-input {
+    flex: 2; 
+    min-width: 150px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.time-picker-group {
+    flex: 3; 
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 10px;
+}
+
+.time-select {
+    border: none;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    cursor: pointer;
+    padding: 5px;
+}
+
+.time-select:focus { outline: none; }
+
+.ampm-select {
+    color: var(--accent); 
+    font-weight: bold;
+}
+
+.time-colon {
+    font-weight: bold;
+    color: #cbd5e1;
+}
