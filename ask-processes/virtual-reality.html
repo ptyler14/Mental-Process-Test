@@ -30,7 +30,9 @@
             </div>
             <div class="input-group">
                 <label>What is the mood?</label>
-                <input type="text" id="vr-mood" placeholder="e.g., Relaxed, laughing, peaceful...">
+                <input type="text" id="vr-mood" 
+                       placeholder="e.g., Relaxed, laughing, peaceful..."
+                       onkeypress="if(event.key === 'Enter') startVR()">
             </div>
             <button class="btn-primary" onclick="startVR()">Enter Scene (30s)</button>
         </div>
@@ -38,13 +40,24 @@
         <div class="process-card" id="vr-active" style="display:none; text-align:center;">
             <h3>Close your eyes and visualize...</h3>
             <p id="scene-prompt" style="font-style:italic; margin-bottom:20px;"></p>
+            
             <div class="timer-display" id="vr-timer">00:30</div>
-            <p>Feel the good feelings only. No fixing problems.</p>
+            
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:20px;">
+                <button class="btn-primary" onclick="togglePause()" id="pause-btn" style="background:#f59e0b;">Pause</button>
+                <button class="btn-primary" onclick="goBack()" style="background:#64748b;">Adjust Setup</button>
+            </div>
+            
+            <p style="margin-top:20px; font-size:0.9rem;">Feel the good feelings only.</p>
         </div>
     </div>
 
     <script src="script.js"></script>
     <script>
+        let timerInterval = null;
+        let timeLeft = 30;
+        let isPaused = false;
+
         function startVR() {
             const where = document.getElementById('vr-where').value;
             const who = document.getElementById('vr-who').value;
@@ -52,26 +65,60 @@
 
             if(!where) return alert("Please set the scene first.");
 
-            // Switch screens
             document.getElementById('scene-setup').style.display = 'none';
             document.getElementById('vr-active').style.display = 'block';
             document.getElementById('scene-prompt').innerText = `You are at ${where}, with ${who}, feeling ${mood}.`;
 
-            // Start Timer
-            let timeLeft = 30;
-            const timerEl = document.getElementById('vr-timer');
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval); // Clear any existing
             
-            const interval = setInterval(() => {
-                timeLeft--;
-                timerEl.textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
-                
-                if (timeLeft <= 0) {
-                    clearInterval(interval);
-                    timerEl.textContent = "Done!";
-                    alert("Great job! You practiced the vibration.");
-                    location.reload(); // Reset
+            timerInterval = setInterval(() => {
+                if(!isPaused) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        document.getElementById('vr-timer').textContent = "Done!";
+                        alert("Great job! You practiced the vibration.");
+                        goBack(); // Reset automatically or stay? User choice. Let's reset.
+                    }
                 }
             }, 1000);
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('pause-btn');
+            if(isPaused) {
+                btn.textContent = "Resume";
+                btn.style.background = "#10b981"; // Green for resume
+            } else {
+                btn.textContent = "Pause";
+                btn.style.background = "#f59e0b"; // Orange for pause
+            }
+        }
+
+        function goBack() {
+            clearInterval(timerInterval);
+            timeLeft = 30;
+            isPaused = false;
+            updateTimerDisplay();
+            
+            // Reset Pause Button Text
+            const btn = document.getElementById('pause-btn');
+            btn.textContent = "Pause";
+            btn.style.background = "#f59e0b";
+
+            document.getElementById('vr-active').style.display = 'none';
+            document.getElementById('scene-setup').style.display = 'block';
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('vr-timer').textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
         }
     </script>
 </body>
