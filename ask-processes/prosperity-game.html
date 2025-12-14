@@ -32,23 +32,20 @@
                 <input type="text" id="item-desc" placeholder="What are you buying? (e.g. Leather Jacket)">
             </div>
             <div class="input-group">
-                <input type="number" id="item-cost" placeholder="Cost ($)">
+                <input type="number" id="item-cost" 
+                       placeholder="Cost ($)"
+                       onkeypress="if(event.key === 'Enter') spendMoney()">
             </div>
             <button class="btn-primary" onclick="spendMoney()">Buy Item</button>
         </div>
 
-        <ul id="transaction-log" class="dynamic-list">
-            </ul>
+        <ul id="transaction-log" class="dynamic-list"></ul>
     </div>
 
     <script src="script.js"></script>
     <script>
-        // Simple Game State logic
         let day = 1;
         let balance = 1000;
-        
-        // Load state (Mockup for now, resets on reload unless we save to localStorage)
-        // For simplicity in this batch, we won't persist past refresh yet.
         
         function updateDisplay() {
             document.getElementById('game-day').textContent = `Day ${day}`;
@@ -70,22 +67,30 @@
             const cost = parseInt(costInput.value);
 
             if(!cost || cost > balance) return alert("Insufficient imaginary funds!");
+            if(!desc.value) return alert("What are you buying?");
 
             balance -= cost;
             
-            // Add log
             const list = document.getElementById('transaction-log');
             const li = document.createElement('li');
             li.className = 'list-item';
-            li.innerHTML = `<span>Purchased: ${desc.value}</span> <span style="color:#ef4444; font-weight:bold;">-$${cost.toLocaleString()}</span>`;
+            
+            // Added simple delete button for consistency, though not strictly asked for
+            li.innerHTML = `
+                <span class="item-content">
+                    Purchased: ${desc.value} <strong style="color:#ef4444; margin-left:10px;">-$${cost.toLocaleString()}</strong>
+                </span>
+                <button class="btn-icon delete" onclick="this.closest('li').remove()" title="Delete">🗑️</button>
+            `;
             list.prepend(li);
 
             desc.value = '';
             costInput.value = '';
+            desc.focus(); // Focus back to description for rapid entry
             updateDisplay();
         }
         
-        updateDisplay(); // Init
+        updateDisplay();
     </script>
 </body>
 </html>
