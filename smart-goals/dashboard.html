@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Goals Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../ask-processes/style.css"> <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+
+    <div class="container" style="max-width: 900px;">
+        <header style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <a href="../index.html" class="back-link">🏠 Main Menu</a>
+                <h1>My Goals Dashboard</h1>
+                <p class="subtitle">Design your life, one area at a time.</p>
+            </div>
+            </header>
+
+        <div class="goals-grid">
+            
+            <div class="category-card">
+                <div class="cat-header health">
+                    <h3>💪 Health & Body</h3>
+                    <button class="btn-sm" onclick="startNewGoal('Health')">+ New</button>
+                </div>
+                <div id="list-health" class="goal-list">
+                    <div class="empty-state">No active goals.</div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="cat-header wealth">
+                    <h3>💰 Career & Wealth</h3>
+                    <button class="btn-sm" onclick="startNewGoal('Wealth')">+ New</button>
+                </div>
+                <div id="list-wealth" class="goal-list">
+                    <div class="empty-state">No active goals.</div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="cat-header relations">
+                    <h3>❤️ Relationships</h3>
+                    <button class="btn-sm" onclick="startNewGoal('Relationships')">+ New</button>
+                </div>
+                <div id="list-relations" class="goal-list">
+                    <div class="empty-state">No active goals.</div>
+                </div>
+            </div>
+
+            <div class="category-card">
+                <div class="cat-header growth">
+                    <h3>🧠 Personal Growth</h3>
+                    <button class="btn-sm" onclick="startNewGoal('Personal Growth')">+ New</button>
+                </div>
+                <div id="list-growth" class="goal-list">
+                    <div class="empty-state">No active goals.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Init Dashboard logic when page loads
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>
