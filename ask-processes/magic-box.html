@@ -17,13 +17,15 @@
 
         <header>
             <h1>The Magic Creation Box</h1>
-            <p>Collect desires. Whatever is contained in this box—IS! </p>
+            <p>Whatever is contained in this box—IS!</p>
         </header>
 
         <div class="process-card">
             <div class="input-group">
                 <label>What do you want to drop in the box?</label>
-                <textarea id="box-input" placeholder="Describe a desire, an image you saw, or a feeling you want..."></textarea>
+                <textarea id="box-input" 
+                          placeholder="Describe a desire, an image you saw, or a feeling you want..."
+                          onkeypress="if(event.key === 'Enter') { event.preventDefault(); dropInBox(); }"></textarea>
             </div>
             <button class="btn-primary" onclick="dropInBox()">Put in Box</button>
         </div>
@@ -40,20 +42,42 @@
         function dropInBox() {
             const input = document.getElementById('box-input');
             const container = document.getElementById('box-contents');
-            if(!input.value) return;
+            const text = input.value.trim();
+            if(!text) return;
 
             const div = document.createElement('div');
             div.className = 'list-item';
             div.style.background = "rgba(255,255,255,0.8)";
-            div.innerHTML = `<strong>Desire:</strong> ${input.value}`;
+            
+            // New Structure
+            div.innerHTML = `
+                <div class="item-content"><strong>Desire:</strong> <span>${text}</span></div>
+                <div class="item-actions">
+                    <button class="btn-icon edit" onclick="editBoxItem(this)">✎</button>
+                    <button class="btn-icon delete" onclick="deleteItem(this)">🗑️</button>
+                </div>
+            `;
             
             container.prepend(div);
             input.value = "";
+            input.focus();
             
             // Visual feedback
             const box = document.getElementById('magic-box');
             box.style.transform = "scale(1.02)";
             setTimeout(() => box.style.transform = "scale(1)", 200);
+        }
+
+        function deleteItem(btn) { btn.closest('.list-item').remove(); }
+
+        function editBoxItem(btn) {
+            const div = btn.closest('.list-item');
+            const span = div.querySelector('span'); // The text part inside item-content
+            
+            const newText = prompt("Edit your desire:", span.textContent);
+            if (newText !== null && newText.trim() !== "") {
+                span.textContent = newText;
+            }
         }
     </script>
 </body>
