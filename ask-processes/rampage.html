@@ -17,37 +17,63 @@
 
         <header>
             <h1>Rampage of Appreciation</h1>
-            <p>Look around your environment. Gently notice something that pleases you. Hold your attention on it until the good feeling increases. </p>
+            <p>Look around. Find something pleasing. Hold your attention on it.</p>
         </header>
 
         <div class="process-card" style="margin-top: 20px;">
             <div class="input-group">
                 <label>I appreciate...</label>
-                <input type="text" id="appreciation-input" placeholder="e.g., The sunlight coming through the window...">
+                <input type="text" id="appreciation-input" 
+                       placeholder="e.g., The sunlight coming through the window..."
+                       onkeypress="if(event.key === 'Enter') addAppreciation()">
             </div>
             <button class="btn-primary" onclick="addAppreciation()">Add to Stream</button>
         </div>
 
-        <ul id="appreciation-list" class="dynamic-list">
-            </ul>
+        <ul id="appreciation-list" class="dynamic-list"></ul>
     </div>
 
     <script src="script.js"></script>
     <script>
-        // Inline script for specific page logic (or can be moved to shared script later)
         function addAppreciation() {
             const input = document.getElementById('appreciation-input');
             const list = document.getElementById('appreciation-list');
-            if(input.value.trim() === "") return;
+            const text = input.value.trim();
+            if(!text) return;
 
             const li = document.createElement('li');
             li.className = 'list-item';
-            li.innerHTML = `<span>✨ ${input.value}</span>`;
             
-            // Insert at the top
+            // New HTML structure with Edit/Delete buttons
+            li.innerHTML = `
+                <span class="item-content">✨ ${text}</span>
+                <div class="item-actions">
+                    <button class="btn-icon edit" onclick="editItem(this)" title="Edit">✎</button>
+                    <button class="btn-icon delete" onclick="deleteItem(this)" title="Delete">🗑️</button>
+                </div>
+            `;
+            
             list.prepend(li);
             input.value = "";
             input.focus();
+        }
+
+        function deleteItem(btn) {
+            // Find the <li> that contains the clicked button and remove it
+            const li = btn.closest('li');
+            li.remove();
+        }
+
+        function editItem(btn) {
+            const li = btn.closest('li');
+            const span = li.querySelector('.item-content');
+            // Remove the "✨ " prefix for editing
+            const currentText = span.textContent.replace('✨ ', '');
+            
+            const newText = prompt("Update your appreciation:", currentText);
+            if (newText !== null && newText.trim() !== "") {
+                span.textContent = `✨ ${newText}`;
+            }
         }
     </script>
 </body>
