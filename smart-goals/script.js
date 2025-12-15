@@ -1,6 +1,6 @@
 // --- CONFIG & STATE ---
 const steps = [
-    'view-initial', 'view-smart-breakdown', 'view-rewrite', 
+    'view-initial', 'view-smart-breakdown', 'view-rewrite', 'view-breakdown',
     'view-obstacles', 'view-resources', 'view-review'
 ];
 let currentStepIndex = 0;
