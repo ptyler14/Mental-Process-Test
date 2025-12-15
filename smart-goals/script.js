@@ -199,7 +199,14 @@ function nextStep(targetId) {
     updateProgress();
     updateReferences();
 }
+function prevStep(targetId) {
+    const currentId = steps[currentStepIndex];
+    if (currentId) get(currentId).classList.add('hidden');
 
+    currentStepIndex = steps.indexOf(targetId);
+    get(targetId).classList.remove('hidden');
+    updateProgress();
+}
 function updateProgress() {
     const percent = (currentStepIndex / (steps.length - 1)) * 100;
     get('progress-bar').style.width = `${percent}%`;
