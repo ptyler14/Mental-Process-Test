@@ -34,5 +34,31 @@
         // Init Dashboard logic when page loads
         document.addEventListener('DOMContentLoaded', loadDashboard);
     </script>
+    <div id="checkin-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h2 id="checkin-title">Check-In Time! ⏰</h2>
+            <p id="checkin-text">You scheduled an action for <strong>[Date]</strong>.</p>
+            
+            <div id="checkin-step-1">
+                <p class="question">Did you manage to complete this?</p>
+                <div class="modal-actions">
+                    <button class="btn-primary" onclick="handleCheckIn(true)" style="background:#10b981;">Yes, I did it! 🎉</button>
+                    <button class="btn-primary" onclick="handleCheckIn(false)" style="background:#ef4444;">No, not yet.</button>
+                </div>
+            </div>
+
+            <div id="checkin-step-no" class="hidden">
+                <p class="question">No problem. What was the main obstacle?</p>
+                <input type="text" id="obstacle-input" placeholder="e.g. Too tired, unexpected meeting...">
+                <button class="btn-primary" onclick="saveObstacle()">Save Learning</button>
+            </div>
+
+            <div id="checkin-step-yes" class="hidden">
+                <p class="question">Great job! That's a vote for your future self.</p>
+                <p>Would you like to schedule the next step now?</p>
+                <button class="btn-primary" onclick="closeCheckIn()">Done for now</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
