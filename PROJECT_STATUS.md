@@ -1,7 +1,7 @@
 # 🛠️ Project Status Dashboard
 
-**Last Updated:** Dec 13, 2025
-**Current Focus:** Building the "Ask & It Is Given" Process Hub.
+**Last Updated:** Dec 14, 2025
+**Current Focus:** expanding Goal Architect into a Dashboard System.
 
 ---
 
@@ -9,39 +9,52 @@
 
 | Tool Name | Status | Type | Storage |
 | :--- | :---: | :--- | :--- |
-| **Process Hub** | 🟢 Live | Main Menu | Static |
-| **#1 Rampage** | 🟢 Beta | Text Stream | Local |
-| **#2 Magic Box** | 🟢 Beta | Visual List | Local |
-| **#3 Workshop** | 🟢 Beta | Structured Form | Local |
-| **#4 VR (Viz)** | 🟢 Beta | Timer/Prompt | Local |
-| **#5 Prosperity** | 🟢 Beta | Interactive Game | Local |
-| **#6 Meditation** | 🟢 Beta | Visual Breath | Local |
-| **Mental Bank** | 🟢 Stable | Ledger | Supabase |
+| **Process Hub** | 🟢 Beta | Mental Tools | Local Storage |
+| **Goal Architect** | 🟡 In Dev | Dashboard System | Local Storage |
+| **Mental Bank** | 🟢 Stable | Ledger | Supabase (Cloud) |
+| **The Placemat** | 🟢 Stable | Task Manager | Local Storage |
+| **Focus Wheel** | 🟢 Stable | Visual Shifting | Local Storage |
 
 ---
 
-## 📝 "Ask & It Is Given" Progress
+## 📝 Recent Accomplishments
 
-We are converting the 22 processes into a unified "Hub" (`ask-processes/`).
+### 1. Goal Architect (Major Update)
+We shifted from a single-pass wizard to a **Dashboard System**.
+* [x] **New Flow:** Home Page -> Dashboard -> Wizard -> Dashboard.
+* [x] **Dynamic Dashboard:** Shows goals categorized by Life Area.
+* [x] **Custom Categories:** Users can add their own areas (e.g., "Spirituality").
+* [x] **Storage:** Supports saving multiple goals via LocalStorage.
 
-* [x] **Hub Structure:** `index.html` (Grid), `style.css` (Shared), `script.js` (Shared).
-* [x] **Process #1 (Rampage):** Completed.
-* [x] **Process #2 (Magic Box):** Completed.
-* [x] **Process #3 (Creative Workshop):** Completed.
-* [x] **Process #4 (Virtual Reality):** Completed (30s Timer).
-* [x] **Process #5 (Prosperity Game):** Completed (Dashboard + Logic).
-* [x] **Process #6 (Meditation):** Completed (Breathing Animation).
-* [ ] **Process #7 (Evaluating Dreams):** *Next Up*
-* [ ] **Process #8 (Book of Positive Aspects):** *Next Up*
-* [ ] **Process #9 (Scripting):** *Next Up*
-* [ ] **Process #16 (Placemat):** Existing tool, linked in Grid.
-* [ ] **Process #17 (Focus Wheel):** Existing tool, linked in Grid.
+### 2. Ask & It Is Given Processes
+Batch 1 & 2 are complete with UX polish (Enter key, Edit/Delete buttons).
+* [x] **#1 Rampage:** Text Stream with Edit/Delete.
+* [x] **#2 Magic Box:** Visual List.
+* [x] **#3 Workshop:** Structured Form.
+* [x] **#4 VR (Viz):** Timer with Pause/Resume.
+* [x] **#5 Prosperity:** Bank logic with Day Counter.
+* [x] **#6 Meditation:** Breathing Animation.
 
 ---
 
-## 🚀 Future Feature: Habit Tracker
-**Concept:** A dashboard to track daily habits and integrate with iPhone Health data.
-* **Status:** On Hold while finishing the "Ask Processes" library.
+## 🚀 Next Up: Goal Architect Features
+
+We are building the "Hierarchy of Goals" features using Local Storage first (Option A).
+
+1.  **The "Check-In" (Retrospective):**
+    * Logic to check if a goal's `actionDate` has passed.
+    * Modal to ask: "Did you do it?" + "What was the obstacle?"
+2.  **The Goal Pyramid (Superordinate Goals):**
+    * UI to capture "Identity/Values" (Why) before the "Action" (How).
+
+---
+
+## 📋 Future Batch: Ask Processes
+* **#7 Evaluating Dreams:** Dream Logger.
+* **#8 Book of Positive Aspects:** Digital Notebook.
+* **#9 Scripting:** Creative Writing Interface.
+
+---
 
 ## 🐛 Tech Debt / Maintenance
-* **Supabase:** `script.js` in the `ask-processes` folder needs to be connected to Supabase eventually so user data (like "Magic Box" items) persists across devices.
+* **Supabase Migration:** Currently, the Dashboard and Ask Processes use `localStorage`. We will migrate them to Supabase later to enable cross-device syncing.
