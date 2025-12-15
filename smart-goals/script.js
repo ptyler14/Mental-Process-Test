@@ -1,5 +1,5 @@
 // --- STATE MANAGEMENT ---
-// UPDATED: Removed 'view-education' (start) and 'view-breakdown' (the 3 sub-goals)
+// UPDATED: Removed 'view-education' and 'view-breakdown' for faster flow
 const steps = [
     'view-initial', 
     'view-smart-breakdown', 
@@ -19,40 +19,158 @@ let goalPendingCheckIn = null;
 // --- DOM HELPER ---
 const get = (id) => document.getElementById(id);
 
-// ... (Keep your DASHBOARD LOGIC and CHECK-IN LOGIC here) ...
-// ... (Do not delete the loadDashboard, addNewCategory, startNewGoal, or CheckIn functions) ...
+// --- DASHBOARD LOGIC (Runs on dashboard.html) ---
+function loadDashboard() {
+    const grid = get('goals-grid');
+    if (!grid) return; // Safety check: stops this running on the wizard page
+
+    grid.innerHTML = ''; // Clear current grid
+
+    // 1. Get Categories
+    const defaults = ['Health', 'Wealth', 'Relationships', 'Personal Growth'];
+    let userCats = JSON.parse(localStorage.getItem('user_categories')) || defaults;
+
+    // 2. Get Goals
+    const goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
+
+    // 3. Build the Cards dynamically
+    userCats.forEach(catName => {
+        const catCard = document.createElement('div');
+        catCard.className = 'category-card';
+        const catGoals = goals.filter(g => g.category === catName);
+        const styleClass = getCategoryStyle(catName);
+
+        catCard.innerHTML = `
+            <div class="cat-header ${styleClass}">
+                <h3>${catName}</h3>
+                <button class="btn-sm" onclick="startNewGoal('${escapeJS(catName)}')">+ New</button>
+            </div>
+            <div class="goal-list">
+                ${catGoals.length === 0 ? '<div class="empty-state">No active goals.</div>' : ''}
+                ${catGoals.map(goal => `
+                    <div class="mini-goal-card">
+                        <span class="mini-goal-title">${goal.title || "Untitled"}</span>
+                        <div class="mini-goal-next">Next: ${goal.nextAction || "None"}</div>
+                        <div class="mini-goal-date">📅 ${formatDate(goal.actionDate)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        grid.appendChild(catCard);
+    });
+
+    // 4. Run the Check-In Scan
+    checkForDueGoals(goals);
+}
+
+function addNewCategory() {
+    const newCat = prompt("Name your new Life Area (e.g., 'Spirituality', 'Hobbies'):");
+    if (newCat && newCat.trim() !== "") {
+        const defaults = ['Health', 'Wealth', 'Relationships', 'Personal Growth'];
+        let userCats = JSON.parse(localStorage.getItem('user_categories')) || defaults;
+        if (!userCats.includes(newCat)) {
+            userCats.push(newCat);
+            localStorage.setItem('user_categories', JSON.stringify(userCats));
+            loadDashboard(); 
+        } else {
+            alert("That category already exists!");
+        }
+    }
+}
+
+function startNewGoal(category) {
+    window.location.href = `index.html?category=${encodeURIComponent(category)}`;
+}
+
+// --- CHECK-IN SYSTEM LOGIC ---
+function checkForDueGoals(goals) {
+    const now = new Date();
+    const dueGoal = goals.find(g => {
+        if (!g.actionDate || g.status === 'completed' || g.status === 'checked_with_obstacle') return false;
+        const actionDate = new Date(g.actionDate);
+        return actionDate < now;
+    });
+
+    if (dueGoal) openCheckInModal(dueGoal);
+}
+
+function openCheckInModal(goal) {
+    goalPendingCheckIn = goal;
+    const modal = document.getElementById('checkin-modal');
+    if(!modal) return; 
+
+    document.getElementById('checkin-step-1').classList.remove('hidden');
+    document.getElementById('checkin-step-no').classList.add('hidden');
+    document.getElementById('checkin-step-yes').classList.add('hidden');
+    
+    document.getElementById('checkin-text').innerHTML = `
+        You planned to <strong>${goal.nextAction}</strong> <br>
+        on ${formatDate(goal.actionDate)}.
+    `;
+    modal.classList.remove('hidden');
+}
+
+function handleCheckIn(success) {
+    document.getElementById('checkin-step-1').classList.add('hidden');
+    if (success) {
+        document.getElementById('checkin-step-yes').classList.remove('hidden');
+        updateGoalStatus(goalPendingCheckIn.id, 'completed');
+    } else {
+        document.getElementById('checkin-step-no').classList.remove('hidden');
+    }
+}
+
+function saveObstacle() {
+    const obstacle = document.getElementById('obstacle-input').value;
+    if (obstacle) updateGoalStatus(goalPendingCheckIn.id, 'checked_with_obstacle');
+    closeCheckIn();
+}
+
+function closeCheckIn() {
+    document.getElementById('checkin-modal').classList.add('hidden');
+    loadDashboard(); 
+}
+
+function updateGoalStatus(id, status) {
+    let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
+    const index = goals.findIndex(g => g.id === id);
+    if (index !== -1) {
+        goals[index].status = status;
+        localStorage.setItem('user_goals_db', JSON.stringify(goals));
+    }
+}
 
 // --- WIZARD LOGIC (Runs on index.html) ---
 document.addEventListener('DOMContentLoaded', () => {
-    // If we are on dashboard page, run dashboard logic
+    // 1. If we are on dashboard page, run dashboard logic
     if(get('goals-grid')) {
         loadDashboard();
         return;
     }
 
-    // --- NEW: EDUCATION MODE CHECK ---
+    // 2. CHECK FOR EDUCATION MODE
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('mode') === 'education') {
-        // Hide Wizard, Show Education Card
+        // Hide Wizard steps
         document.querySelectorAll('.step-view').forEach(el => el.classList.add('hidden'));
+        // Show Education Only
         get('view-education').classList.remove('hidden');
-        get('progress-container').classList.add('hidden'); // Hide progress bar
+        get('progress-container').classList.add('hidden'); 
         
-        // Change the "Start" button on the education page to go back to dashboard
+        // Update the button to go back to dashboard
         const startBtn = get('view-education').querySelector('.btn-primary');
         if(startBtn) {
             startBtn.textContent = "Back to Dashboard";
             startBtn.onclick = () => window.location.href = 'dashboard.html';
         }
-        return; // Stop here, don't load the wizard
+        return; // STOP here
     }
-    // ----------------------------------
 
+    // 3. NORMAL WIZARD START
     const catParam = urlParams.get('category');
     if(catParam) currentCategory = catParam;
 
-    // Force Wizard to start at the new Step 0 (view-initial)
-    // We unhide the progress container just in case
+    // Start at Step 0 (which is now view-initial, skipping education)
     get('progress-container').classList.remove('hidden');
     nextStep(steps[0]);
 
@@ -70,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(get('inp-conf-1')) get('inp-conf-1').addEventListener('input', (e) => get('val-conf-1').textContent = e.target.value);
     if(get('inp-conf-2')) get('inp-conf-2').addEventListener('input', (e) => get('val-conf-2').textContent = e.target.value);
 });
+
 // --- NAVIGATION ---
 function startExercise() {
     get('progress-container').classList.remove('hidden');
@@ -84,14 +203,21 @@ function nextStep(targetId) {
     updateProgress();
     updateReferences();
 }
+
 function prevStep(targetId) {
     const currentId = steps[currentStepIndex];
     if (currentId) get(currentId).classList.add('hidden');
-
-    currentStepIndex = steps.indexOf(targetId);
-    get(targetId).classList.remove('hidden');
-    updateProgress();
+    
+    // Find index of target
+    // We need to look up the ID in the steps array to find the new index
+    const newIndex = steps.indexOf(targetId);
+    if(newIndex !== -1) {
+        currentStepIndex = newIndex;
+        get(targetId).classList.remove('hidden');
+        updateProgress();
+    }
 }
+
 function updateProgress() {
     const percent = (currentStepIndex / (steps.length - 1)) * 100;
     get('progress-bar').style.width = `${percent}%`;
@@ -136,7 +262,7 @@ function generateReview() {
         actionDate: actionDateIso,
         obstacles: get('inp-obstacles').value,
         strategy: get('inp-responses').value,
-        status: 'pending', // New status field
+        status: 'pending', 
         created: new Date().toISOString()
     });
 
