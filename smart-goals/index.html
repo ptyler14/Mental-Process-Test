@@ -100,28 +100,30 @@
 
             <div class="step-actions">
                 <button class="btn-secondary" onclick="prevStep('view-smart-breakdown')">Back</button>
-                <button class="btn-primary" onclick="nextStep('view-obstacles')">Next: Plan for Obstacles</button>
+                <button class="btn-primary" onclick="nextStep('view-breakdown')">Next: Set Date</button>
             </div>
         </div>
 
-        <div id="view-breakdown" class="screen hidden">
-            <h2>Breaking it Down</h2>
-            <div class="card info-box" style="margin-bottom:20px; padding:15px; background:#ecfdf5; border-color:var(--accent);">
-                <p><strong>Remember:</strong> Make your goal for this week specific, measurable, and achievable!</p>
+        <div id="view-breakdown" class="step-view hidden">
+            <div class="step-header">
+                <div class="step-number">03</div>
+                <h2>Make it Real</h2>
             </div>
-            
-            <label class="label-accent">What can you do THIS WEEK to move toward your goal?</label>
-            <textarea id="inp-this-week" placeholder="Be specific (e.g. Go for a 30 min walk tomorrow)"></textarea>
-            
-            <label class="label-accent">When exactly will you do it?</label>
-            <input type="text" id="action-datetime" class="flatpickr-input" placeholder="Select Date & Time...">
+            <p>Great! Now, let's schedule the very first action step.</p>
 
-            <label class="label-accent">What are 1-3 intermediate goals?</label>
-            <textarea id="inp-intermediate" placeholder="e.g. Exercise once a week for 2 weeks..."></textarea>
+            <div class="input-group">
+                <label>What is the immediate next action you will take?</label>
+                <input type="text" id="inp-this-week" placeholder="e.g. Call the gym, Buy the domain name...">
+            </div>
 
-            <div class="nav-row">
-                <button class="secondary-btn" onclick="prevStep('view-rewrite')">Back</button>
-                <button class="primary-btn" onclick="nextStep('view-obstacles')">Next</button>
+            <div class="input-group">
+                <label>When will you do this?</label>
+                <input type="text" id="action-datetime" placeholder="Select Date & Time...">
+            </div>
+
+            <div class="step-actions">
+                <button class="btn-secondary" onclick="prevStep('view-rewrite')">Back</button>
+                <button class="btn-primary" onclick="nextStep('view-obstacles')">Next: Plan for Obstacles</button>
             </div>
         </div>
 
