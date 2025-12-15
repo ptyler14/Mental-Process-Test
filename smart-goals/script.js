@@ -7,15 +7,15 @@ const steps = [
 let currentStepIndex = 0;
 let dateTimePicker = null;
 
-// New: We need to know which goal we are currently editing
+// We need to know which goal we are currently editing
 let currentGoalId = null; 
 let currentCategory = "Personal Growth"; // Default
+let goalPendingCheckIn = null; // Store the goal being checked
 
 // --- DOM HELPER ---
 const get = (id) => document.getElementById(id);
 
-// --- DASHBOARD LOGIC ---
-// --- DASHBOARD LOGIC ---
+// --- DASHBOARD LOGIC (Runs on dashboard.html) ---
 function loadDashboard() {
     const grid = get('goals-grid');
     if (!grid) return; // Safety check: stops this running on the wizard page
@@ -61,18 +61,16 @@ function loadDashboard() {
         grid.appendChild(catCard);
     });
 
-    // 4. Run the Check-In Scan (This is the new line!)
+    // 4. Run the Check-In Scan
     checkForDueGoals(goals);
 }
 
 function addNewCategory() {
     const newCat = prompt("Name your new Life Area (e.g., 'Spirituality', 'Hobbies'):");
     if (newCat && newCat.trim() !== "") {
-        // 1. Get existing list
         const defaults = ['Health', 'Wealth', 'Relationships', 'Personal Growth'];
         let userCats = JSON.parse(localStorage.getItem('user_categories')) || defaults;
         
-        // 2. Add new one (if unique)
         if (!userCats.includes(newCat)) {
             userCats.push(newCat);
             localStorage.setItem('user_categories', JSON.stringify(userCats));
@@ -84,34 +82,95 @@ function addNewCategory() {
 }
 
 function startNewGoal(category) {
-    // Redirect to the wizard with category param
     window.location.href = `index.html?category=${encodeURIComponent(category)}`;
 }
 
-// Helper to assign colors consistently to custom categories
-function getCategoryStyle(name) {
-    const styles = ['health', 'wealth', 'relations', 'growth'];
-    // Simple hash: sum of char codes % 4
-    const sum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return styles[sum % styles.length];
+// --- CHECK-IN SYSTEM LOGIC ---
+function checkForDueGoals(goals) {
+    const now = new Date();
+    
+    // Find a goal that:
+    // 1. Has a date set
+    // 2. Is in the past
+    // 3. Is NOT marked 'completed' or 'checked'
+    const dueGoal = goals.find(g => {
+        if (!g.actionDate || g.status === 'completed' || g.status === 'checked_with_obstacle') return false;
+        const actionDate = new Date(g.actionDate);
+        return actionDate < now;
+    });
+
+    if (dueGoal) {
+        openCheckInModal(dueGoal);
+    }
 }
 
-// Safety helper for strings in onclick
-function escapeJS(str) {
-    return str.replace(/'/g, "\\'");
+function openCheckInModal(goal) {
+    goalPendingCheckIn = goal;
+    const modal = document.getElementById('checkin-modal');
+    if(!modal) return; // Safety check
+
+    // Reset Modal State
+    document.getElementById('checkin-step-1').classList.remove('hidden');
+    document.getElementById('checkin-step-no').classList.add('hidden');
+    document.getElementById('checkin-step-yes').classList.add('hidden');
+    
+    // Fill Info
+    document.getElementById('checkin-text').innerHTML = `
+        You planned to <strong>${goal.nextAction}</strong> <br>
+        on ${formatDate(goal.actionDate)}.
+    `;
+    
+    modal.classList.remove('hidden');
+}
+
+function handleCheckIn(success) {
+    document.getElementById('checkin-step-1').classList.add('hidden');
+    
+    if (success) {
+        document.getElementById('checkin-step-yes').classList.remove('hidden');
+        updateGoalStatus(goalPendingCheckIn.id, 'completed');
+    } else {
+        document.getElementById('checkin-step-no').classList.remove('hidden');
+    }
+}
+
+function saveObstacle() {
+    const obstacle = document.getElementById('obstacle-input').value;
+    if (obstacle) {
+        // Mark as checked so it doesn't pop up again immediately
+        updateGoalStatus(goalPendingCheckIn.id, 'checked_with_obstacle');
+    }
+    closeCheckIn();
+}
+
+function closeCheckIn() {
+    document.getElementById('checkin-modal').classList.add('hidden');
+    loadDashboard(); // Refresh UI
+}
+
+function updateGoalStatus(id, status) {
+    let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
+    const index = goals.findIndex(g => g.id === id);
+    if (index !== -1) {
+        goals[index].status = status;
+        localStorage.setItem('user_goals_db', JSON.stringify(goals));
+    }
 }
 
 // --- WIZARD LOGIC (Runs on index.html) ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if we are on the Dashboard or the Wizard
-    if(get('goals-grid')) return; // We are on dashboard, stop here.
+    // If we are on dashboard page, run dashboard logic
+    if(get('goals-grid')) {
+        loadDashboard();
+        return;
+    }
 
-    // 1. Capture Category from URL
+    // Otherwise, we are on the Wizard page
     const urlParams = new URLSearchParams(window.location.search);
     const catParam = urlParams.get('category');
     if(catParam) currentCategory = catParam;
 
-    // 2. Init Flatpickr
+    // Init Flatpickr
     if (get('action-datetime')) {
         dateTimePicker = flatpickr("#action-datetime", {
             enableTime: true,
@@ -121,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Init Sliders
+    // Init Sliders
     if(get('inp-conf-1')) get('inp-conf-1').addEventListener('input', (e) => get('val-conf-1').textContent = e.target.value);
     if(get('inp-conf-2')) get('inp-conf-2').addEventListener('input', (e) => get('val-conf-2').textContent = e.target.value);
 });
@@ -148,11 +207,9 @@ function updateProgress() {
 }
 
 function updateReferences() {
-    // Update simple text refs
     const goal = get('inp-initial').value;
     document.querySelectorAll('.ref-goal').forEach(el => el.textContent = goal || "your goal");
 
-    // Update Step 3 Summary
     if (currentStepIndex === steps.indexOf('view-rewrite')) {
         get('ref-s').textContent = get('inp-s').value;
         get('ref-m').textContent = get('inp-m').value;
@@ -162,13 +219,11 @@ function updateReferences() {
 
 // --- SAVE & GENERATE ---
 function generateReview() {
-    // 1. Populate Review Screen
     get('out-smart-final').textContent = get('inp-smart-final').value;
     get('out-this-week').textContent = get('inp-this-week').value;
     get('out-obstacles').textContent = get('inp-obstacles').value;
     get('out-responses').textContent = get('inp-responses').value;
     
-    // 2. Handle Date/Time
     const actionName = get('inp-this-week').value || "Work on Goal";
     let actionDateIso = null;
     
@@ -178,9 +233,9 @@ function generateReview() {
         setupCalendarButtons(actionName, dateObj);
     }
 
-    // 3. SAVE TO DATABASE (Array)
+    // SAVE TO DATABASE
     saveGoalToDatabase({
-        id: Date.now(), // Simple unique ID
+        id: Date.now(),
         category: currentCategory,
         title: get('inp-smart-final').value || get('inp-initial').value,
         initialGoal: get('inp-initial').value,
@@ -189,6 +244,7 @@ function generateReview() {
         actionDate: actionDateIso,
         obstacles: get('inp-obstacles').value,
         strategy: get('inp-responses').value,
+        status: 'pending', // New status field
         created: new Date().toISOString()
     });
 
@@ -196,11 +252,8 @@ function generateReview() {
 }
 
 function saveGoalToDatabase(newGoal) {
-    // Get existing array
     const db = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-    // Add new goal
     db.push(newGoal);
-    // Save back
     localStorage.setItem('user_goals_db', JSON.stringify(db));
 }
 
@@ -209,6 +262,16 @@ function formatDate(isoString) {
     if(!isoString) return "No Date";
     const date = new Date(isoString);
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute:'2-digit' });
+}
+
+function getCategoryStyle(name) {
+    const styles = ['health', 'wealth', 'relations', 'growth'];
+    const sum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return styles[sum % styles.length];
+}
+
+function escapeJS(str) {
+    return str.replace(/'/g, "\\'");
 }
 
 function setupCalendarButtons(title, startDateObj) {
@@ -243,81 +306,4 @@ function downloadICS(startDate, endDate, title) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-}
-// --- CHECK-IN SYSTEM ---
-let goalPendingCheckIn = null; // Store the goal being checked
-
-function checkForDueGoals(goals) {
-    const now = new Date();
-    
-    // Find a goal that:
-    // 1. Has a date set
-    // 2. Is in the past
-    // 3. Is NOT marked 'completed' or 'checked'
-    const dueGoal = goals.find(g => {
-        if (!g.actionDate || g.status === 'completed') return false;
-        const actionDate = new Date(g.actionDate);
-        return actionDate < now;
-    });
-
-    if (dueGoal) {
-        openCheckInModal(dueGoal);
-    }
-}
-
-function openCheckInModal(goal) {
-    goalPendingCheckIn = goal;
-    const modal = document.getElementById('checkin-modal');
-    
-    // Reset Modal State
-    document.getElementById('checkin-step-1').classList.remove('hidden');
-    document.getElementById('checkin-step-no').classList.add('hidden');
-    document.getElementById('checkin-step-yes').classList.add('hidden');
-    
-    // Fill Info
-    document.getElementById('checkin-text').innerHTML = `
-        You planned to <strong>${goal.nextAction}</strong> <br>
-        on ${formatDate(goal.actionDate)}.
-    `;
-    
-    modal.classList.remove('hidden');
-}
-
-function handleCheckIn(success) {
-    document.getElementById('checkin-step-1').classList.add('hidden');
-    
-    if (success) {
-        document.getElementById('checkin-step-yes').classList.remove('hidden');
-        updateGoalStatus(goalPendingCheckIn.id, 'completed');
-        // Effect: Confetti could go here!
-    } else {
-        document.getElementById('checkin-step-no').classList.remove('hidden');
-        // We don't mark completed yet, we wait for obstacle input
-    }
-}
-
-function saveObstacle() {
-    const obstacle = document.getElementById('obstacle-input').value;
-    if (obstacle) {
-        // Save obstacle to goal history (Mockup logic for now)
-        console.log(`Obstacle logged for Goal ${goalPendingCheckIn.id}: ${obstacle}`);
-        
-        // Mark as checked so it doesn't pop up again immediately
-        updateGoalStatus(goalPendingCheckIn.id, 'checked_with_obstacle');
-    }
-    closeCheckIn();
-}
-
-function closeCheckIn() {
-    document.getElementById('checkin-modal').classList.add('hidden');
-    loadDashboard(); // Refresh UI to remove/update the goal card
-}
-
-function updateGoalStatus(id, status) {
-    let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-    const index = goals.findIndex(g => g.id === id);
-    if (index !== -1) {
-        goals[index].status = status;
-        localStorage.setItem('user_goals_db', JSON.stringify(goals));
-    }
 }
