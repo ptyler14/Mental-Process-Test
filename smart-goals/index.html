@@ -7,6 +7,36 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        /* Extra fix to make text boxes larger as requested */
+        textarea.large-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 80px; /* Makes them nice and tall */
+            margin-top: 5px;
+        }
+        .info-box-small {
+            background: #f0fdf4;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            color: #1e293b;
+        }
+        .info-box-small ul {
+            padding-left: 20px;
+            margin: 5px 0 0 0;
+        }
+        .info-box-small li {
+            margin-bottom: 4px;
+        }
+    </style>
 </head>
 <body>
 
@@ -24,13 +54,13 @@
 
         <div class="wizard-card">
             
-            <div id="view-education" class="step-view hidden">
+            <div id="view-initial" class="step-view">
                 <div class="step-header">
-                    <h2>Goal Setting 101</h2>
+                    <h2>The Starting Point</h2>
                 </div>
-                <div class="info-box">
-                    <p><strong>Why S.M.A.R.T.?</strong></p>
-                    <p>Most goals fail because they are vague ("I want to be rich"). Your brain can't act on vague instructions.</p>
+                
+                <div class="info-box-small">
+                    <p><strong>Remember: The best goals are S.M.A.R.T.</strong></p>
                     <ul>
                         <li><strong>S</strong>pecific (Who, what, where?)</li>
                         <li><strong>M</strong>easurable (How much? How many?)</li>
@@ -39,38 +69,42 @@
                         <li><strong>T</strong>ime-Bound (When is the deadline?)</li>
                     </ul>
                 </div>
-                <div class="step-actions">
-                    <button class="btn-primary" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
-                </div>
-            </div> <div id="view-initial" class="step-view">
-                <div class="step-header">
-                    <div class="step-number">01</div>
-                    <h2>The Starting Point</h2>
-                </div>
-                <p>What is your goal? Don't overthink it—just write it down.</p>
-                <textarea id="inp-initial" placeholder="e.g. I want to get in shape..."></textarea>
+
+                <p style="margin-bottom: 10px;">What is your goal? Don't overthink it—just write it down.</p>
+                <textarea id="inp-initial" class="large-input" placeholder="e.g. I want to get in shape..."></textarea>
                 
                 <div class="step-actions">
                     <button class="btn-primary" onclick="nextStep('view-smart-breakdown')">Next: Refine Goal</button>
                 </div>
             </div> <div id="view-smart-breakdown" class="step-view hidden">
                 <div class="step-header">
-                    <div class="step-number">02</div>
                     <h2>Refine Your Goal</h2>
                 </div>
-                <p>Let's make "<span class="ref-goal">your goal</span>" stronger using the S.M.A.R.T. method.</p>
+                <p>Let's make "<span class="ref-goal">your goal</span>" stronger. Break it down:</p>
                 
                 <div class="input-group">
                     <label><strong>Specific:</strong> What exactly do you want to accomplish?</label>
-                    <input type="text" id="inp-s" placeholder="Who, what, where, why?">
+                    <textarea id="inp-s" class="large-input" placeholder="Who, what, where, why?"></textarea>
                 </div>
+                
                 <div class="input-group">
                     <label><strong>Measurable:</strong> How will you know when it's done?</label>
-                    <input type="text" id="inp-m" placeholder="e.g. Lose 10 lbs, Save $500...">
+                    <textarea id="inp-m" class="large-input" placeholder="e.g. Lose 10 lbs, Save $500..."></textarea>
                 </div>
+
                 <div class="input-group">
-                    <label><strong>Time-Bound:</strong> When do you want to achieve this?</label>
-                    <input type="text" id="inp-t" placeholder="e.g. By December 31st...">
+                    <label><strong>Achievable:</strong> Is this realistic for you right now?</label>
+                    <textarea id="inp-a" class="large-input" placeholder="Do you have the skills and resources?"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label><strong>Relevant:</strong> Why does this matter to you?</label>
+                    <textarea id="inp-r" class="large-input" placeholder="How does this align with your values?"></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label><strong>Time-Bound:</strong> When is the deadline?</label>
+                    <textarea id="inp-t" class="large-input" placeholder="e.g. By December 31st..."></textarea>
                 </div>
 
                 <div class="step-actions">
@@ -79,7 +113,6 @@
                 </div>
             </div> <div id="view-rewrite" class="step-view hidden">
                 <div class="step-header">
-                    <div class="step-number">03</div>
                     <h2>Put it Together</h2>
                 </div>
                 <p>Now, rewrite your goal into one complete SMART statement.</p>
@@ -91,7 +124,7 @@
                 </div>
                 
                 <label class="label-accent">My SMART Goal is:</label>
-                <textarea id="inp-smart-final" placeholder="To be healthier, I will..."></textarea>
+                <textarea id="inp-smart-final" class="large-input" placeholder="To be healthier, I will..."></textarea>
 
                 <div class="step-actions">
                     <button class="btn-secondary" onclick="prevStep('view-smart-breakdown')">Back</button>
@@ -99,19 +132,18 @@
                 </div>
             </div> <div id="view-breakdown" class="step-view hidden">
                 <div class="step-header">
-                    <div class="step-number">04</div>
                     <h2>Make it Real</h2>
                 </div>
                 <p style="margin-bottom: 20px;">Great! Now, let's schedule the very first action step.</p>
 
                 <div class="input-group">
                     <label>What is the immediate next action you will take?</label>
-                    <input type="text" id="inp-this-week" placeholder="e.g. Call the gym, Buy the domain name...">
+                    <input type="text" id="inp-this-week" class="large-input" style="min-height: 50px;" placeholder="e.g. Call the gym, Buy the domain name...">
                 </div>
 
                 <div class="input-group">
                     <label>When will you do this?</label>
-                    <input type="text" id="action-datetime" placeholder="Select Date & Time...">
+                    <input type="text" id="action-datetime" class="large-input" style="min-height: 50px;" placeholder="Select Date & Time...">
                 </div>
 
                 <div class="step-actions">
@@ -120,18 +152,17 @@
                 </div>
             </div> <div id="view-obstacles" class="step-view hidden">
                 <div class="step-header">
-                    <div class="step-number">05</div>
                     <h2>Plan for Obstacles</h2>
                 </div>
                 <p>The path is rarely smooth. What might get in your way?</p>
                 
                 <div class="input-group">
                     <label><strong>Possible Obstacle:</strong> (Internal or External)</label>
-                    <input type="text" id="inp-obstacles" placeholder="e.g. I might get too tired after work...">
+                    <textarea id="inp-obstacles" class="large-input" placeholder="e.g. I might get too tired after work..."></textarea>
                 </div>
                 <div class="input-group">
                     <label><strong>My Strategy:</strong> (If X happens, I will do Y)</label>
-                    <input type="text" id="inp-responses" placeholder="e.g. I will pack my gym bag the night before...">
+                    <textarea id="inp-responses" class="large-input" placeholder="e.g. I will pack my gym bag the night before..."></textarea>
                 </div>
 
                 <div class="step-actions">
@@ -140,15 +171,14 @@
                 </div>
             </div> <div id="view-resources" class="step-view hidden">
                 <div class="step-header">
-                    <div class="step-number">06</div>
                     <h2>Confidence Check</h2>
                 </div>
                 <p>Do you have everything you need?</p>
 
                 <div class="input-group">
                     <label>On a scale of 1-10, how confident are you?</label>
-                    <input type="range" id="inp-conf-1" min="1" max="10" value="5">
-                    <p style="text-align: center; font-weight: bold; color: var(--primary-color);"><span id="val-conf-1">5</span>/10</p>
+                    <input type="range" id="inp-conf-1" min="1" max="10" value="5" style="width: 100%; margin: 20px 0;">
+                    <p style="text-align: center; font-weight: bold; color: var(--primary-color); font-size: 1.5rem;"><span id="val-conf-1">5</span>/10</p>
                 </div>
 
                 <div class="step-actions">
@@ -186,9 +216,7 @@
                     <button class="btn-primary" onclick="window.location.href='dashboard.html'">Save & Return to Dashboard</button>
                 </div>
             </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="script.js">
-        
-    </script>
+    <script src="script.js"></script>
 
 </body>
 </html>
