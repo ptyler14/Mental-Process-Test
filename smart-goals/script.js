@@ -1,161 +1,26 @@
 // --- STATE MANAGEMENT ---
+// UPDATED: Removed 'view-education' (start) and 'view-breakdown' (the 3 sub-goals)
 const steps = [
-    'view-education', 'view-initial', 'view-smart-breakdown', 
-    'view-rewrite', 'view-breakdown', 'view-obstacles', 
-    'view-resources', 'view-review'
+    'view-initial', 
+    'view-smart-breakdown', 
+    'view-rewrite', 
+    // 'view-breakdown' was here - DELETED
+    'view-obstacles', 
+    'view-resources', 
+    'view-review'
 ];
+
 let currentStepIndex = 0;
 let dateTimePicker = null;
-
-// We need to know which goal we are currently editing
 let currentGoalId = null; 
-let currentCategory = "Personal Growth"; // Default
-let goalPendingCheckIn = null; // Store the goal being checked
+let currentCategory = "Personal Growth"; 
+let goalPendingCheckIn = null; 
 
 // --- DOM HELPER ---
 const get = (id) => document.getElementById(id);
 
-// --- DASHBOARD LOGIC (Runs on dashboard.html) ---
-function loadDashboard() {
-    const grid = get('goals-grid');
-    if (!grid) return; // Safety check: stops this running on the wizard page
-
-    grid.innerHTML = ''; // Clear current grid
-
-    // 1. Get Categories (Defaults + User Added)
-    const defaults = ['Health', 'Wealth', 'Relationships', 'Personal Growth'];
-    let userCats = JSON.parse(localStorage.getItem('user_categories')) || defaults;
-
-    // 2. Get Goals
-    const goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-
-    // 3. Build the Cards dynamically
-    userCats.forEach(catName => {
-        // Create the Category Section
-        const catCard = document.createElement('div');
-        catCard.className = 'category-card';
-
-        // Filter goals for this category
-        const catGoals = goals.filter(g => g.category === catName);
-
-        // Determine Color Style
-        const styleClass = getCategoryStyle(catName);
-
-        catCard.innerHTML = `
-            <div class="cat-header ${styleClass}">
-                <h3>${catName}</h3>
-                <button class="btn-sm" onclick="startNewGoal('${escapeJS(catName)}')">+ New</button>
-            </div>
-            <div class="goal-list">
-                ${catGoals.length === 0 ? '<div class="empty-state">No active goals.</div>' : ''}
-                ${catGoals.map(goal => `
-                    <div class="mini-goal-card">
-                        <span class="mini-goal-title">${goal.title || "Untitled"}</span>
-                        <div class="mini-goal-next">Next: ${goal.nextAction || "None"}</div>
-                        <div class="mini-goal-date">📅 ${formatDate(goal.actionDate)}</div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-
-        grid.appendChild(catCard);
-    });
-
-    // 4. Run the Check-In Scan
-    checkForDueGoals(goals);
-}
-
-function addNewCategory() {
-    const newCat = prompt("Name your new Life Area (e.g., 'Spirituality', 'Hobbies'):");
-    if (newCat && newCat.trim() !== "") {
-        const defaults = ['Health', 'Wealth', 'Relationships', 'Personal Growth'];
-        let userCats = JSON.parse(localStorage.getItem('user_categories')) || defaults;
-        
-        if (!userCats.includes(newCat)) {
-            userCats.push(newCat);
-            localStorage.setItem('user_categories', JSON.stringify(userCats));
-            loadDashboard(); // Refresh screen
-        } else {
-            alert("That category already exists!");
-        }
-    }
-}
-
-function startNewGoal(category) {
-    window.location.href = `index.html?category=${encodeURIComponent(category)}`;
-}
-
-// --- CHECK-IN SYSTEM LOGIC ---
-function checkForDueGoals(goals) {
-    const now = new Date();
-    
-    // Find a goal that:
-    // 1. Has a date set
-    // 2. Is in the past
-    // 3. Is NOT marked 'completed' or 'checked'
-    const dueGoal = goals.find(g => {
-        if (!g.actionDate || g.status === 'completed' || g.status === 'checked_with_obstacle') return false;
-        const actionDate = new Date(g.actionDate);
-        return actionDate < now;
-    });
-
-    if (dueGoal) {
-        openCheckInModal(dueGoal);
-    }
-}
-
-function openCheckInModal(goal) {
-    goalPendingCheckIn = goal;
-    const modal = document.getElementById('checkin-modal');
-    if(!modal) return; // Safety check
-
-    // Reset Modal State
-    document.getElementById('checkin-step-1').classList.remove('hidden');
-    document.getElementById('checkin-step-no').classList.add('hidden');
-    document.getElementById('checkin-step-yes').classList.add('hidden');
-    
-    // Fill Info
-    document.getElementById('checkin-text').innerHTML = `
-        You planned to <strong>${goal.nextAction}</strong> <br>
-        on ${formatDate(goal.actionDate)}.
-    `;
-    
-    modal.classList.remove('hidden');
-}
-
-function handleCheckIn(success) {
-    document.getElementById('checkin-step-1').classList.add('hidden');
-    
-    if (success) {
-        document.getElementById('checkin-step-yes').classList.remove('hidden');
-        updateGoalStatus(goalPendingCheckIn.id, 'completed');
-    } else {
-        document.getElementById('checkin-step-no').classList.remove('hidden');
-    }
-}
-
-function saveObstacle() {
-    const obstacle = document.getElementById('obstacle-input').value;
-    if (obstacle) {
-        // Mark as checked so it doesn't pop up again immediately
-        updateGoalStatus(goalPendingCheckIn.id, 'checked_with_obstacle');
-    }
-    closeCheckIn();
-}
-
-function closeCheckIn() {
-    document.getElementById('checkin-modal').classList.add('hidden');
-    loadDashboard(); // Refresh UI
-}
-
-function updateGoalStatus(id, status) {
-    let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-    const index = goals.findIndex(g => g.id === id);
-    if (index !== -1) {
-        goals[index].status = status;
-        localStorage.setItem('user_goals_db', JSON.stringify(goals));
-    }
-}
+// ... (Keep your DASHBOARD LOGIC and CHECK-IN LOGIC here) ...
+// ... (Do not delete the loadDashboard, addNewCategory, startNewGoal, or CheckIn functions) ...
 
 // --- WIZARD LOGIC (Runs on index.html) ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -165,10 +30,31 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Otherwise, we are on the Wizard page
+    // --- NEW: EDUCATION MODE CHECK ---
     const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'education') {
+        // Hide Wizard, Show Education Card
+        document.querySelectorAll('.step-view').forEach(el => el.classList.add('hidden'));
+        get('view-education').classList.remove('hidden');
+        get('progress-container').classList.add('hidden'); // Hide progress bar
+        
+        // Change the "Start" button on the education page to go back to dashboard
+        const startBtn = get('view-education').querySelector('.btn-primary');
+        if(startBtn) {
+            startBtn.textContent = "Back to Dashboard";
+            startBtn.onclick = () => window.location.href = 'dashboard.html';
+        }
+        return; // Stop here, don't load the wizard
+    }
+    // ----------------------------------
+
     const catParam = urlParams.get('category');
     if(catParam) currentCategory = catParam;
+
+    // Force Wizard to start at the new Step 0 (view-initial)
+    // We unhide the progress container just in case
+    get('progress-container').classList.remove('hidden');
+    nextStep(steps[0]);
 
     // Init Flatpickr
     if (get('action-datetime')) {
@@ -184,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if(get('inp-conf-1')) get('inp-conf-1').addEventListener('input', (e) => get('val-conf-1').textContent = e.target.value);
     if(get('inp-conf-2')) get('inp-conf-2').addEventListener('input', (e) => get('val-conf-2').textContent = e.target.value);
 });
-
 // --- NAVIGATION ---
 function startExercise() {
     get('progress-container').classList.remove('hidden');
