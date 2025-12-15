@@ -15,6 +15,7 @@ let currentCategory = "Personal Growth"; // Default
 const get = (id) => document.getElementById(id);
 
 // --- DASHBOARD LOGIC ---
+// --- DASHBOARD LOGIC ---
 function loadDashboard() {
     const grid = get('goals-grid');
     if (!grid) return; // Safety check: stops this running on the wizard page
@@ -59,9 +60,9 @@ function loadDashboard() {
 
         grid.appendChild(catCard);
     });
-    // NEW LINE: Run the check-in scan
-checkForDueGoals(goals); 
-}
+
+    // 4. Run the Check-In Scan (This is the new line!)
+    checkForDueGoals(goals);
 }
 
 function addNewCategory() {
