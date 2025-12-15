@@ -1,7 +1,7 @@
 # 🛠️ Project Status Dashboard
 
-**Last Updated:** Dec 14, 2025
-**Current Focus:** expanding Goal Architect into a Dashboard System.
+**Last Updated:** Dec 15, 2025
+**Current Focus:** Polishing Goal Architect UI & Logic
 
 ---
 
@@ -12,49 +12,44 @@
 | **Process Hub** | 🟢 Beta | Mental Tools | Local Storage |
 | **Goal Architect** | 🟡 In Dev | Dashboard System | Local Storage |
 | **Mental Bank** | 🟢 Stable | Ledger | Supabase (Cloud) |
-| **The Placemat** | 🟢 Stable | Task Manager | Local Storage |
-| **Focus Wheel** | 🟢 Stable | Visual Shifting | Local Storage |
 
 ---
 
-## 📝 Recent Accomplishments
+## 📝 Recent Accomplishments (Dec 15)
 
-### 1. Goal Architect (Major Update)
-We shifted from a single-pass wizard to a **Dashboard System**.
-* [x] **New Flow:** Home Page -> Dashboard -> Wizard -> Dashboard.
-* [x] **Dynamic Dashboard:** Shows goals categorized by Life Area.
-* [x] **Custom Categories:** Users can add their own areas (e.g., "Spirituality").
-* [x] **Storage:** Supports saving multiple goals via LocalStorage.
+### 1. Goal Architect (Logic Overhaul)
+* [x] **Streamlined Wizard:** Removed "Goal Setting 101" and "3 Sub-goals" steps for faster entry.
+* [x] **Smart Dashboard:** Added logic to scan for due dates and trigger a "Check-In" modal.
+* [x] **Education Mode:** Moved the tutorial to a "Refresher" button on the dashboard instead of forcing it on every new goal.
+* [x] **Navigation Fixes:** Rewired the "Next/Back" buttons to handle the new streamlined flow.
 
-### 2. Ask & It Is Given Processes
-Batch 1 & 2 are complete with UX polish (Enter key, Edit/Delete buttons).
-* [x] **#1 Rampage:** Text Stream with Edit/Delete.
-* [x] **#2 Magic Box:** Visual List.
-* [x] **#3 Workshop:** Structured Form.
-* [x] **#4 VR (Viz):** Timer with Pause/Resume.
-* [x] **#5 Prosperity:** Bank logic with Day Counter.
-* [x] **#6 Meditation:** Breathing Animation.
+### 2. UI Updates
+* [x] **Dashboard Header:** Centered layout with a clear call-to-action for education.
+* [x] **Button Styling:** Standardized button classes (`btn-primary`) across the wizard (work in progress).
 
 ---
 
-## 🚀 Next Up: Goal Architect Features
+## 🚀 Next Up: The "Goal vs. Action" Refactor
 
-We are building the "Hierarchy of Goals" features using Local Storage first (Option A).
+We identified a critical UX improvement: Distinguishing the **Destination** from the **Steps**.
 
-1.  **The "Check-In" (Retrospective):**
-    * Logic to check if a goal's `actionDate` has passed.
-    * Modal to ask: "Did you do it?" + "What was the obstacle?"
-2.  **The Goal Pyramid (Superordinate Goals):**
-    * UI to capture "Identity/Values" (Why) before the "Action" (How).
-
----
-
-## 📋 Future Batch: Ask Processes
-* **#7 Evaluating Dreams:** Dream Logger.
-* **#8 Book of Positive Aspects:** Digital Notebook.
-* **#9 Scripting:** Creative Writing Interface.
+1.  **UI Separation:**
+    * **Goal:** The persistent container (e.g., "Run a Marathon").
+    * **Action:** The disposable task (e.g., "Buy Shoes") that lives inside the card.
+2.  **The Loop:**
+    * Checking off an Action should **not** close the Goal.
+    * It should trigger a prompt: *"What is the immediate next step?"*
+3.  **Visual Fixes:** Ensure all buttons on the "Starting Point" and "Make it Real" pages are rendering correctly.
 
 ---
 
-## 🐛 Tech Debt / Maintenance
-* **Supabase Migration:** Currently, the Dashboard and Ask Processes use `localStorage`. We will migrate them to Supabase later to enable cross-device syncing.
+## 🐛 Known Issues
+* **Button Styles:** Some buttons on the Wizard pages are reverting to default grey boxes (HTML structure needs closing tags verified).
+* **Navigation Leaks:** Buttons from one step occasionally appear on another (likely `</div>` mismatch in `index.html`).
+
+---
+
+## 📋 Future Roadmap
+* **Goal Pyramid:** Adding "Identity/Values" (Superordinate Goals) to the dashboard.
+* **Supabase Migration:** Eventually moving Goal data to the cloud for cross-device syncing.
+* **Ask Processes (Batch 3):** Evaluating Dreams, Book of Positive Aspects.
