@@ -14,48 +14,87 @@ let currentCategory = "Personal Growth"; // Default
 // --- DOM HELPER ---
 const get = (id) => document.getElementById(id);
 
-// --- DASHBOARD LOGIC (Runs on dashboard.html) ---
+// --- DASHBOARD LOGIC ---
 function loadDashboard() {
+    const grid = get('goals-grid');
+    if (!grid) return; // Safety check: stops this running on the wizard page
+
+    grid.innerHTML = ''; // Clear current grid
+
+    // 1. Get Categories (Defaults + User Added)
+    const defaults = ['Health', 'Wealth', 'Relationships', 'Personal Growth'];
+    let userCats = JSON.parse(localStorage.getItem('user_categories')) || defaults;
+
+    // 2. Get Goals
     const goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-    
-    // Clear all lists first
-    ['health', 'wealth', 'relations', 'growth'].forEach(cat => {
-        const list = get(`list-${cat}`);
-        if(list) list.innerHTML = '<div class="empty-state">No active goals.</div>';
-    });
 
-    // Populate lists
-    goals.forEach(goal => {
-        const listId = getListIdByCategory(goal.category);
-        const list = get(listId);
-        
-        // Remove empty state if it exists
-        if(list.querySelector('.empty-state')) list.innerHTML = '';
+    // 3. Build the Cards dynamically
+    userCats.forEach(catName => {
+        // Create the Category Section
+        const catCard = document.createElement('div');
+        catCard.className = 'category-card';
 
-        // Create Card
-        const card = document.createElement('div');
-        card.className = 'mini-goal-card';
-        card.onclick = () => editGoal(goal.id); // Future: Edit functionality
-        
-        card.innerHTML = `
-            <span class="mini-goal-title">${goal.title || "Untitled Goal"}</span>
-            <div class="mini-goal-next">Next: ${goal.nextAction || "No action set"}</div>
-            <div class="mini-goal-date">📅 ${formatDate(goal.actionDate)}</div>
+        // Filter goals for this category
+        const catGoals = goals.filter(g => g.category === catName);
+
+        // Determine Color Style
+        const styleClass = getCategoryStyle(catName);
+
+        catCard.innerHTML = `
+            <div class="cat-header ${styleClass}">
+                <h3>${catName}</h3>
+                <button class="btn-sm" onclick="startNewGoal('${escapeJS(catName)}')">+ New</button>
+            </div>
+            <div class="goal-list">
+                ${catGoals.length === 0 ? '<div class="empty-state">No active goals.</div>' : ''}
+                ${catGoals.map(goal => `
+                    <div class="mini-goal-card">
+                        <span class="mini-goal-title">${goal.title || "Untitled"}</span>
+                        <div class="mini-goal-next">Next: ${goal.nextAction || "None"}</div>
+                        <div class="mini-goal-date">📅 ${formatDate(goal.actionDate)}</div>
+                    </div>
+                `).join('')}
+            </div>
         `;
-        list.appendChild(card);
+
+        grid.appendChild(catCard);
     });
 }
 
-function getListIdByCategory(cat) {
-    if(cat === 'Health') return 'list-health';
-    if(cat === 'Wealth') return 'list-wealth';
-    if(cat === 'Relationships') return 'list-relations';
-    return 'list-growth';
+function addNewCategory() {
+    const newCat = prompt("Name your new Life Area (e.g., 'Spirituality', 'Hobbies'):");
+    if (newCat && newCat.trim() !== "") {
+        // 1. Get existing list
+        const defaults = ['Health', 'Wealth', 'Relationships', 'Personal Growth'];
+        let userCats = JSON.parse(localStorage.getItem('user_categories')) || defaults;
+        
+        // 2. Add new one (if unique)
+        if (!userCats.includes(newCat)) {
+            userCats.push(newCat);
+            localStorage.setItem('user_categories', JSON.stringify(userCats));
+            loadDashboard(); // Refresh screen
+        } else {
+            alert("That category already exists!");
+        }
+    }
 }
 
 function startNewGoal(category) {
     // Redirect to the wizard with category param
     window.location.href = `index.html?category=${encodeURIComponent(category)}`;
+}
+
+// Helper to assign colors consistently to custom categories
+function getCategoryStyle(name) {
+    const styles = ['health', 'wealth', 'relations', 'growth'];
+    // Simple hash: sum of char codes % 4
+    const sum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return styles[sum % styles.length];
+}
+
+// Safety helper for strings in onclick
+function escapeJS(str) {
+    return str.replace(/'/g, "\\'");
 }
 
 // --- WIZARD LOGIC (Runs on index.html) ---
