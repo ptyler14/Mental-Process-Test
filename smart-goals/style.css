@@ -197,3 +197,43 @@ input[type=range] { width: 100%; }
     border: 1px solid #cbd5e1;
     border-radius: 8px;
 }
+/* --- BUTTON FIXES --- */
+.step-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 10px;
+}
+
+.btn-primary {
+    background-color: #10b981; /* Green */
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px; /* Rounded Corners */
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary:hover {
+    background-color: #059669; /* Darker Green */
+}
+
+.btn-secondary {
+    background-color: #f1f5f9; /* Light Grey */
+    color: #64748b;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #e2e8f0;
+}
