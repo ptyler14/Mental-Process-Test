@@ -150,3 +150,50 @@ input[type=range] { width: 100%; }
 .mini-goal-title { font-weight: bold; font-size: 0.95rem; display: block; margin-bottom: 4px;}
 .mini-goal-next { font-size: 0.8rem; color: #64748b; }
 .mini-goal-date { font-size: 0.75rem; color: var(--accent); font-weight: bold; }
+/* --- CHECK-IN MODAL --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay.hidden { display: none; }
+
+.modal-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.question { font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-bottom: 15px; }
+
+/* Input inside modal */
+#obstacle-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+}
