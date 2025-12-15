@@ -19,49 +19,14 @@
             </div>
             </header>
 
-        <div class="goals-grid">
-            
-            <div class="category-card">
-                <div class="cat-header health">
-                    <h3>💪 Health & Body</h3>
-                    <button class="btn-sm" onclick="startNewGoal('Health')">+ New</button>
-                </div>
-                <div id="list-health" class="goal-list">
-                    <div class="empty-state">No active goals.</div>
-                </div>
-            </div>
-
-            <div class="category-card">
-                <div class="cat-header wealth">
-                    <h3>💰 Career & Wealth</h3>
-                    <button class="btn-sm" onclick="startNewGoal('Wealth')">+ New</button>
-                </div>
-                <div id="list-wealth" class="goal-list">
-                    <div class="empty-state">No active goals.</div>
-                </div>
-            </div>
-
-            <div class="category-card">
-                <div class="cat-header relations">
-                    <h3>❤️ Relationships</h3>
-                    <button class="btn-sm" onclick="startNewGoal('Relationships')">+ New</button>
-                </div>
-                <div id="list-relations" class="goal-list">
-                    <div class="empty-state">No active goals.</div>
-                </div>
-            </div>
-
-            <div class="category-card">
-                <div class="cat-header growth">
-                    <h3>🧠 Personal Growth</h3>
-                    <button class="btn-sm" onclick="startNewGoal('Personal Growth')">+ New</button>
-                </div>
-                <div id="list-growth" class="goal-list">
-                    <div class="empty-state">No active goals.</div>
-                </div>
-            </div>
-
+        <div style="margin-bottom: 20px; text-align: right;">
+            <button class="btn-primary" onclick="addNewCategory()" style="padding: 8px 16px; font-size: 0.9rem;">
+                + Add New Area
+            </button>
         </div>
+
+        <div id="goals-grid" class="goals-grid">
+            </div>
     </div>
 
     <script src="script.js"></script>
