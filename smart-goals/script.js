@@ -59,6 +59,9 @@ function loadDashboard() {
 
         grid.appendChild(catCard);
     });
+    // NEW LINE: Run the check-in scan
+checkForDueGoals(goals); 
+}
 }
 
 function addNewCategory() {
@@ -239,4 +242,81 @@ function downloadICS(startDate, endDate, title) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+// --- CHECK-IN SYSTEM ---
+let goalPendingCheckIn = null; // Store the goal being checked
+
+function checkForDueGoals(goals) {
+    const now = new Date();
+    
+    // Find a goal that:
+    // 1. Has a date set
+    // 2. Is in the past
+    // 3. Is NOT marked 'completed' or 'checked'
+    const dueGoal = goals.find(g => {
+        if (!g.actionDate || g.status === 'completed') return false;
+        const actionDate = new Date(g.actionDate);
+        return actionDate < now;
+    });
+
+    if (dueGoal) {
+        openCheckInModal(dueGoal);
+    }
+}
+
+function openCheckInModal(goal) {
+    goalPendingCheckIn = goal;
+    const modal = document.getElementById('checkin-modal');
+    
+    // Reset Modal State
+    document.getElementById('checkin-step-1').classList.remove('hidden');
+    document.getElementById('checkin-step-no').classList.add('hidden');
+    document.getElementById('checkin-step-yes').classList.add('hidden');
+    
+    // Fill Info
+    document.getElementById('checkin-text').innerHTML = `
+        You planned to <strong>${goal.nextAction}</strong> <br>
+        on ${formatDate(goal.actionDate)}.
+    `;
+    
+    modal.classList.remove('hidden');
+}
+
+function handleCheckIn(success) {
+    document.getElementById('checkin-step-1').classList.add('hidden');
+    
+    if (success) {
+        document.getElementById('checkin-step-yes').classList.remove('hidden');
+        updateGoalStatus(goalPendingCheckIn.id, 'completed');
+        // Effect: Confetti could go here!
+    } else {
+        document.getElementById('checkin-step-no').classList.remove('hidden');
+        // We don't mark completed yet, we wait for obstacle input
+    }
+}
+
+function saveObstacle() {
+    const obstacle = document.getElementById('obstacle-input').value;
+    if (obstacle) {
+        // Save obstacle to goal history (Mockup logic for now)
+        console.log(`Obstacle logged for Goal ${goalPendingCheckIn.id}: ${obstacle}`);
+        
+        // Mark as checked so it doesn't pop up again immediately
+        updateGoalStatus(goalPendingCheckIn.id, 'checked_with_obstacle');
+    }
+    closeCheckIn();
+}
+
+function closeCheckIn() {
+    document.getElementById('checkin-modal').classList.add('hidden');
+    loadDashboard(); // Refresh UI to remove/update the goal card
+}
+
+function updateGoalStatus(id, status) {
+    let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
+    const index = goals.findIndex(g => g.id === id);
+    if (index !== -1) {
+        goals[index].status = status;
+        localStorage.setItem('user_goals_db', JSON.stringify(goals));
+    }
 }
