@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
-        /* Extra fix to make text boxes larger as requested */
+        /* Extra fix to make text boxes larger */
         textarea.large-input {
             width: 100%;
             padding: 12px;
@@ -17,24 +17,29 @@
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
             resize: vertical;
-            min-height: 80px; /* Makes them nice and tall */
+            min-height: 80px; 
             margin-top: 5px;
         }
         .info-box-small {
             background: #f0fdf4;
             border-left: 4px solid #10b981;
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
             border-radius: 4px;
             font-size: 0.95rem;
             color: #1e293b;
+            line-height: 1.5;
         }
-        .info-box-small ul {
-            padding-left: 20px;
-            margin: 5px 0 0 0;
+        .info-box-small h3 {
+            margin: 0 0 8px 0;
+            font-size: 1rem;
+            color: #065f46;
         }
-        .info-box-small li {
-            margin-bottom: 4px;
+        .info-box-small p {
+            margin-bottom: 15px;
+        }
+        .info-box-small p:last-child {
+            margin-bottom: 0;
         }
     </style>
 </head>
@@ -60,23 +65,22 @@
                 </div>
                 
                 <div class="info-box-small">
-                    <p><strong>Remember: The best goals are S.M.A.R.T.</strong></p>
-                    <ul>
-                        <li><strong>S</strong>pecific (Who, what, where?)</li>
-                        <li><strong>M</strong>easurable (How much? How many?)</li>
-                        <li><strong>A</strong>chievable (Is it realistic?)</li>
-                        <li><strong>R</strong>elevant (Does it matter to you?)</li>
-                        <li><strong>T</strong>ime-Bound (When is the deadline?)</li>
-                    </ul>
+                    <h3>What are SMART goals?</h3>
+                    <p>SMART goals are a way of setting goals that makes it more likely that we will achieve them. SMART stands for specific, measurable, achievable, relevant, and time-bound.</p>
+                    
+                    <h3>When could a SMART goal be helpful?</h3>
+                    <p>When we have something we’d like to work toward, writing a SMART goal can help set us up to take action. This exercise walks you through writing a SMART goal step by step. It helps you to think through smaller goals on the way to your main goal and plan for the challenges that may arise along the way.</p>
                 </div>
 
-                <p style="margin-bottom: 10px;">What is your goal? Don't overthink it—just write it down.</p>
+                <p style="margin-bottom: 10px; font-weight: 600;">Ready? Just write down your initial thought:</p>
                 <textarea id="inp-initial" class="large-input" placeholder="e.g. I want to get in shape..."></textarea>
                 
                 <div class="step-actions">
                     <button class="btn-primary" onclick="nextStep('view-smart-breakdown')">Next: Refine Goal</button>
                 </div>
-            </div> <div id="view-smart-breakdown" class="step-view hidden">
+            </div>
+
+            <div id="view-smart-breakdown" class="step-view hidden">
                 <div class="step-header">
                     <h2>Refine Your Goal</h2>
                 </div>
@@ -111,7 +115,9 @@
                     <button class="btn-secondary" onclick="prevStep('view-initial')">Back</button>
                     <button class="btn-primary" onclick="nextStep('view-rewrite')">Next: Put it Together</button>
                 </div>
-            </div> <div id="view-rewrite" class="step-view hidden">
+            </div>
+
+            <div id="view-rewrite" class="step-view hidden">
                 <div class="step-header">
                     <h2>Put it Together</h2>
                 </div>
@@ -130,7 +136,9 @@
                     <button class="btn-secondary" onclick="prevStep('view-smart-breakdown')">Back</button>
                     <button class="btn-primary" onclick="nextStep('view-breakdown')">Next: Make it Real</button>
                 </div>
-            </div> <div id="view-breakdown" class="step-view hidden">
+            </div>
+
+            <div id="view-breakdown" class="step-view hidden">
                 <div class="step-header">
                     <h2>Make it Real</h2>
                 </div>
@@ -138,10 +146,10 @@
 
                 <div class="input-group">
                     <label>What is the immediate next action you will take?</label>
-                    <input type="text" id="inp-this-week" class="large-input" style="min-height: 50px;" placeholder="e.g. Call the gym, Buy the domain name...">
+                    <textarea id="inp-this-week" class="large-input" style="min-height: 60px;" placeholder="e.g. Call the gym, Buy the domain name..."></textarea>
                 </div>
 
-                <div class="input-group">
+                <div class="input-group" style="margin-top: 25px;">
                     <label>When will you do this?</label>
                     <input type="text" id="action-datetime" class="large-input" style="min-height: 50px;" placeholder="Select Date & Time...">
                 </div>
@@ -150,7 +158,9 @@
                     <button class="btn-secondary" onclick="prevStep('view-rewrite')">Back</button>
                     <button class="btn-primary" onclick="nextStep('view-obstacles')">Next: Plan for Obstacles</button>
                 </div>
-            </div> <div id="view-obstacles" class="step-view hidden">
+            </div>
+
+            <div id="view-obstacles" class="step-view hidden">
                 <div class="step-header">
                     <h2>Plan for Obstacles</h2>
                 </div>
@@ -169,7 +179,9 @@
                     <button class="btn-secondary" onclick="prevStep('view-breakdown')">Back</button>
                     <button class="btn-primary" onclick="nextStep('view-resources')">Next: Resources</button>
                 </div>
-            </div> <div id="view-resources" class="step-view hidden">
+            </div>
+
+            <div id="view-resources" class="step-view hidden">
                 <div class="step-header">
                     <h2>Confidence Check</h2>
                 </div>
@@ -185,7 +197,9 @@
                     <button class="btn-secondary" onclick="prevStep('view-obstacles')">Back</button>
                     <button class="btn-primary" onclick="generateReview()">Next: Review Goal</button>
                 </div>
-            </div> <div id="view-review" class="step-view hidden">
+            </div>
+
+            <div id="view-review" class="step-view hidden">
                 <div class="step-header">
                     <h2>Your Goal Blueprint 🚀</h2>
                 </div>
@@ -213,9 +227,12 @@
                 </div>
 
                 <div class="step-actions">
+                    <button class="btn-secondary" onclick="prevStep('view-resources')">Back</button>
                     <button class="btn-primary" onclick="window.location.href='dashboard.html'">Save & Return to Dashboard</button>
                 </div>
-            </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+            </div>
+
+        </div> </div> <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="script.js"></script>
 
 </body>
