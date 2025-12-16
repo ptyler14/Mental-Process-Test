@@ -7,253 +7,336 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <style>
-        /* Dashboard specific styles */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px 0;
+        /* --- DASHBOARD STYLES --- */
+        body {
+            background-color: #f8fafc; /* Light background */
         }
         
-        .category-column {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 15px;
-            border: 1px solid #e2e8f0;
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            gap: 15px;
         }
 
-        .category-title {
-            font-family: 'Merriweather', serif;
-            font-size: 1.2rem;
-            color: #1e293b;
-            border-bottom: 2px solid #10b981;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        .goal-card {
+        /* Category Sections */
+        .category-section {
             background: white;
             border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .category-header {
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #1e293b;
+            font-family: 'Merriweather', serif;
+        }
+
+        .category-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Grid for Cards inside a Category */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* Goal Card Styling */
+        .goal-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
         }
 
         .goal-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: #94a3b8;
         }
 
-        .goal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-
-        .goal-header h4 {
-            margin: 0;
-            font-size: 1rem;
-            color: #334155;
+        .goal-title {
             font-weight: 600;
-            width: 80%;
+            font-size: 1.1rem;
+            color: #0f172a;
+            margin-bottom: 5px;
+            padding-right: 60px; /* Space for buttons */
         }
 
-        .goal-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-icon {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            padding: 2px;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-        }
-        .btn-icon:hover { opacity: 1; }
-        .btn-delete:hover { color: #ef4444; }
-        .btn-archive:hover { color: #64748b; }
-
-        .next-action {
-            background: #f0fdf4;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-        }
-
-        .next-action label {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-
-        .date-badge {
-            font-size: 0.75rem;
+        .goal-original {
+            font-size: 0.85rem;
             color: #64748b;
-            margin-top: 5px;
+            font-style: italic;
+            margin-bottom: 15px;
             display: block;
         }
 
-        .empty-state {
-            text-align: center;
-            color: #94a3b8;
-            font-style: italic;
-            padding: 20px;
+        /* Card Action Buttons (Delete/Archive) */
+        .card-tools {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
         }
+
+        .btn-tool {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+            padding: 2px;
+        }
+        .btn-tool:hover { opacity: 1; }
+        .btn-delete:hover { color: #ef4444; }
+
+        /* The Next Step Box */
+        .next-step-box {
+            background: #f0fdf4; /* Light Green */
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .next-step-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .next-step-row input[type="checkbox"] {
+            margin-top: 4px;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+        }
+
+        .step-text {
+            font-size: 0.95rem;
+            color: #166534;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .due-date {
+            display: block;
+            font-size: 0.75rem;
+            color: #15803d;
+            margin-top: 4px;
+            margin-left: 26px; /* Align with text */
+        }
+        
+        /* Modal for Education */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .modal-show { display: flex; }
+
     </style>
 </head>
 <body>
 
     <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
             <div>
                 <h1>My Life Hub</h1>
                 <p class="subtitle">Your command center.</p>
             </div>
-            <button class="btn-primary" onclick="window.location.href='index.html'">+ New Goal</button>
+            
+            <div class="header-actions">
+                <button class="btn-secondary" onclick="toggleEducation()">🎓 Goal 101</button>
+                <button class="btn-primary" onclick="window.location.href='index.html'">+ New Goal</button>
+            </div>
         </header>
 
-        <div class="dashboard-grid">
-            <div class="category-column" id="col-Health">
-                <div class="category-title">Health & Body</div>
-                <div class="goals-container" id="list-Health"></div>
+        <div id="education-modal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>Goal Setting 101</h2>
+                <div class="info-box-small" style="background:#f0fdf4; padding:15px; border-radius:8px; border-left:4px solid #10b981;">
+                    <p><strong>S.M.A.R.T. Goals are:</strong></p>
+                    <ul style="padding-left:20px; margin-top:5px;">
+                        <li><strong>S</strong>pecific</li>
+                        <li><strong>M</strong>easurable</li>
+                        <li><strong>A</strong>chievable</li>
+                        <li><strong>R</strong>elevant</li>
+                        <li><strong>T</strong>ime-Bound</li>
+                    </ul>
+                </div>
+                <p>Use the "New Goal" button to launch the wizard. It will guide you through breaking down your big dreams into small, actionable steps.</p>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button class="btn-secondary" onclick="toggleEducation()">Close</button>
+                </div>
             </div>
+        </div>
 
-            <div class="category-column" id="col-Wealth">
-                <div class="category-title">Wealth & Career</div>
-                <div class="goals-container" id="list-Wealth"></div>
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">💪</span>
+                <h2>Health & Body</h2>
             </div>
+            <div id="list-Health" class="goals-grid">
+                </div>
+        </div>
 
-            <div class="category-column" id="col-Relationships">
-                <div class="category-title">Relationships</div>
-                <div class="goals-container" id="list-Relationships"></div>
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">💼</span>
+                <h2>Wealth & Career</h2>
             </div>
+            <div id="list-Wealth" class="goals-grid"></div>
+        </div>
 
-            <div class="category-column" id="col-Wisdom">
-                <div class="category-title">Wisdom & Self</div>
-                <div class="goals-container" id="list-Wisdom"></div>
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">❤️</span>
+                <h2>Relationships</h2>
             </div>
+            <div id="list-Relationships" class="goals-grid"></div>
+        </div>
+
+        <div class="category-section">
+            <div class="category-header">
+                <span class="category-icon">🧠</span>
+                <h2>Wisdom & Self</h2>
+            </div>
+            <div id="list-Wisdom" class="goals-grid"></div>
         </div>
 
     </div>
 
     <script>
-        // --- DASHBOARD LOGIC ---
-
-        // 1. Load Goals on Startup
-        // We name this 'loadDashboard' to match any potential existing references
+        // --- 1. Load Goals ---
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboard();
         });
 
         function loadDashboard() {
-            // Get goals from storage
             const goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
             
-            // Clear all columns first
+            // Clear containers
             ['Health', 'Wealth', 'Relationships', 'Wisdom'].forEach(cat => {
-                const container = document.getElementById(`list-${cat}`);
-                if(container) container.innerHTML = '';
+                document.getElementById(`list-${cat}`).innerHTML = '';
             });
 
-            // Filter out archived goals
+            // Filter out archived
             const activeGoals = goals.filter(g => !g.archived);
 
-            if (activeGoals.length === 0) {
-                return; // Nothing to show
-            }
-
-            // Loop through goals and create cards
             activeGoals.forEach(goal => {
-                // Default to Wisdom if category is missing or invalid
-                let category = goal.category || 'Wisdom'; 
-                
-                // Ensure the category actually exists in our HTML
+                let category = goal.category || 'Wisdom';
+                // Safety check for category names
                 if (!['Health', 'Wealth', 'Relationships', 'Wisdom'].includes(category)) {
                     category = 'Wisdom';
                 }
 
-                const listContainer = document.getElementById(`list-${category}`);
-                
-                if (listContainer) {
-                    const card = createGoalCard(goal);
-                    listContainer.appendChild(card);
+                const container = document.getElementById(`list-${category}`);
+                if (container) {
+                    container.appendChild(createGoalCard(goal));
                 }
             });
+            
+            // Optional: If a section is empty, maybe show a placeholder? 
+            // For now, we leave it clean/empty.
         }
 
-        // 2. Function to Create the HTML for One Card
+        // --- 2. Create Card HTML ---
         function createGoalCard(goal) {
             const div = document.createElement('div');
             div.className = 'goal-card';
             
-            // Formatting the Date
+            // Date Format
             let dateDisplay = "No date set";
             if(goal.actionDate) {
-                // Use built-in JS date formatting
-                dateDisplay = new Date(goal.actionDate).toLocaleDateString() + ' ' + 
-                              new Date(goal.actionDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const d = new Date(goal.actionDate);
+                dateDisplay = d.toLocaleDateString() + ' at ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             }
 
             div.innerHTML = `
-                <div class="goal-header">
-                    <h4>${goal.finalSmart || goal.initialGoal}</h4>
-                    <div class="goal-actions">
-                        <button class="btn-icon btn-archive" onclick="archiveGoal('${goal.id}')" title="Archive (Hide)">📂</button>
-                        <button class="btn-icon btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete Permanently">🗑️</button>
-                    </div>
-                </div>
-                
-                <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 8px;">
-                    <em>Original: ${goal.initialGoal}</em>
+                <div class="card-tools">
+                    <button class="btn-tool" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
+                    <button class="btn-tool btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete">🗑️</button>
                 </div>
 
-                <div class="next-action">
-                    <label>
+                <div class="goal-title">${goal.finalSmart || goal.initialGoal}</div>
+                <span class="goal-original">Started as: "${goal.initialGoal}"</span>
+
+                <div class="next-step-box">
+                    <div class="next-step-row">
                         <input type="checkbox" onchange="completeAction('${goal.id}')">
-                        <span>${goal.nextAction}</span>
-                    </label>
-                    <span class="date-badge">📅 Due: ${dateDisplay}</span>
+                        <span class="step-text">${goal.nextAction || 'No action set'}</span>
+                    </div>
+                    <span class="due-date">📅 Due: ${dateDisplay}</span>
                 </div>
             `;
             return div;
         }
 
-        // 3. DELETE Function
+        // --- 3. Education Modal Toggle ---
+        function toggleEducation() {
+            const modal = document.getElementById('education-modal');
+            if(modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            } else {
+                modal.style.display = 'flex';
+            }
+        }
+
+        // --- 4. Logic Functions ---
         window.deleteGoal = function(id) {
-            if(confirm("Are you sure you want to permanently delete this goal?")) {
+            if(confirm("Permanently delete this goal?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
                 goals = goals.filter(g => g.id !== id);
                 localStorage.setItem('user_goals_db', JSON.stringify(goals));
-                loadDashboard(); // Re-draw
+                loadDashboard();
             }
         };
 
-        // 4. ARCHIVE Function
         window.archiveGoal = function(id) {
-            if(confirm("Archive this goal? It will be hidden from this view.")) {
+            if(confirm("Archive this goal?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
                 const index = goals.findIndex(g => g.id === id);
-                if (index > -1) {
+                if(index > -1) {
                     goals[index].archived = true;
                     localStorage.setItem('user_goals_db', JSON.stringify(goals));
-                    loadDashboard(); // Re-draw
+                    loadDashboard();
                 }
             }
         };
 
-        // 5. COMPLETE ACTION Placeholder
         window.completeAction = function(id) {
-            alert("Great job! Step completed. (We will add the 'Next Step' popup logic soon!)");
+            alert("Step Completed! (Future: Pop up 'Next Step' wizard)");
         };
-
     </script>
 </body>
 </html>
