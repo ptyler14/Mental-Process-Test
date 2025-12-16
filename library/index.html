@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Wisdom Vault</title>
+    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
+    <style>
+        /* LIBRARY SPECIFIC OVERRIDES */
+        body { 
+            padding: 0; margin: 0; 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex;
+            background-color: #f8fafc;
+        }
+
+        /* 1. SIDEBAR */
+        .sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .book-item {
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+        .book-item:hover { background: #f0f7fa; border-color: #e0e0e0; }
+        .book-item.active { background: #e0f7fa; border-color: var(--accent); }
+
+        .book-cover-mini {
+            width: 10px; height: 40px; border-radius: 2px; display: inline-block;
+            vertical-align: middle; margin-right: 10px;
+        }
+
+        /* 2. READER AREA */
+        .reader-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: white;
+        }
+
+        .reader-header {
+            padding: 20px 40px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+        }
+
+        .chapter-tabs {
+            padding: 0 40px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            background: #fafafa;
+        }
+
+        .tab {
+            padding: 15px 0;
+            cursor: pointer;
+            color: #7f8c8d;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .tab:hover { color: var(--primary); }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .content-scroll {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* TYPOGRAPHY */
+        .prose { font-family: 'Merriweather', serif; font-size: 1.15rem; line-height: 1.8; color: #333; }
+        .prose h3 { font-family: 'Inter', sans-serif; margin-top: 30px; color: var(--primary); font-weight: 600; }
+        
+        .highlight-box {
+            background: #fff3e0; border-left: 4px solid #d35400;
+            padding: 20px; margin: 20px 0; font-family: 'Inter', sans-serif; font-size: 0.95rem;
+        }
+
+        /* VIDEO */
+        .video-container {
+            margin: 30px 0;
+            position: relative;
+            padding-bottom: 56.25%; 
+            height: 0; overflow: hidden; border-radius: 8px; background: #000;
+        }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:0; }
+
+        /* ACTION BAR */
+        .action-bar {
+            background: #f8fafc; border-top: 1px solid #e0e0e0; padding: 20px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .back-link { text-decoration: none; color: #7f8c8d; font-size: 0.9rem; font-weight: bold; }
+        .back-link:hover { color: var(--primary); }
+
+        .empty-state { display: flex; justify-content: center; align-items: center; height: 100%; color: #999; font-style: italic; }
+        
+        /* Mobile adjustment */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow: auto; }
+            .sidebar { width: 100%; height: 200px; }
+            .reader-area { height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html" class="back-link">⬅ Main Menu</a>
+            <h2 style="margin: 10px 0 0 0; font-size: 1.2rem; color: var(--primary);">The Wisdom Vault</h2>
+        </div>
+        <div id="book-list">
+            </div>
+    </aside>
+
+    <main class="reader-area">
+        <div id="reader-content" style="height:100%; display:flex; flex-direction:column;">
+            <div class="empty-state">Select a book from the sidebar to begin teaching.</div>
+        </div>
+    </main>
+
+    <script src="books.js"></script>
+    
+    <script>
+        let currentBook = null;
+        let currentChapterIndex = 0;
+
+        document.addEventListener('DOMContentLoaded', renderBookList);
+
+        function renderBookList() {
+            const list = document.getElementById('book-list');
+            list.innerHTML = '';
+
+            LIBRARY_DATA.forEach(book => {
+                const item = document.createElement('div');
+                item.className = 'book-item';
+                item.onclick = () => loadBook(book.id);
+                // Simple highlight logic
+                item.setAttribute('data-id', book.id);
+                
+                item.innerHTML = `
+                    <div class="book-cover-mini" style="background:${book.coverColor}"></div>
+                    <span style="font-weight:600; font-size:0.9rem;">${book.title}</span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function loadBook(bookId) {
+            currentBook = LIBRARY_DATA.find(b => b.id === bookId);
+            currentChapterIndex = 0;
+            
+            // Highlight active sidebar item
+            document.querySelectorAll('.book-item').forEach(el => {
+                el.classList.remove('active');
+                if(el.getAttribute('data-id') === bookId) el.classList.add('active');
+            });
+
+            renderReader();
+        }
+
+        function renderReader() {
+            if(!currentBook) return;
+
+            const chapter = currentBook.chapters[currentChapterIndex];
+            const container = document.getElementById('reader-content');
+
+            // Build Tabs
+            let tabsHtml = '';
+            currentBook.chapters.forEach((chap, idx) => {
+                const isActive = idx === currentChapterIndex ? 'active' : '';
+                tabsHtml += `<div class="tab ${isActive}" onclick="switchChapter(${idx})">Chap ${idx + 1}</div>`;
+            });
+
+            // Build Video
+            let videoHtml = '';
+            if(chapter.videoUrl) {
+                videoHtml = `<div class="video-container"><iframe src="${chapter.videoUrl}" allowfullscreen></iframe></div>`;
+            }
+
+            container.innerHTML = `
+                <div class="reader-header">
+                    <div>
+                        <h2 style="margin:0; font-size:1.4rem; color:var(--primary); font-family:'Merriweather',serif;">${currentBook.title}</h2>
+                        <span style="color:#7f8c8d; font-size:0.9rem;">${currentBook.author}</span>
+                    </div>
+                </div>
+                
+                <div class="chapter-tabs">${tabsHtml}</div>
+
+                <div class="content-scroll">
+                    <h1 style="font-size:1.8rem;">${chapter.title}</h1>
+                    ${videoHtml}
+                    <div class="prose">${chapter.content}</div>
+                </div>
+
+                <div class="action-bar">
+                    <div style="font-style:italic; color:#555; max-width:60%;">
+                        <strong>Suggested Action:</strong> "${chapter.actionIdea}"
+                    </div>
+                    <button class="primary-btn" style="width:auto; padding: 10px 20px;" onclick="createTaskFromChapter()">+ Add to Smart Goals</button>
+                </div>
+            `;
+        }
+
+        function switchChapter(idx) {
+            currentChapterIndex = idx;
+            renderReader();
+        }
+
+        // --- INTEGRATION WITH SMART GOALS ---
+        function createTaskFromChapter() {
+            const chapter = currentBook.chapters[currentChapterIndex];
+            const taskText = prompt("Edit Task for Smart Goals:", chapter.actionIdea);
+            
+            if(!taskText) return;
+
+            // Load existing goals from LocalStorage (Shared with Smart Goals App)
+            let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
+            
+            // Find/Create a "Learning" Goal Container
+            let bookGoal = goals.find(g => g.initialGoal === "Mastery: " + currentBook.title && !g.archived);
+
+            if(!bookGoal) {
+                bookGoal = {
+                    id: Date.now(),
+                    initialGoal: "Mastery: " + currentBook.title,
+                    finalSmart: "Apply lessons from " + currentBook.title,
+                    category: "Wisdom", // Uses "Wisdom" category
+                    createdAt: new Date().toISOString(),
+                    tasks: [],
+                    archived: false
+                };
+                goals.push(bookGoal);
+            }
+
+            // Add the Task
+            bookGoal.tasks.push({
+                id: Date.now() + 1,
+                text: taskText + ` (Ch ${currentChapterIndex + 1})`,
+                date: new Date().toISOString(),
+                completed: false
+            });
+
+            localStorage.setItem('user_goals_db', JSON.stringify(goals));
+            alert(`Task added to "${currentBook.title}" in Smart Goals!`);
+        }
+    </script>
+</body>
+</html>
