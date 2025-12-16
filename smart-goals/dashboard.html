@@ -7,76 +7,101 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <style>
-        /* Minimal styles to support the Delete/Archive buttons */
-        /* These won't break your main layout */
+        /* DASHBOARD SPECIFIC STYLES */
         
-        .dashboard-category {
+        /* 1. Category Headers */
+        .category-section {
             margin-bottom: 40px;
         }
 
         .category-title {
             font-family: 'Merriweather', serif;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
+            color: #1e293b;
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 10px;
             margin-bottom: 20px;
-            color: #1e293b;
         }
 
+        /* 2. The Goal Card */
         .goal-card {
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 20px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            position: relative; /* Needed for positioning buttons */
+            position: relative; /* For button positioning */
         }
 
-        /* The Delete/Archive Buttons (Top Right of Card) */
+        /* 3. Delete/Archive Buttons (Top Right) */
         .card-actions {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 20px;
+            right: 20px;
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .action-btn {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 1.1rem;
-            opacity: 0.5;
+            font-size: 1.2rem;
+            opacity: 0.4;
             transition: opacity 0.2s;
-            padding: 2px;
+            padding: 0;
         }
-
         .action-btn:hover { opacity: 1; }
-        .btn-delete:hover { color: #ef4444; } /* Red on hover */
-        .btn-archive:hover { color: #64748b; } /* Grey on hover */
+        .btn-delete:hover { color: #ef4444; }
+
+        /* 4. Card Content */
+        .goal-header h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            color: #0f172a;
+            padding-right: 80px; /* Space for buttons */
+        }
 
         .goal-meta {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: #64748b;
-            margin-bottom: 15px;
             font-style: italic;
+            margin-bottom: 15px;
         }
 
-        .next-step-container {
-            background: #f0fdf4;
-            padding: 10px;
+        /* 5. Next Step Box */
+        .next-step-box {
+            background: #f0fdf4; /* Light Green */
+            border: 1px solid #bbf7d0;
             border-radius: 6px;
+            padding: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
-        /* Modal for Goal 101 */
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            color: #166534;
+        }
+
+        .date-badge {
+            background: #dcfce7;
+            color: #15803d;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* 6. Education Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none;
-            justify-content: center; align-items: center; z-index: 999;
+            justify-content: center; align-items: center; z-index: 1000;
         }
         .modal-content {
             background: white; padding: 30px; border-radius: 12px;
@@ -117,22 +142,22 @@
             </div>
         </div>
 
-        <div class="dashboard-category">
+        <div class="category-section">
             <h2 class="category-title">Health & Body</h2>
             <div id="list-Health"></div>
         </div>
 
-        <div class="dashboard-category">
+        <div class="category-section">
             <h2 class="category-title">Wealth & Career</h2>
             <div id="list-Wealth"></div>
         </div>
 
-        <div class="dashboard-category">
+        <div class="category-section">
             <h2 class="category-title">Relationships</h2>
             <div id="list-Relationships"></div>
         </div>
 
-        <div class="dashboard-category">
+        <div class="category-section">
             <h2 class="category-title">Wisdom & Self</h2>
             <div id="list-Wisdom"></div>
         </div>
@@ -140,25 +165,24 @@
     </div>
 
     <script>
-        // Load goals when page opens
         document.addEventListener('DOMContentLoaded', loadDashboard);
 
         function loadDashboard() {
             const goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
             
-            // Clear current lists
+            // Clear Lists
             ['Health', 'Wealth', 'Relationships', 'Wisdom'].forEach(cat => {
                 document.getElementById(`list-${cat}`).innerHTML = '';
             });
 
-            // Filter active goals (not archived)
+            // Filter Active Goals
             const activeGoals = goals.filter(g => !g.archived);
 
             activeGoals.forEach(goal => {
-                // Default category fallback
+                // Determine Category
                 let cat = goal.category || 'Wisdom';
                 if(!['Health', 'Wealth', 'Relationships', 'Wisdom'].includes(cat)) cat = 'Wisdom';
-
+                
                 const container = document.getElementById(`list-${cat}`);
                 if(container) {
                     container.appendChild(createCard(goal));
@@ -170,7 +194,7 @@
             const div = document.createElement('div');
             div.className = 'goal-card';
             
-            // Date formatting
+            // Format Date
             let dateText = "";
             if(goal.actionDate) {
                 const d = new Date(goal.actionDate);
@@ -179,26 +203,27 @@
 
             div.innerHTML = `
                 <div class="card-actions">
-                    <button class="action-btn btn-archive" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
+                    <button class="action-btn" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
                     <button class="action-btn btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete">🗑️</button>
                 </div>
-
-                <h3>${goal.finalSmart || goal.initialGoal}</h3>
+                
+                <div class="goal-header">
+                    <h3>${goal.finalSmart || goal.initialGoal}</h3>
+                </div>
                 <div class="goal-meta">Started as: "${goal.initialGoal}"</div>
 
-                <div class="next-step-container">
-                    <div>
+                <div class="next-step-box">
+                    <div class="checkbox-wrapper">
                         <input type="checkbox" onchange="completeAction('${goal.id}')">
-                        <span style="font-weight:600; color:#166534; margin-left:8px;">${goal.nextAction || 'No action set'}</span>
+                        <span>${goal.nextAction || 'No action set'}</span>
                     </div>
-                    <span style="font-size:0.8rem; color:#15803d;">Due: ${dateText}</span>
+                    <span class="date-badge">Due: ${dateText || 'No Date'}</span>
                 </div>
             `;
             return div;
         }
 
-        // --- Logic Functions ---
-
+        // --- BUTTON LOGIC ---
         function toggleEducation() {
             const m = document.getElementById('edu-modal');
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
@@ -209,24 +234,24 @@
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
                 goals = goals.filter(g => g.id !== id);
                 localStorage.setItem('user_goals_db', JSON.stringify(goals));
-                loadDashboard(); // Refresh UI
+                loadDashboard();
             }
         };
 
         window.archiveGoal = function(id) {
-            if(confirm("Archive this goal? (Hide from view)")) {
+            if(confirm("Archive this goal?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
                 const idx = goals.findIndex(g => g.id === id);
                 if(idx > -1) {
                     goals[idx].archived = true;
                     localStorage.setItem('user_goals_db', JSON.stringify(goals));
-                    loadDashboard(); // Refresh UI
+                    loadDashboard();
                 }
             }
         };
 
         window.completeAction = function(id) {
-            alert("Action Completed! (We will add the logic to schedule the NEXT step soon!)");
+            alert("Action checked! (Next Step logic coming soon)");
         };
     </script>
 </body>
