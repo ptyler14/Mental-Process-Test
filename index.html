@@ -106,6 +106,15 @@
                     <button class="text-btn info-btn" onclick="openModal('modal-goals')">ⓘ Learn More</button>
                 </div>
             </div>
+            <div class="tool-card">
+    <span class="badge" style="background:#fff3e0; color:#d35400;">Learning</span>
+    <h2>The Wisdom Vault</h2>
+    <p>A library of rewritten books and mentorship lessons designed for active teaching and rapid implementation.</p>
+    <div class="card-actions">
+        <a href="library/index.html" class="primary-btn small-btn" style="background-color:#d35400;">Open Vault</a>
+        <button class="text-btn info-btn" onclick="openModal('modal-library')">ⓘ Learn More</button>
+    </div>
+</div>
             <div class="tool-card" onclick="location.href='ask-processes/index.html'">
     <div class="icon">✨</div>
     <h3>Ask & It Is Given</h3>
@@ -227,6 +236,21 @@
             <button class="primary-btn full-width" style="background-color:#16a34a;" onclick="window.location.href='smart-goals/index.html'">Start Planning</button>
         </div>
     </div>
+    <div id="modal-library" class="modal-overlay hidden">
+    <div class="modal-box">
+        <button class="close-modal" onclick="closeModal('modal-library')">&times;</button>
+        <h2>The Wisdom Vault</h2>
+        <div class="modal-content">
+            <h3>What is it?</h3>
+            <p>A dedicated reader interface containing summarized books, video lessons, and key concepts tailored for mentorship.</p>
+            <h3>Why use it?</h3>
+            <p>To digest complex ideas quickly and turn "passive reading" into "active doing."</p>
+            <h3>How to do it?</h3>
+            <p>Select a book from the sidebar. Read the chapter aloud. Use the "Create Task" button to instantly send an action item to your Smart Goals dashboard.</p>
+        </div>
+        <button class="primary-btn full-width" style="background-color:#d35400;" onclick="window.location.href='library/index.html'">Enter Vault</button>
+    </div>
+</div>
 
     <script>
         // --- SUPABASE CONFIG ---
