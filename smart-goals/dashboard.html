@@ -8,20 +8,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <style>
         /* --- DASHBOARD STYLES --- */
-        
-        /* 1. LAYOUT CONTAINER */
         .container {
-            max-width: 1000px; /* Wider to fit the 2x2 grid nicely */
+            max-width: 1000px;
             margin: 0 auto;
             padding: 40px 20px;
         }
 
-        /* 2. HEADER (Based on your snippet) */
         header {
             margin-bottom: 40px; 
             display: flex; 
             justify-content: space-between; 
-            align-items: flex-start; /* Aligns items to top */
+            align-items: flex-start;
         }
 
         .header-left h1 {
@@ -39,32 +36,21 @@
         }
         .back-link:hover { color: #10b981; }
 
-        .subtitle {
-            color: #64748b;
-            font-style: italic;
-        }
+        .subtitle { color: #64748b; font-style: italic; }
 
-        .header-right {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        /* 3. THE 2x2 GRID */
+        /* GRID LAYOUT */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* Two equal columns */
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
             margin-top: 20px;
         }
-
-        /* Mobile Stack */
         @media (max-width: 768px) {
             .dashboard-grid { grid-template-columns: 1fr; } 
             header { flex-direction: column; gap: 20px; }
         }
 
-        /* 4. CATEGORY BOXES */
+        /* BOXES & CARDS */
         .category-box {
             background: #ffffff;
             border: 1px solid #e2e8f0;
@@ -90,7 +76,6 @@
             color: #1e293b;
         }
 
-        /* 5. GOAL CARDS */
         .goal-card {
             background: #f8fafc;
             border: 1px solid #cbd5e1;
@@ -104,10 +89,9 @@
             font-weight: 600;
             color: #0f172a;
             margin-bottom: 5px;
-            padding-right: 60px; /* Space for buttons */
+            padding-right: 60px;
         }
 
-        /* Archive/Delete Buttons */
         .card-tools {
             position: absolute;
             top: 15px;
@@ -137,7 +121,6 @@
             color: #166534;
         }
         
-        /* Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none;
@@ -146,6 +129,22 @@
         .modal-content {
             background: white; padding: 30px; border-radius: 12px;
             max-width: 500px; width: 90%;
+        }
+
+        /* Footer for Reset Button */
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+        }
+        .btn-danger-text {
+            color: #ef4444;
+            background: none;
+            border: none;
+            font-size: 0.8rem;
+            text-decoration: underline;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -159,7 +158,7 @@
                 <p class="subtitle">Design your life, one area at a time.</p>
             </div>
             
-            <div class="header-right">
+            <div class="header-right" style="display: flex; gap: 10px; align-items: center;">
                 <button class="btn-sm" onclick="toggleEducation()" style="background:#f1f5f9; color:#64748b; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
                     ℹ️ Goal Setting 101
                 </button>
@@ -186,40 +185,28 @@
         </div>
 
         <div class="dashboard-grid">
-            
             <div class="category-box">
-                <div class="category-header">
-                    <span>💪</span>
-                    <h2>Health & Body</h2>
-                </div>
+                <div class="category-header"><span>💪</span><h2>Health & Body</h2></div>
                 <div id="list-Health"></div>
             </div>
-
             <div class="category-box">
-                <div class="category-header">
-                    <span>💼</span>
-                    <h2>Wealth & Career</h2>
-                </div>
+                <div class="category-header"><span>💼</span><h2>Wealth & Career</h2></div>
                 <div id="list-Wealth"></div>
             </div>
-
             <div class="category-box">
-                <div class="category-header">
-                    <span>❤️</span>
-                    <h2>Relationships</h2>
-                </div>
+                <div class="category-header"><span>❤️</span><h2>Relationships</h2></div>
                 <div id="list-Relationships"></div>
             </div>
-
             <div class="category-box">
-                <div class="category-header">
-                    <span>☀️</span>
-                    <h2>Happiness & Lifestyle</h2>
-                </div>
+                <div class="category-header"><span>☀️</span><h2>Happiness & Lifestyle</h2></div>
                 <div id="list-Happiness"></div>
             </div>
+        </div>
 
-        </div> </div>
+        <footer>
+            <button class="btn-danger-text" onclick="resetAllData()">⚠️ Reset All Data (Clear all goals)</button>
+        </footer>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', loadDashboard);
@@ -236,16 +223,11 @@
             const activeGoals = goals.filter(g => !g.archived);
 
             activeGoals.forEach(goal => {
-                // Ensure category matches one of our 4 boxes
                 let cat = goal.category || 'Happiness';
-                if(!['Health', 'Wealth', 'Relationships', 'Happiness'].includes(cat)) {
-                    cat = 'Happiness';
-                }
+                if(!['Health', 'Wealth', 'Relationships', 'Happiness'].includes(cat)) cat = 'Happiness';
                 
                 const container = document.getElementById(`list-${cat}`);
-                if(container) {
-                    container.appendChild(createCard(goal));
-                }
+                if(container) container.appendChild(createCard(goal));
             });
         }
 
@@ -259,17 +241,20 @@
                 dateText = d.toLocaleDateString();
             }
 
+            // Ensure ID is treated as string for the function call
+            const goalId = String(goal.id);
+
             div.innerHTML = `
                 <div class="card-tools">
-                    <button class="btn-tool" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
-                    <button class="btn-tool btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete">🗑️</button>
+                    <button class="btn-tool" onclick="archiveGoal('${goalId}')" title="Archive">📂</button>
+                    <button class="btn-tool btn-delete" onclick="deleteGoal('${goalId}')" title="Delete">🗑️</button>
                 </div>
                 
                 <div class="goal-title">${goal.finalSmart || goal.initialGoal}</div>
                 <div style="font-size:0.8rem; color:#64748b; font-style:italic;">"${goal.initialGoal}"</div>
 
                 <div class="next-step-row">
-                    <input type="checkbox" onchange="completeAction('${goal.id}')">
+                    <input type="checkbox" onchange="completeAction('${goalId}')">
                     <span>${goal.nextAction || 'No action set'}</span>
                 </div>
                 <div style="font-size:0.75rem; color:#15803d; margin-top:4px; margin-left:22px;">Due: ${dateText || 'No Date'}</div>
@@ -282,19 +267,24 @@
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
         }
 
+        // --- FIXED DELETE FUNCTION ---
         window.deleteGoal = function(id) {
             if(confirm("Permanently delete this goal?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-                goals = goals.filter(g => g.id !== id);
+                
+                // FILTER FIX: Convert both to String to ensure they match
+                goals = goals.filter(g => String(g.id) !== String(id));
+                
                 localStorage.setItem('user_goals_db', JSON.stringify(goals));
-                loadDashboard();
+                loadDashboard(); // Refresh screen
             }
         };
 
         window.archiveGoal = function(id) {
             if(confirm("Archive this goal?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-                const idx = goals.findIndex(g => g.id === id);
+                const idx = goals.findIndex(g => String(g.id) === String(id));
+                
                 if(idx > -1) {
                     goals[idx].archived = true;
                     localStorage.setItem('user_goals_db', JSON.stringify(goals));
@@ -303,8 +293,18 @@
             }
         };
 
+        // NUCLEAR OPTION: Clear Everything
+        window.resetAllData = function() {
+            const code = prompt("Type 'DELETE' to confirm wiping all goals:");
+            if(code === 'DELETE') {
+                localStorage.removeItem('user_goals_db');
+                loadDashboard();
+                alert("All goals wiped.");
+            }
+        };
+
         window.completeAction = function(id) {
-            alert("Action checked!");
+            // Placeholder for future logic
         };
     </script>
 </body>
