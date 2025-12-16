@@ -7,204 +7,158 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <style>
-        /* Minimal overrides to keep things tidy without changing the main theme */
-        .dashboard-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+        /* Minimal styles to support the Delete/Archive buttons */
+        /* These won't break your main layout */
         
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .category-section {
+        .dashboard-category {
             margin-bottom: 40px;
         }
 
         .category-title {
             font-family: 'Merriweather', serif;
-            font-size: 1.5rem;
-            color: #1e293b;
+            font-size: 1.4rem;
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 10px;
             margin-bottom: 20px;
+            color: #1e293b;
         }
 
-        /* The Card Look */
         .goal-card {
             background: white;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 20px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            position: relative;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative; /* Needed for positioning buttons */
         }
 
-        .goal-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .goal-main-text {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #0f172a;
-            margin-bottom: 5px;
-            padding-right: 60px; /* Space for buttons */
-        }
-
-        .goal-sub-text {
-            font-size: 0.9rem;
-            color: #64748b;
-            font-style: italic;
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        /* Action Buttons (Delete/Archive) */
+        /* The Delete/Archive Buttons (Top Right of Card) */
         .card-actions {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
             display: flex;
             gap: 8px;
         }
 
-        .btn-icon {
+        .action-btn {
             background: none;
             border: none;
             cursor: pointer;
             font-size: 1.1rem;
-            opacity: 0.4;
+            opacity: 0.5;
             transition: opacity 0.2s;
+            padding: 2px;
         }
-        .btn-icon:hover { opacity: 1; }
-        .btn-delete:hover { color: #ef4444; }
 
-        /* Next Step Area */
-        .next-step-area {
+        .action-btn:hover { opacity: 1; }
+        .btn-delete:hover { color: #ef4444; } /* Red on hover */
+        .btn-archive:hover { color: #64748b; } /* Grey on hover */
+
+        .goal-meta {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+
+        .next-step-container {
             background: #f0fdf4;
-            border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
+            border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
         
-        .date-tag {
-            font-size: 0.8rem;
-            color: #15803d;
-            background: #dcfce7;
-            padding: 2px 8px;
-            border-radius: 4px;
-        }
-
-        /* Education Modal */
+        /* Modal for Goal 101 */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none;
+            justify-content: center; align-items: center; z-index: 999;
         }
-        .modal-box {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
+        .modal-content {
+            background: white; padding: 30px; border-radius: 12px;
+            max-width: 500px; width: 90%;
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px;">
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
             <div>
                 <h1>My Life Hub</h1>
                 <p class="subtitle">Your command center.</p>
             </div>
             
-            <div class="header-actions">
+            <div style="display: flex; gap: 15px;">
                 <button class="btn-secondary" onclick="toggleEducation()">🎓 Goal 101</button>
                 <button class="btn-primary" onclick="window.location.href='index.html'">+ New Goal</button>
             </div>
         </header>
 
-        <div id="dashboard-content">
-            <div class="category-section">
-                <h2 class="category-title">Health & Body</h2>
-                <div id="list-Health"></div>
-            </div>
-
-            <div class="category-section">
-                <h2 class="category-title">Wealth & Career</h2>
-                <div id="list-Wealth"></div>
-            </div>
-
-            <div class="category-section">
-                <h2 class="category-title">Relationships</h2>
-                <div id="list-Relationships"></div>
-            </div>
-
-            <div class="category-section">
-                <h2 class="category-title">Wisdom & Self</h2>
-                <div id="list-Wisdom"></div>
+        <div id="edu-modal" class="modal-overlay">
+            <div class="modal-content">
+                <h2>Goal Setting 101</h2>
+                <div style="background:#f0fdf4; padding:15px; border-radius:8px; border-left:4px solid #10b981; margin: 15px 0;">
+                    <ul style="padding-left:20px; margin:0; line-height:1.6;">
+                        <li><strong>S</strong>pecific</li>
+                        <li><strong>M</strong>easurable</li>
+                        <li><strong>A</strong>chievable</li>
+                        <li><strong>R</strong>elevant</li>
+                        <li><strong>T</strong>ime-Bound</li>
+                    </ul>
+                </div>
+                <div style="text-align: right;">
+                    <button class="btn-secondary" onclick="toggleEducation()">Close</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="edu-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h2>Goal Setting 101</h2>
-            <div style="background:#f0fdf4; padding:15px; border-radius:8px; border-left:4px solid #10b981; margin: 15px 0;">
-                <ul style="padding-left:20px; margin:0; line-height:1.6;">
-                    <li><strong>S</strong>pecific</li>
-                    <li><strong>M</strong>easurable</li>
-                    <li><strong>A</strong>chievable</li>
-                    <li><strong>R</strong>elevant</li>
-                    <li><strong>T</strong>ime-Bound</li>
-                </ul>
-            </div>
-            <p>Use the "New Goal" button to start the wizard.</p>
-            <div style="text-align: right; margin-top: 20px;">
-                <button class="btn-secondary" onclick="toggleEducation()">Close</button>
-            </div>
+        <div class="dashboard-category">
+            <h2 class="category-title">Health & Body</h2>
+            <div id="list-Health"></div>
         </div>
+
+        <div class="dashboard-category">
+            <h2 class="category-title">Wealth & Career</h2>
+            <div id="list-Wealth"></div>
+        </div>
+
+        <div class="dashboard-category">
+            <h2 class="category-title">Relationships</h2>
+            <div id="list-Relationships"></div>
+        </div>
+
+        <div class="dashboard-category">
+            <h2 class="category-title">Wisdom & Self</h2>
+            <div id="list-Wisdom"></div>
+        </div>
+
     </div>
 
     <script>
-        // Load on start
+        // Load goals when page opens
         document.addEventListener('DOMContentLoaded', loadDashboard);
 
         function loadDashboard() {
             const goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
             
-            // Clear lists
+            // Clear current lists
             ['Health', 'Wealth', 'Relationships', 'Wisdom'].forEach(cat => {
                 document.getElementById(`list-${cat}`).innerHTML = '';
             });
 
-            // Filter active
+            // Filter active goals (not archived)
             const activeGoals = goals.filter(g => !g.archived);
 
             activeGoals.forEach(goal => {
+                // Default category fallback
                 let cat = goal.category || 'Wisdom';
                 if(!['Health', 'Wealth', 'Relationships', 'Wisdom'].includes(cat)) cat = 'Wisdom';
-                
+
                 const container = document.getElementById(`list-${cat}`);
                 if(container) {
                     container.appendChild(createCard(goal));
@@ -217,7 +171,7 @@
             div.className = 'goal-card';
             
             // Date formatting
-            let dateText = "No date";
+            let dateText = "";
             if(goal.actionDate) {
                 const d = new Date(goal.actionDate);
                 dateText = d.toLocaleDateString();
@@ -225,29 +179,26 @@
 
             div.innerHTML = `
                 <div class="card-actions">
-                    <button class="btn-icon" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
-                    <button class="btn-icon btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete">🗑️</button>
-                </div>
-                
-                <div class="goal-header-row">
-                    <div>
-                        <div class="goal-main-text">${goal.finalSmart || goal.initialGoal}</div>
-                        <span class="goal-sub-text">Started as: "${goal.initialGoal}"</span>
-                    </div>
+                    <button class="action-btn btn-archive" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
+                    <button class="action-btn btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete">🗑️</button>
                 </div>
 
-                <div class="next-step-area">
-                    <div class="checkbox-wrapper">
+                <h3>${goal.finalSmart || goal.initialGoal}</h3>
+                <div class="goal-meta">Started as: "${goal.initialGoal}"</div>
+
+                <div class="next-step-container">
+                    <div>
                         <input type="checkbox" onchange="completeAction('${goal.id}')">
-                        <span style="font-weight:500; color:#166534;">${goal.nextAction || 'No action set'}</span>
+                        <span style="font-weight:600; color:#166534; margin-left:8px;">${goal.nextAction || 'No action set'}</span>
                     </div>
-                    <span class="date-tag">📅 ${dateText}</span>
+                    <span style="font-size:0.8rem; color:#15803d;">Due: ${dateText}</span>
                 </div>
             `;
             return div;
         }
 
-        // Logic Helpers
+        // --- Logic Functions ---
+
         function toggleEducation() {
             const m = document.getElementById('edu-modal');
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
@@ -258,24 +209,24 @@
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
                 goals = goals.filter(g => g.id !== id);
                 localStorage.setItem('user_goals_db', JSON.stringify(goals));
-                loadDashboard();
+                loadDashboard(); // Refresh UI
             }
         };
 
         window.archiveGoal = function(id) {
-            if(confirm("Archive this goal?")) {
+            if(confirm("Archive this goal? (Hide from view)")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
                 const idx = goals.findIndex(g => g.id === id);
                 if(idx > -1) {
                     goals[idx].archived = true;
                     localStorage.setItem('user_goals_db', JSON.stringify(goals));
-                    loadDashboard();
+                    loadDashboard(); // Refresh UI
                 }
             }
         };
 
         window.completeAction = function(id) {
-            alert("Action Completed! (Next Step Logic Coming Soon)");
+            alert("Action Completed! (We will add the logic to schedule the NEXT step soon!)");
         };
     </script>
 </body>
