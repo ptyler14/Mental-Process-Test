@@ -112,15 +112,83 @@
         .btn-tool:hover { opacity: 1; }
         .btn-delete:hover { color: #ef4444; }
 
-        .next-step-row {
+        /* TASK LIST STYLES */
+        .task-list {
+            margin-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+        }
+
+        .task-item {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 10px;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
             font-size: 0.9rem;
             color: #166534;
+            background: #f0fdf4;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .task-item.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        .task-date {
+            font-size: 0.75rem;
+            color: #15803d;
+            display: block;
+            margin-left: 24px;
+        }
+
+        /* QUICK ADD FORM */
+        .quick-add-btn {
+            background: none;
+            border: 1px dashed #cbd5e1;
+            color: #64748b;
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .quick-add-btn:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+            border-color: #94a3b8;
+        }
+
+        .add-task-form {
+            display: none; /* Hidden by default */
+            margin-top: 10px;
+            background: white;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+
+        .add-task-form input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
         }
         
+        /* Modal & Footer */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none;
@@ -130,21 +198,11 @@
             background: white; padding: 30px; border-radius: 12px;
             max-width: 500px; width: 90%;
         }
-
-        /* Footer for Reset Button */
         footer {
-            margin-top: 50px;
-            text-align: center;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 20px;
+            margin-top: 50px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px;
         }
         .btn-danger-text {
-            color: #ef4444;
-            background: none;
-            border: none;
-            font-size: 0.8rem;
-            text-decoration: underline;
-            cursor: pointer;
+            color: #ef4444; background: none; border: none; font-size: 0.8rem; text-decoration: underline; cursor: pointer;
         }
     </style>
 </head>
@@ -211,15 +269,40 @@
     <script>
         document.addEventListener('DOMContentLoaded', loadDashboard);
 
+        // Main Load Function
         function loadDashboard() {
-            const goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
+            let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
             
-            // Clear Lists
+            // 1. MIGRATION: Convert old single-task goals to multi-task format
+            let dataChanged = false;
+            goals = goals.map(g => {
+                if (!g.tasks) {
+                    // Create tasks array and move 'nextAction' into it
+                    g.tasks = [];
+                    if (g.nextAction) {
+                        g.tasks.push({
+                            id: Date.now() + Math.random(), // Random ID
+                            text: g.nextAction,
+                            date: g.actionDate,
+                            completed: g.actionCompleted || false
+                        });
+                    }
+                    dataChanged = true;
+                }
+                return g;
+            });
+
+            if (dataChanged) {
+                localStorage.setItem('user_goals_db', JSON.stringify(goals));
+            }
+            
+            // 2. Clear Lists
             ['Health', 'Wealth', 'Relationships', 'Happiness'].forEach(cat => {
                 const el = document.getElementById(`list-${cat}`);
                 if(el) el.innerHTML = '';
             });
 
+            // 3. Render Cards
             const activeGoals = goals.filter(g => !g.archived);
 
             activeGoals.forEach(goal => {
@@ -234,15 +317,28 @@
         function createCard(goal) {
             const div = document.createElement('div');
             div.className = 'goal-card';
-            
-            let dateText = "";
-            if(goal.actionDate) {
-                const d = new Date(goal.actionDate);
-                dateText = d.toLocaleDateString();
-            }
-
-            // Ensure ID is treated as string for the function call
             const goalId = String(goal.id);
+
+            // Generate HTML for Tasks
+            let tasksHtml = '';
+            if (goal.tasks && goal.tasks.length > 0) {
+                goal.tasks.forEach(task => {
+                    const dateStr = task.date ? new Date(task.date).toLocaleDateString() : '';
+                    tasksHtml += `
+                        <div class="task-item ${task.completed ? 'completed' : ''}">
+                            <input type="checkbox" 
+                                ${task.completed ? 'checked' : ''} 
+                                onchange="toggleTask('${goalId}', '${task.id}')">
+                            <div>
+                                <div>${task.text}</div>
+                                ${dateStr ? `<span class="task-date">Due: ${dateStr}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                tasksHtml = '<div style="font-size:0.8rem; color:#94a3b8; font-style:italic;">No steps planned yet.</div>';
+            }
 
             div.innerHTML = `
                 <div class="card-tools">
@@ -251,32 +347,91 @@
                 </div>
                 
                 <div class="goal-title">${goal.finalSmart || goal.initialGoal}</div>
-                <div style="font-size:0.8rem; color:#64748b; font-style:italic;">"${goal.initialGoal}"</div>
+                <div style="font-size:0.8rem; color:#64748b; font-style:italic; margin-bottom:10px;">"${goal.initialGoal}"</div>
 
-                <div class="next-step-row">
-                    <input type="checkbox" onchange="completeAction('${goalId}')">
-                    <span>${goal.nextAction || 'No action set'}</span>
+                <div class="task-list">
+                    ${tasksHtml}
                 </div>
-                <div style="font-size:0.75rem; color:#15803d; margin-top:4px; margin-left:22px;">Due: ${dateText || 'No Date'}</div>
+
+                <button class="quick-add-btn" onclick="showAddForm('${goalId}')">+ Add Step</button>
+
+                <div id="form-${goalId}" class="add-task-form">
+                    <input type="text" id="input-text-${goalId}" placeholder="What is the next step?">
+                    <input type="date" id="input-date-${goalId}">
+                    <div class="form-actions">
+                        <button class="btn-sm" onclick="hideAddForm('${goalId}')" style="background:#f1f5f9; border:none; padding:5px 10px; cursor:pointer;">Cancel</button>
+                        <button class="btn-sm" onclick="addTask('${goalId}')" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Save</button>
+                    </div>
+                </div>
             `;
             return div;
         }
+
+        // --- NEW TASK FUNCTIONS ---
+
+        function showAddForm(goalId) {
+            document.getElementById(`form-${goalId}`).style.display = 'block';
+        }
+
+        function hideAddForm(goalId) {
+            document.getElementById(`form-${goalId}`).style.display = 'none';
+        }
+
+        window.addTask = function(goalId) {
+            const textInput = document.getElementById(`input-text-${goalId}`);
+            const dateInput = document.getElementById(`input-date-${goalId}`);
+            const text = textInput.value;
+            const date = dateInput.value;
+
+            if(!text) {
+                alert("Please type a task!");
+                return;
+            }
+
+            let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
+            const goalIndex = goals.findIndex(g => String(g.id) === String(goalId));
+
+            if(goalIndex > -1) {
+                // Add new task to the array
+                goals[goalIndex].tasks.push({
+                    id: Date.now(),
+                    text: text,
+                    date: date,
+                    completed: false
+                });
+                localStorage.setItem('user_goals_db', JSON.stringify(goals));
+                loadDashboard(); // Refresh UI
+            }
+        };
+
+        window.toggleTask = function(goalId, taskId) {
+            let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
+            const goalIndex = goals.findIndex(g => String(g.id) === String(goalId));
+
+            if(goalIndex > -1) {
+                const taskIndex = goals[goalIndex].tasks.findIndex(t => String(t.id) === String(taskId));
+                if(taskIndex > -1) {
+                    // Flip boolean
+                    goals[goalIndex].tasks[taskIndex].completed = !goals[goalIndex].tasks[taskIndex].completed;
+                    localStorage.setItem('user_goals_db', JSON.stringify(goals));
+                    loadDashboard();
+                }
+            }
+        };
+
+        // --- EXISTING UTILITIES ---
 
         function toggleEducation() {
             const m = document.getElementById('edu-modal');
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
         }
 
-        // --- FIXED DELETE FUNCTION ---
         window.deleteGoal = function(id) {
             if(confirm("Permanently delete this goal?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-                
-                // FILTER FIX: Convert both to String to ensure they match
                 goals = goals.filter(g => String(g.id) !== String(id));
-                
                 localStorage.setItem('user_goals_db', JSON.stringify(goals));
-                loadDashboard(); // Refresh screen
+                loadDashboard();
             }
         };
 
@@ -284,7 +439,6 @@
             if(confirm("Archive this goal?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
                 const idx = goals.findIndex(g => String(g.id) === String(id));
-                
                 if(idx > -1) {
                     goals[idx].archived = true;
                     localStorage.setItem('user_goals_db', JSON.stringify(goals));
@@ -293,7 +447,6 @@
             }
         };
 
-        // NUCLEAR OPTION: Clear Everything
         window.resetAllData = function() {
             const code = prompt("Type 'DELETE' to confirm wiping all goals:");
             if(code === 'DELETE') {
@@ -301,10 +454,6 @@
                 loadDashboard();
                 alert("All goals wiped.");
             }
-        };
-
-        window.completeAction = function(id) {
-            // Placeholder for future logic
         };
     </script>
 </body>
