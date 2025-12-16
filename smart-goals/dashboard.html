@@ -7,97 +7,95 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <style>
-        /* DASHBOARD SPECIFIC STYLES */
-        
-        /* 1. Category Headers */
-        .category-section {
-            margin-bottom: 40px;
+        /* --- 2x2 GRID LAYOUT --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two equal columns */
+            gap: 30px; /* Space between the boxes */
+            margin-top: 20px;
         }
 
-        .category-title {
-            font-family: 'Merriweather', serif;
-            font-size: 1.5rem;
-            color: #1e293b;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+        /* If screen is small (mobile), stack them vertically instead */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        /* 2. The Goal Card */
-        .goal-card {
-            background: white;
+        /* The Box for each Category */
+        .category-box {
+            background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            position: relative; /* For button positioning */
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            min-height: 300px; /* Ensures boxes are substantial even if empty */
         }
 
-        /* 3. Delete/Archive Buttons (Top Right) */
-        .card-actions {
-            position: absolute;
-            top: 20px;
-            right: 20px;
+        .category-header {
             display: flex;
+            align-items: center;
             gap: 10px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .action-btn {
+        .category-header h2 {
+            margin: 0;
+            font-family: 'Merriweather', serif;
+            font-size: 1.25rem;
+            color: #1e293b;
+        }
+
+        /* Goal Card inside the box */
+        .goal-card {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .goal-title {
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 5px;
+            padding-right: 50px; /* Make room for icons */
+        }
+
+        /* Tools (Archive/Delete) */
+        .card-tools {
+            position: absolute;
+            top: 15px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-tool {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             opacity: 0.4;
             transition: opacity 0.2s;
-            padding: 0;
+            padding: 2px;
         }
-        .action-btn:hover { opacity: 1; }
+        .btn-tool:hover { opacity: 1; }
         .btn-delete:hover { color: #ef4444; }
 
-        /* 4. Card Content */
-        .goal-header h3 {
-            margin: 0 0 5px 0;
-            font-size: 1.1rem;
-            color: #0f172a;
-            padding-right: 80px; /* Space for buttons */
-        }
-
-        .goal-meta {
+        .next-step-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
             font-size: 0.9rem;
-            color: #64748b;
-            font-style: italic;
-            margin-bottom: 15px;
-        }
-
-        /* 5. Next Step Box */
-        .next-step-box {
-            background: #f0fdf4; /* Light Green */
-            border: 1px solid #bbf7d0;
-            border-radius: 6px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
             color: #166534;
         }
-
-        .date-badge {
-            background: #dcfce7;
-            color: #15803d;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-        }
-
-        /* 6. Education Modal */
+        
+        /* Modal Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none;
@@ -142,27 +140,41 @@
             </div>
         </div>
 
-        <div class="category-section">
-            <h2 class="category-title">Health & Body</h2>
-            <div id="list-Health"></div>
-        </div>
+        <div class="dashboard-grid">
+            
+            <div class="category-box">
+                <div class="category-header">
+                    <span>💪</span>
+                    <h2>Health & Body</h2>
+                </div>
+                <div id="list-Health"></div>
+            </div>
 
-        <div class="category-section">
-            <h2 class="category-title">Wealth & Career</h2>
-            <div id="list-Wealth"></div>
-        </div>
+            <div class="category-box">
+                <div class="category-header">
+                    <span>💼</span>
+                    <h2>Wealth & Career</h2>
+                </div>
+                <div id="list-Wealth"></div>
+            </div>
 
-        <div class="category-section">
-            <h2 class="category-title">Relationships</h2>
-            <div id="list-Relationships"></div>
-        </div>
+            <div class="category-box">
+                <div class="category-header">
+                    <span>❤️</span>
+                    <h2>Relationships</h2>
+                </div>
+                <div id="list-Relationships"></div>
+            </div>
 
-        <div class="category-section">
-            <h2 class="category-title">Wisdom & Self</h2>
-            <div id="list-Wisdom"></div>
-        </div>
+            <div class="category-box">
+                <div class="category-header">
+                    <span>🧠</span>
+                    <h2>Wisdom & Self</h2>
+                </div>
+                <div id="list-Wisdom"></div>
+            </div>
 
-    </div>
+        </div> </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', loadDashboard);
@@ -179,7 +191,6 @@
             const activeGoals = goals.filter(g => !g.archived);
 
             activeGoals.forEach(goal => {
-                // Determine Category
                 let cat = goal.category || 'Wisdom';
                 if(!['Health', 'Wealth', 'Relationships', 'Wisdom'].includes(cat)) cat = 'Wisdom';
                 
@@ -194,7 +205,7 @@
             const div = document.createElement('div');
             div.className = 'goal-card';
             
-            // Format Date
+            // Date Format
             let dateText = "";
             if(goal.actionDate) {
                 const d = new Date(goal.actionDate);
@@ -202,28 +213,24 @@
             }
 
             div.innerHTML = `
-                <div class="card-actions">
-                    <button class="action-btn" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
-                    <button class="action-btn btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete">🗑️</button>
+                <div class="card-tools">
+                    <button class="btn-tool" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
+                    <button class="btn-tool btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete">🗑️</button>
                 </div>
                 
-                <div class="goal-header">
-                    <h3>${goal.finalSmart || goal.initialGoal}</h3>
-                </div>
-                <div class="goal-meta">Started as: "${goal.initialGoal}"</div>
+                <div class="goal-title">${goal.finalSmart || goal.initialGoal}</div>
+                <div style="font-size:0.8rem; color:#64748b; font-style:italic;">"${goal.initialGoal}"</div>
 
-                <div class="next-step-box">
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" onchange="completeAction('${goal.id}')">
-                        <span>${goal.nextAction || 'No action set'}</span>
-                    </div>
-                    <span class="date-badge">Due: ${dateText || 'No Date'}</span>
+                <div class="next-step-row">
+                    <input type="checkbox" onchange="completeAction('${goal.id}')">
+                    <span>${goal.nextAction || 'No action set'}</span>
                 </div>
+                <div style="font-size:0.75rem; color:#15803d; margin-top:4px; margin-left:22px;">Due: ${dateText || 'No Date'}</div>
             `;
             return div;
         }
 
-        // --- BUTTON LOGIC ---
+        // Logic Helpers
         function toggleEducation() {
             const m = document.getElementById('edu-modal');
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
