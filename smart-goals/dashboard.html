@@ -48,13 +48,16 @@
         .task-item.completed { text-decoration: line-through; opacity: 0.6; background: #e2e8f0; color: #64748b; }
         
         /* New Styles for Date & Calendar Link */
-        .task-meta { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+        .task-meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
         .task-date { font-size: 0.75rem; color: #15803d; }
-        .cal-link { 
-            text-decoration: none; font-size: 0.85rem; opacity: 0.7; transition: opacity 0.2s; 
-            cursor: pointer; display: flex; align-items: center;
+        
+        .cal-btn { 
+            background: none; border: 1px solid #bbf7d0; border-radius: 4px; 
+            font-size: 0.75rem; cursor: pointer; padding: 2px 6px; 
+            text-decoration: none; color: #15803d; transition: all 0.2s;
+            display: flex; align-items: center; gap: 4px;
         }
-        .cal-link:hover { opacity: 1; transform: scale(1.1); }
+        .cal-btn:hover { background: #dcfce7; transform: translateY(-1px); }
         
         .quick-add-btn { background: none; border: 1px dashed #cbd5e1; color: #64748b; width: 100%; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 10px; }
         .quick-add-btn:hover { background: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
@@ -174,21 +177,40 @@
             });
         }
 
-        // --- GOOGLE CALENDAR LINK GENERATOR ---
-        function generateCalendarLink(text, dateStr) {
-            if (!dateStr) return '';
-            
-            // Create Start Date
+        // --- CALENDAR LOGIC ---
+
+        function generateGoogleLink(text, dateStr) {
+            if (!dateStr) return '#';
             const startDate = new Date(dateStr);
-            // Create End Date (Start + 1 Hour)
             const endDate = new Date(startDate.getTime() + (60 * 60 * 1000));
-
-            // Format for Google: YYYYMMDDThhmmssZ
             const format = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
+            return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(text)}&dates=${format(startDate)}/${format(endDate)}&details=${encodeURIComponent("Goal Task")}`;
+        }
 
-            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(text)}&dates=${format(startDate)}/${format(endDate)}&details=${encodeURIComponent("Goal Task")}`;
+        // Generate iCal/Outlook .ics file download
+        function downloadICS(text, dateStr) {
+            if (!dateStr) return;
+            const startDate = new Date(dateStr);
+            const endDate = new Date(startDate.getTime() + (60 * 60 * 1000));
+            const format = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
             
-            return url;
+            const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+SUMMARY:${text}
+DTSTART:${format(startDate)}
+DTEND:${format(endDate)}
+DESCRIPTION:Goal Task
+END:VEVENT
+END:VCALENDAR`;
+
+            const blob = new Blob([icsContent], { type: 'text/calendar' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'task.ics';
+            a.click();
+            window.URL.revokeObjectURL(url);
         }
 
         function createCard(goal) {
@@ -201,11 +223,15 @@
                 goal.tasks.forEach(task => {
                     const dateStr = task.date ? new Date(task.date).toLocaleDateString() : '';
                     
-                    // Generate Calendar Link if date exists
-                    let calLinkHtml = '';
+                    // Generate Calendar Buttons
+                    let calControls = '';
                     if (task.date && !task.completed) {
-                        const url = generateCalendarLink(task.text, task.date);
-                        calLinkHtml = `<a href="${url}" target="_blank" class="cal-link" title="Add to Google Calendar">📅</a>`;
+                        const googleUrl = generateGoogleLink(task.text, task.date);
+                        // Using onclick for the download to handle the file generation
+                        calControls = `
+                            <a href="${googleUrl}" target="_blank" class="cal-btn" title="Add to Google">📅 Google</a>
+                            <button onclick="downloadICS('${task.text.replace(/'/g, "\\'")}', '${task.date}')" class="cal-btn" title="Download iCal/Outlook">🍏 iCal</button>
+                        `;
                     }
 
                     tasksHtml += `
@@ -215,7 +241,7 @@
                                 <div>${task.text}</div>
                                 <div class="task-meta">
                                     ${dateStr ? `<span class="task-date">Due: ${dateStr}</span>` : ''}
-                                    ${calLinkHtml}
+                                    ${calControls}
                                 </div>
                             </div>
                         </div>`;
