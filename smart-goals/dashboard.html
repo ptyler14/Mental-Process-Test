@@ -8,34 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <style>
         /* --- DASHBOARD STYLES --- */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-
-        header {
-            margin-bottom: 40px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-start;
-        }
-
-        .header-left h1 {
-            margin: 10px 0 5px 0;
-            font-size: 2rem;
-            color: #1e293b;
-            font-family: 'Merriweather', serif;
-        }
-
-        .back-link {
-            text-decoration: none;
-            color: #64748b;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        .back-link:hover { color: #10b981; }
-
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        header { margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .header-left h1 { margin: 10px 0 5px 0; font-size: 2rem; color: #1e293b; font-family: 'Merriweather', serif; }
+        .back-link { text-decoration: none; color: #64748b; font-size: 0.9rem; font-weight: 500; }
         .subtitle { color: #64748b; font-style: italic; }
 
         /* GRID LAYOUT */
@@ -45,165 +21,51 @@
             gap: 30px;
             margin-top: 20px;
         }
-        @media (max-width: 768px) {
-            .dashboard-grid { grid-template-columns: 1fr; } 
-            header { flex-direction: column; gap: 20px; }
-        }
+        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } header { flex-direction: column; gap: 20px; } }
 
         /* BOXES & CARDS */
         .category-box {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            min-height: 300px;
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); min-height: 300px;
         }
+        .category-header { display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px; }
+        .category-header h2 { margin: 0; font-family: 'Merriweather', serif; font-size: 1.25rem; color: #1e293b; }
 
-        .category-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        .category-header h2 {
-            margin: 0;
-            font-family: 'Merriweather', serif;
-            font-size: 1.25rem;
-            color: #1e293b;
-        }
-
-        .goal-card {
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            position: relative;
-        }
-
-        .goal-title {
-            font-weight: 600;
-            color: #0f172a;
-            margin-bottom: 5px;
-            padding-right: 60px;
-        }
-
-        .card-tools {
-            position: absolute;
-            top: 15px;
-            right: 10px;
-            display: flex;
-            gap: 5px;
-        }
-
-        .btn-tool {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            opacity: 0.4;
-            transition: opacity 0.2s;
-            padding: 2px;
-        }
+        .goal-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-bottom: 15px; position: relative; }
+        .goal-title { font-weight: 600; color: #0f172a; margin-bottom: 5px; padding-right: 60px; }
+        .card-tools { position: absolute; top: 15px; right: 10px; display: flex; gap: 5px; }
+        .btn-tool { background: none; border: none; cursor: pointer; font-size: 1rem; opacity: 0.4; transition: opacity 0.2s; padding: 2px; }
         .btn-tool:hover { opacity: 1; }
         .btn-delete:hover { color: #ef4444; }
 
-        /* TASK LIST STYLES */
-        .task-list {
-            margin-top: 15px;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 10px;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-            color: #166534;
-            background: #f0fdf4;
-            padding: 8px;
-            border-radius: 6px;
-        }
-
-        .task-item.completed {
-            text-decoration: line-through;
-            opacity: 0.6;
-            background: #e2e8f0;
-            color: #64748b;
-        }
-
-        .task-date {
-            font-size: 0.75rem;
-            color: #15803d;
-            display: block;
-            margin-left: 24px;
-        }
-
-        /* QUICK ADD FORM */
-        .quick-add-btn {
-            background: none;
-            border: 1px dashed #cbd5e1;
-            color: #64748b;
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            margin-top: 10px;
-            transition: all 0.2s;
-        }
-        .quick-add-btn:hover {
-            background: #f1f5f9;
-            color: #0f172a;
-            border-color: #94a3b8;
-        }
-
-        .add-task-form {
-            display: none; /* Hidden by default */
-            margin-top: 10px;
-            background: white;
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-        }
-
-        .add-task-form input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 8px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 5px;
-            justify-content: flex-end;
-        }
+        /* TASK LIST & QUICK ADD */
+        .task-list { margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px; }
         
-        /* Modal & Footer */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: none;
-            justify-content: center; align-items: center; z-index: 1000;
+        .task-item { 
+            display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; 
+            font-size: 0.9rem; color: #166534; background: #f0fdf4; padding: 8px; border-radius: 6px; 
         }
-        .modal-content {
-            background: white; padding: 30px; border-radius: 12px;
-            max-width: 500px; width: 90%;
+        .task-item.completed { text-decoration: line-through; opacity: 0.6; background: #e2e8f0; color: #64748b; }
+        
+        /* New Styles for Date & Calendar Link */
+        .task-meta { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+        .task-date { font-size: 0.75rem; color: #15803d; }
+        .cal-link { 
+            text-decoration: none; font-size: 0.85rem; opacity: 0.7; transition: opacity 0.2s; 
+            cursor: pointer; display: flex; align-items: center;
         }
-        footer {
-            margin-top: 50px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px;
-        }
-        .btn-danger-text {
-            color: #ef4444; background: none; border: none; font-size: 0.8rem; text-decoration: underline; cursor: pointer;
-        }
+        .cal-link:hover { opacity: 1; transform: scale(1.1); }
+        
+        .quick-add-btn { background: none; border: 1px dashed #cbd5e1; color: #64748b; width: 100%; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-top: 10px; }
+        .quick-add-btn:hover { background: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
+        .add-task-form { display: none; margin-top: 10px; background: white; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; }
+        .add-task-form input { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: 'Inter', sans-serif; }
+        .form-actions { display: flex; gap: 5px; justify-content: flex-end; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; }
+        footer { margin-top: 50px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+        .btn-danger-text { color: #ef4444; background: none; border: none; font-size: 0.8rem; text-decoration: underline; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -216,7 +78,10 @@
                 <p class="subtitle">Design your life, one area at a time.</p>
             </div>
             
-            <div class="header-right" style="display: flex; gap: 10px; align-items: center;">
+            <div class="header-right" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button class="btn-sm" onclick="addNewCategory()" style="background:#e0f2fe; color:#0369a1; border: 1px solid #7dd3fc; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                    + Category
+                </button>
                 <button class="btn-sm" onclick="toggleEducation()" style="background:#f1f5f9; color:#64748b; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
                     ℹ️ Goal Setting 101
                 </button>
@@ -236,82 +101,94 @@
                         <li><strong>T</strong>ime-Bound</li>
                     </ul>
                 </div>
-                <div style="text-align: right;">
-                    <button class="btn-secondary" onclick="toggleEducation()">Close</button>
-                </div>
+                <div style="text-align: right;"><button class="btn-secondary" onclick="toggleEducation()">Close</button></div>
             </div>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="category-box">
-                <div class="category-header"><span>💪</span><h2>Health & Body</h2></div>
-                <div id="list-Health"></div>
-            </div>
-            <div class="category-box">
-                <div class="category-header"><span>💼</span><h2>Wealth & Career</h2></div>
-                <div id="list-Wealth"></div>
-            </div>
-            <div class="category-box">
-                <div class="category-header"><span>❤️</span><h2>Relationships</h2></div>
-                <div id="list-Relationships"></div>
-            </div>
-            <div class="category-box">
-                <div class="category-header"><span>☀️</span><h2>Happiness & Lifestyle</h2></div>
-                <div id="list-Happiness"></div>
-            </div>
-        </div>
+        <div id="main-grid" class="dashboard-grid"></div>
 
         <footer>
-            <button class="btn-danger-text" onclick="resetAllData()">⚠️ Reset All Data (Clear all goals)</button>
+            <button class="btn-danger-text" onclick="resetAllData()">⚠️ Reset All Data</button>
         </footer>
     </div>
 
     <script>
+        // --- 1. CONFIGURATION ---
+        const DEFAULT_CATEGORIES = [
+            { key: 'Health', name: 'Health & Body', icon: '💪' },
+            { key: 'Wealth', name: 'Wealth & Career', icon: '💼' },
+            { key: 'Relationships', name: 'Relationships', icon: '❤️' },
+            { key: 'Happiness', name: 'Happiness & Lifestyle', icon: '☀️' }
+        ];
+
         document.addEventListener('DOMContentLoaded', loadDashboard);
 
-        // Main Load Function
         function loadDashboard() {
             let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-            
-            // 1. MIGRATION: Convert old single-task goals to multi-task format
-            let dataChanged = false;
+            let categories = JSON.parse(localStorage.getItem('user_categories_db'));
+            if (!categories || categories.length === 0) {
+                categories = DEFAULT_CATEGORIES;
+                localStorage.setItem('user_categories_db', JSON.stringify(categories));
+            }
+
+            // Build Grid
+            const grid = document.getElementById('main-grid');
+            grid.innerHTML = ''; 
+
+            categories.forEach(cat => {
+                const box = document.createElement('div');
+                box.className = 'category-box';
+                box.innerHTML = `
+                    <div class="category-header"><span>${cat.icon || '📌'}</span><h2>${cat.name}</h2></div>
+                    <div id="list-${cat.key}"></div>
+                `;
+                grid.appendChild(box);
+            });
+
+            // Populate Goals
             goals = goals.map(g => {
                 if (!g.tasks) {
-                    // Create tasks array and move 'nextAction' into it
                     g.tasks = [];
                     if (g.nextAction) {
                         g.tasks.push({
-                            id: Date.now() + Math.random(), // Random ID
+                            id: Date.now() + Math.random(),
                             text: g.nextAction,
                             date: g.actionDate,
                             completed: g.actionCompleted || false
                         });
                     }
-                    dataChanged = true;
                 }
                 return g;
             });
-
-            if (dataChanged) {
-                localStorage.setItem('user_goals_db', JSON.stringify(goals));
-            }
             
-            // 2. Clear Lists
-            ['Health', 'Wealth', 'Relationships', 'Happiness'].forEach(cat => {
-                const el = document.getElementById(`list-${cat}`);
-                if(el) el.innerHTML = '';
-            });
-
-            // 3. Render Cards
             const activeGoals = goals.filter(g => !g.archived);
-
             activeGoals.forEach(goal => {
-                let cat = goal.category || 'Happiness';
-                if(!['Health', 'Wealth', 'Relationships', 'Happiness'].includes(cat)) cat = 'Happiness';
-                
-                const container = document.getElementById(`list-${cat}`);
+                let catKey = goal.category || 'Happiness';
+                const catExists = categories.find(c => c.key === catKey);
+                if(!catExists) {
+                    if(catKey === 'Wisdom') catKey = 'Happiness';
+                    else catKey = 'Happiness';
+                }
+                const container = document.getElementById(`list-${catKey}`);
                 if(container) container.appendChild(createCard(goal));
             });
+        }
+
+        // --- GOOGLE CALENDAR LINK GENERATOR ---
+        function generateCalendarLink(text, dateStr) {
+            if (!dateStr) return '';
+            
+            // Create Start Date
+            const startDate = new Date(dateStr);
+            // Create End Date (Start + 1 Hour)
+            const endDate = new Date(startDate.getTime() + (60 * 60 * 1000));
+
+            // Format for Google: YYYYMMDDThhmmssZ
+            const format = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+            const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(text)}&dates=${format(startDate)}/${format(endDate)}&details=${encodeURIComponent("Goal Task")}`;
+            
+            return url;
         }
 
         function createCard(goal) {
@@ -319,22 +196,29 @@
             div.className = 'goal-card';
             const goalId = String(goal.id);
 
-            // Generate HTML for Tasks
             let tasksHtml = '';
             if (goal.tasks && goal.tasks.length > 0) {
                 goal.tasks.forEach(task => {
                     const dateStr = task.date ? new Date(task.date).toLocaleDateString() : '';
+                    
+                    // Generate Calendar Link if date exists
+                    let calLinkHtml = '';
+                    if (task.date && !task.completed) {
+                        const url = generateCalendarLink(task.text, task.date);
+                        calLinkHtml = `<a href="${url}" target="_blank" class="cal-link" title="Add to Google Calendar">📅</a>`;
+                    }
+
                     tasksHtml += `
                         <div class="task-item ${task.completed ? 'completed' : ''}">
-                            <input type="checkbox" 
-                                ${task.completed ? 'checked' : ''} 
-                                onchange="toggleTask('${goalId}', '${task.id}')">
-                            <div>
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${goalId}', '${task.id}')">
+                            <div style="flex-grow:1;">
                                 <div>${task.text}</div>
-                                ${dateStr ? `<span class="task-date">Due: ${dateStr}</span>` : ''}
+                                <div class="task-meta">
+                                    ${dateStr ? `<span class="task-date">Due: ${dateStr}</span>` : ''}
+                                    ${calLinkHtml}
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
             } else {
                 tasksHtml = '<div style="font-size:0.8rem; color:#94a3b8; font-style:italic;">No steps planned yet.</div>';
@@ -345,98 +229,77 @@
                     <button class="btn-tool" onclick="archiveGoal('${goalId}')" title="Archive">📂</button>
                     <button class="btn-tool btn-delete" onclick="deleteGoal('${goalId}')" title="Delete">🗑️</button>
                 </div>
-                
                 <div class="goal-title">${goal.finalSmart || goal.initialGoal}</div>
                 <div style="font-size:0.8rem; color:#64748b; font-style:italic; margin-bottom:10px;">"${goal.initialGoal}"</div>
-
-                <div class="task-list">
-                    ${tasksHtml}
-                </div>
-
+                <div class="task-list">${tasksHtml}</div>
                 <button class="quick-add-btn" onclick="showAddForm('${goalId}')">+ Add Step</button>
-
                 <div id="form-${goalId}" class="add-task-form">
-                    <input type="text" id="input-text-${goalId}" placeholder="What is the next step?">
+                    <input type="text" id="input-text-${goalId}" placeholder="Next step?">
                     <input type="date" id="input-date-${goalId}">
                     <div class="form-actions">
-                        <button class="btn-sm" onclick="hideAddForm('${goalId}')" style="background:#f1f5f9; border:none; padding:5px 10px; cursor:pointer;">Cancel</button>
-                        <button class="btn-sm" onclick="addTask('${goalId}')" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Save</button>
+                        <button class="btn-sm" onclick="hideAddForm('${goalId}')" style="background:#f1f5f9; border:none; padding:5px; cursor:pointer;">Cancel</button>
+                        <button class="btn-sm" onclick="addTask('${goalId}')" style="background:#10b981; color:white; border:none; padding:5px; border-radius:4px; cursor:pointer;">Save</button>
                     </div>
-                </div>
-            `;
+                </div>`;
             return div;
         }
 
-        // --- NEW TASK FUNCTIONS ---
-
-        function showAddForm(goalId) {
-            document.getElementById(`form-${goalId}`).style.display = 'block';
-        }
-
-        function hideAddForm(goalId) {
-            document.getElementById(`form-${goalId}`).style.display = 'none';
-        }
-
-        window.addTask = function(goalId) {
-            const textInput = document.getElementById(`input-text-${goalId}`);
-            const dateInput = document.getElementById(`input-date-${goalId}`);
-            const text = textInput.value;
-            const date = dateInput.value;
-
-            if(!text) {
-                alert("Please type a task!");
-                return;
+        // --- FUNCTIONS ---
+        window.addNewCategory = function() {
+            const name = prompt("New category name (e.g. 'Travel'):");
+            if(name) {
+                let categories = JSON.parse(localStorage.getItem('user_categories_db')) || DEFAULT_CATEGORIES;
+                const key = name.replace(/\s+/g, '');
+                categories.push({ key: key, name: name, icon: '🌟' });
+                localStorage.setItem('user_categories_db', JSON.stringify(categories));
+                loadDashboard(); 
             }
+        };
 
+        function showAddForm(id) { document.getElementById(`form-${id}`).style.display = 'block'; }
+        function hideAddForm(id) { document.getElementById(`form-${id}`).style.display = 'none'; }
+        
+        window.addTask = function(goalId) {
+            const text = document.getElementById(`input-text-${goalId}`).value;
+            const date = document.getElementById(`input-date-${goalId}`).value;
+            if(!text) return alert("Please type a task!");
+            
             let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-            const goalIndex = goals.findIndex(g => String(g.id) === String(goalId));
-
-            if(goalIndex > -1) {
-                // Add new task to the array
-                goals[goalIndex].tasks.push({
-                    id: Date.now(),
-                    text: text,
-                    date: date,
-                    completed: false
-                });
+            const idx = goals.findIndex(g => String(g.id) === String(goalId));
+            if(idx > -1) {
+                goals[idx].tasks.push({ id: Date.now(), text, date, completed: false });
                 localStorage.setItem('user_goals_db', JSON.stringify(goals));
-                loadDashboard(); // Refresh UI
+                loadDashboard();
             }
         };
 
         window.toggleTask = function(goalId, taskId) {
             let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-            const goalIndex = goals.findIndex(g => String(g.id) === String(goalId));
-
-            if(goalIndex > -1) {
-                const taskIndex = goals[goalIndex].tasks.findIndex(t => String(t.id) === String(taskId));
-                if(taskIndex > -1) {
-                    // Flip boolean
-                    goals[goalIndex].tasks[taskIndex].completed = !goals[goalIndex].tasks[taskIndex].completed;
+            const gIdx = goals.findIndex(g => String(g.id) === String(goalId));
+            if(gIdx > -1) {
+                const tIdx = goals[gIdx].tasks.findIndex(t => String(t.id) === String(taskId));
+                if(tIdx > -1) {
+                    goals[gIdx].tasks[tIdx].completed = !goals[gIdx].tasks[tIdx].completed;
                     localStorage.setItem('user_goals_db', JSON.stringify(goals));
                     loadDashboard();
                 }
             }
         };
 
-        // --- EXISTING UTILITIES ---
-
         function toggleEducation() {
             const m = document.getElementById('edu-modal');
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
         }
-
         window.deleteGoal = function(id) {
-            if(confirm("Permanently delete this goal?")) {
+            if(confirm("Permanently delete?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
                 goals = goals.filter(g => String(g.id) !== String(id));
                 localStorage.setItem('user_goals_db', JSON.stringify(goals));
                 loadDashboard();
             }
         };
-
         window.archiveGoal = function(id) {
-            if(confirm("Archive this goal?")) {
+            if(confirm("Archive?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
                 const idx = goals.findIndex(g => String(g.id) === String(id));
                 if(idx > -1) {
@@ -446,13 +309,11 @@
                 }
             }
         };
-
         window.resetAllData = function() {
-            const code = prompt("Type 'DELETE' to confirm wiping all goals:");
-            if(code === 'DELETE') {
-                localStorage.removeItem('user_goals_db');
+            if(prompt("Type 'DELETE' to confirm:") === 'DELETE') {
+                localStorage.clear(); 
                 loadDashboard();
-                alert("All goals wiped.");
+                alert("Reset complete.");
             }
         };
     </script>
