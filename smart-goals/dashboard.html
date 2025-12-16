@@ -7,169 +7,132 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet">
     <style>
-        /* --- DASHBOARD STYLES --- */
-        body {
-            background-color: #f8fafc; /* Light background */
+        /* Minimal overrides to keep things tidy without changing the main theme */
+        .dashboard-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
         }
         
-        /* Header Actions */
         .header-actions {
             display: flex;
             gap: 15px;
+            align-items: center;
         }
 
-        /* Category Sections */
         .category-section {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-family: 'Merriweather', serif;
+            font-size: 1.5rem;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* The Card Look */
+        .goal-card {
             background: white;
             border: 1px solid #e2e8f0;
             border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .category-header {
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .category-header h2 {
-            margin: 0;
-            font-size: 1.25rem;
-            color: #1e293b;
-            font-family: 'Merriweather', serif;
-        }
-
-        .category-icon {
-            font-size: 1.5rem;
-        }
-
-        /* Grid for Cards inside a Category */
-        .goals-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        /* Goal Card Styling */
-        .goal-card {
-            background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
             padding: 20px;
-            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             position: relative;
         }
 
-        .goal-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-color: #94a3b8;
+        .goal-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
 
-        .goal-title {
-            font-weight: 600;
+        .goal-main-text {
             font-size: 1.1rem;
+            font-weight: 600;
             color: #0f172a;
             margin-bottom: 5px;
             padding-right: 60px; /* Space for buttons */
         }
 
-        .goal-original {
-            font-size: 0.85rem;
+        .goal-sub-text {
+            font-size: 0.9rem;
             color: #64748b;
             font-style: italic;
             margin-bottom: 15px;
             display: block;
         }
 
-        /* Card Action Buttons (Delete/Archive) */
-        .card-tools {
+        /* Action Buttons (Delete/Archive) */
+        .card-actions {
             position: absolute;
             top: 20px;
             right: 20px;
             display: flex;
-            gap: 5px;
+            gap: 8px;
         }
 
-        .btn-tool {
+        .btn-icon {
             background: none;
             border: none;
             cursor: pointer;
             font-size: 1.1rem;
             opacity: 0.4;
             transition: opacity 0.2s;
-            padding: 2px;
         }
-        .btn-tool:hover { opacity: 1; }
+        .btn-icon:hover { opacity: 1; }
         .btn-delete:hover { color: #ef4444; }
 
-        /* The Next Step Box */
-        .next-step-box {
-            background: #f0fdf4; /* Light Green */
-            border: 1px solid #bbf7d0;
-            border-radius: 6px;
+        /* Next Step Area */
+        .next-step-area {
+            background: #f0fdf4;
+            border-radius: 8px;
             padding: 12px;
-            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .next-step-row {
+        .checkbox-wrapper {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 10px;
         }
-
-        .next-step-row input[type="checkbox"] {
-            margin-top: 4px;
-            cursor: pointer;
-            width: 16px;
-            height: 16px;
-        }
-
-        .step-text {
-            font-size: 0.95rem;
-            color: #166534;
-            font-weight: 500;
-            line-height: 1.4;
-        }
-
-        .due-date {
-            display: block;
-            font-size: 0.75rem;
-            color: #15803d;
-            margin-top: 4px;
-            margin-left: 26px; /* Align with text */
-        }
         
-        /* Modal for Education */
+        .date-tag {
+            font-size: 0.8rem;
+            color: #15803d;
+            background: #dcfce7;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        /* Education Modal */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
-            display: none; /* Hidden by default */
+            display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
-        .modal-content {
+        .modal-box {
             background: white;
             padding: 30px;
             border-radius: 12px;
             max-width: 500px;
             width: 90%;
         }
-        .modal-show { display: flex; }
-
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+    <div class="dashboard-container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px;">
             <div>
                 <h1>My Life Hub</h1>
                 <p class="subtitle">Your command center.</p>
@@ -181,138 +144,115 @@
             </div>
         </header>
 
-        <div id="education-modal" class="modal-overlay">
-            <div class="modal-content">
-                <h2>Goal Setting 101</h2>
-                <div class="info-box-small" style="background:#f0fdf4; padding:15px; border-radius:8px; border-left:4px solid #10b981;">
-                    <p><strong>S.M.A.R.T. Goals are:</strong></p>
-                    <ul style="padding-left:20px; margin-top:5px;">
-                        <li><strong>S</strong>pecific</li>
-                        <li><strong>M</strong>easurable</li>
-                        <li><strong>A</strong>chievable</li>
-                        <li><strong>R</strong>elevant</li>
-                        <li><strong>T</strong>ime-Bound</li>
-                    </ul>
-                </div>
-                <p>Use the "New Goal" button to launch the wizard. It will guide you through breaking down your big dreams into small, actionable steps.</p>
-                <div style="text-align: right; margin-top: 20px;">
-                    <button class="btn-secondary" onclick="toggleEducation()">Close</button>
-                </div>
+        <div id="dashboard-content">
+            <div class="category-section">
+                <h2 class="category-title">Health & Body</h2>
+                <div id="list-Health"></div>
+            </div>
+
+            <div class="category-section">
+                <h2 class="category-title">Wealth & Career</h2>
+                <div id="list-Wealth"></div>
+            </div>
+
+            <div class="category-section">
+                <h2 class="category-title">Relationships</h2>
+                <div id="list-Relationships"></div>
+            </div>
+
+            <div class="category-section">
+                <h2 class="category-title">Wisdom & Self</h2>
+                <div id="list-Wisdom"></div>
             </div>
         </div>
+    </div>
 
-        <div class="category-section">
-            <div class="category-header">
-                <span class="category-icon">💪</span>
-                <h2>Health & Body</h2>
+    <div id="edu-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>Goal Setting 101</h2>
+            <div style="background:#f0fdf4; padding:15px; border-radius:8px; border-left:4px solid #10b981; margin: 15px 0;">
+                <ul style="padding-left:20px; margin:0; line-height:1.6;">
+                    <li><strong>S</strong>pecific</li>
+                    <li><strong>M</strong>easurable</li>
+                    <li><strong>A</strong>chievable</li>
+                    <li><strong>R</strong>elevant</li>
+                    <li><strong>T</strong>ime-Bound</li>
+                </ul>
             </div>
-            <div id="list-Health" class="goals-grid">
-                </div>
-        </div>
-
-        <div class="category-section">
-            <div class="category-header">
-                <span class="category-icon">💼</span>
-                <h2>Wealth & Career</h2>
+            <p>Use the "New Goal" button to start the wizard.</p>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn-secondary" onclick="toggleEducation()">Close</button>
             </div>
-            <div id="list-Wealth" class="goals-grid"></div>
         </div>
-
-        <div class="category-section">
-            <div class="category-header">
-                <span class="category-icon">❤️</span>
-                <h2>Relationships</h2>
-            </div>
-            <div id="list-Relationships" class="goals-grid"></div>
-        </div>
-
-        <div class="category-section">
-            <div class="category-header">
-                <span class="category-icon">🧠</span>
-                <h2>Wisdom & Self</h2>
-            </div>
-            <div id="list-Wisdom" class="goals-grid"></div>
-        </div>
-
     </div>
 
     <script>
-        // --- 1. Load Goals ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadDashboard();
-        });
+        // Load on start
+        document.addEventListener('DOMContentLoaded', loadDashboard);
 
         function loadDashboard() {
             const goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
             
-            // Clear containers
+            // Clear lists
             ['Health', 'Wealth', 'Relationships', 'Wisdom'].forEach(cat => {
                 document.getElementById(`list-${cat}`).innerHTML = '';
             });
 
-            // Filter out archived
+            // Filter active
             const activeGoals = goals.filter(g => !g.archived);
 
             activeGoals.forEach(goal => {
-                let category = goal.category || 'Wisdom';
-                // Safety check for category names
-                if (!['Health', 'Wealth', 'Relationships', 'Wisdom'].includes(category)) {
-                    category = 'Wisdom';
-                }
-
-                const container = document.getElementById(`list-${category}`);
-                if (container) {
-                    container.appendChild(createGoalCard(goal));
+                let cat = goal.category || 'Wisdom';
+                if(!['Health', 'Wealth', 'Relationships', 'Wisdom'].includes(cat)) cat = 'Wisdom';
+                
+                const container = document.getElementById(`list-${cat}`);
+                if(container) {
+                    container.appendChild(createCard(goal));
                 }
             });
-            
-            // Optional: If a section is empty, maybe show a placeholder? 
-            // For now, we leave it clean/empty.
         }
 
-        // --- 2. Create Card HTML ---
-        function createGoalCard(goal) {
+        function createCard(goal) {
             const div = document.createElement('div');
             div.className = 'goal-card';
             
-            // Date Format
-            let dateDisplay = "No date set";
+            // Date formatting
+            let dateText = "No date";
             if(goal.actionDate) {
                 const d = new Date(goal.actionDate);
-                dateDisplay = d.toLocaleDateString() + ' at ' + d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                dateText = d.toLocaleDateString();
             }
 
             div.innerHTML = `
-                <div class="card-tools">
-                    <button class="btn-tool" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
-                    <button class="btn-tool btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete">🗑️</button>
+                <div class="card-actions">
+                    <button class="btn-icon" onclick="archiveGoal('${goal.id}')" title="Archive">📂</button>
+                    <button class="btn-icon btn-delete" onclick="deleteGoal('${goal.id}')" title="Delete">🗑️</button>
+                </div>
+                
+                <div class="goal-header-row">
+                    <div>
+                        <div class="goal-main-text">${goal.finalSmart || goal.initialGoal}</div>
+                        <span class="goal-sub-text">Started as: "${goal.initialGoal}"</span>
+                    </div>
                 </div>
 
-                <div class="goal-title">${goal.finalSmart || goal.initialGoal}</div>
-                <span class="goal-original">Started as: "${goal.initialGoal}"</span>
-
-                <div class="next-step-box">
-                    <div class="next-step-row">
+                <div class="next-step-area">
+                    <div class="checkbox-wrapper">
                         <input type="checkbox" onchange="completeAction('${goal.id}')">
-                        <span class="step-text">${goal.nextAction || 'No action set'}</span>
+                        <span style="font-weight:500; color:#166534;">${goal.nextAction || 'No action set'}</span>
                     </div>
-                    <span class="due-date">📅 Due: ${dateDisplay}</span>
+                    <span class="date-tag">📅 ${dateText}</span>
                 </div>
             `;
             return div;
         }
 
-        // --- 3. Education Modal Toggle ---
+        // Logic Helpers
         function toggleEducation() {
-            const modal = document.getElementById('education-modal');
-            if(modal.style.display === 'flex') {
-                modal.style.display = 'none';
-            } else {
-                modal.style.display = 'flex';
-            }
+            const m = document.getElementById('edu-modal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
         }
 
-        // --- 4. Logic Functions ---
         window.deleteGoal = function(id) {
             if(confirm("Permanently delete this goal?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
@@ -325,9 +265,9 @@
         window.archiveGoal = function(id) {
             if(confirm("Archive this goal?")) {
                 let goals = JSON.parse(localStorage.getItem('user_goals_db')) || [];
-                const index = goals.findIndex(g => g.id === id);
-                if(index > -1) {
-                    goals[index].archived = true;
+                const idx = goals.findIndex(g => g.id === id);
+                if(idx > -1) {
+                    goals[idx].archived = true;
                     localStorage.setItem('user_goals_db', JSON.stringify(goals));
                     loadDashboard();
                 }
@@ -335,7 +275,7 @@
         };
 
         window.completeAction = function(id) {
-            alert("Step Completed! (Future: Pop up 'Next Step' wizard)");
+            alert("Action Completed! (Next Step Logic Coming Soon)");
         };
     </script>
 </body>
