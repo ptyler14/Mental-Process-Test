@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wellness Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"> 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div id="auth-container" class="auth-overlay">
+        <div class="auth-box">
+            <h2 id="auth-title">Welcome Back</h2>
+            <p id="auth-subtitle">Sign in to access your wellness tools.</p>
+            
+            <input type="email" id="email-input" placeholder="Email">
+            <input type="password" id="password-input" placeholder="Password">
+            
+            <button id="auth-action-btn" class="primary-btn full-width">Log In</button>
+            
+            <p class="toggle-text">
+                <span id="toggle-auth-prompt">Don't have an account?</span>
+                <button id="toggle-auth-btn" class="text-btn">Sign Up</button>
+            </p>
+
+            <p id="auth-message" class="error-text"></p>
+        </div>
+    </div>
+
+    <div id="dashboard-container" class="container hidden">
+        <header>
+            <div class="header-content">
+                <h1>My Wellness Tools</h1>
+                <button id="logout-btn" class="text-btn">Log Out</button>
+            </div>
+            <p class="subtitle">A collection of tools for growth and mindset.</p>
+        </header>
+
+        <div class="tools-grid">
+            
+            <div class="tool-card">
+                <span class="badge">Active</span>
+                <h2>The Mental Bank</h2>
+                <p>A nightly ledger ritual to reprogram your subconscious mind and increase prosperity consciousness.</p>
+                <div class="card-actions">
+                    <a href="mental-bank/index.html" class="primary-btn small-btn">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-mental-bank')">ⓘ Learn More</button>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <span class="badge" style="background:#f3e5f5; color:#8e44ad;">Active</span>
+                <h2>The Placemat</h2>
+                <p>Overwhelmed? Delegate tasks to the Universe and focus only on what you can do today.</p>
+                <div class="card-actions">
+                    <a href="placemat/index.html" class="primary-btn small-btn" style="background-color:#8e44ad;">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-placemat')">ⓘ Learn More</button>
+                </div>
+            </div>
+            
+            <div class="tool-card">
+                <span class="badge" style="background:#e3f2fd; color:#2980b9;">New</span>
+                <h2>Segment Intending</h2>
+                <p>Master the art of pre-paving your day. Practice setting intentions before you act.</p>
+                <div class="card-actions">
+                    <a href="segment-intending/index.html" class="primary-btn small-btn" style="background-color:#2980b9;">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-segment')">ⓘ Learn More</button>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <span class="badge" style="background:#fff3e0; color:#e67e22;">New</span>
+                <h2>Focus Wheel</h2>
+                <p>Shift your vibration from negative to positive by finding thoughts that feel true and good.</p>
+                <div class="card-actions">
+                    <a href="focus-wheel/index.html" class="primary-btn small-btn" style="background-color:#e67e22;">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-focus-wheel')">ⓘ Learn More</button>
+                </div>
+            </div>
+            <div class="tool-card">
+                <span class="badge" style="background:#e0f2f1; color:#00695c;">New</span>
+                <h2>Simpson Protocol</h2>
+                <p>A deep, holistic hypnosis session where your Superconscious mind does the healing work.</p>
+                <div class="card-actions">
+                    <a href="simpson-protocol/index.html" class="primary-btn small-btn" style="background-color:#00695c;">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-sp')">ⓘ Learn More</button>
+                </div>
+            </div>
+            <div class="tool-card">
+                <span class="badge" style="background:#e3f2fd; color:#0288d1;">Reflection</span>
+                <h2>Areas of Life</h2>
+                <p>Assess your satisfaction, importance, and effort across 13 key areas of life.</p>
+                <div class="card-actions">
+                    <a href="areas-of-life/index.html" class="primary-btn small-btn" style="background-color:#0288d1;">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-areas')">ⓘ Learn More</button>
+                </div>
+            </div>
+            <div class="tool-card">
+                <span class="badge" style="background:#f0fdf4; color:#15803d;">Planning</span>
+                <h2>Goal Architect</h2>
+                <p>Turn your vague wishes into concrete, actionable SMART goals with a step-by-step wizard.</p>
+                <div class="card-actions">
+                    <a href="smart-goals/dashboard.html" class="primary-btn small-btn" style="background-color:#16a34a;">Open Tool</a>
+                    <button class="text-btn info-btn" onclick="openModal('modal-goals')">ⓘ Learn More</button>
+                </div>
+            </div>
+            <div class="tool-card">
+    <span class="badge" style="background:#fff3e0; color:#d35400;">Learning</span>
+    <h2>The Wisdom Vault</h2>
+    <p>A library of rewritten books and mentorship lessons designed for active teaching and rapid implementation.</p>
+    <div class="card-actions">
+        <a href="library/index.html" class="primary-btn small-btn" style="background-color:#d35400;">Open Vault</a>
+        <button class="text-btn info-btn" onclick="openModal('modal-library')">ⓘ Learn More</button>
+    </div>
+</div>
+            <div class="tool-card" onclick="location.href='ask-processes/index.html'">
+    <div class="icon">✨</div>
+    <h3>Ask & It Is Given</h3>
+    <p>The library of 22 vibration-shifting processes.</p>
+</div>
+
+        </div>
+    </div>
+
+    <div id="modal-mental-bank" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-mental-bank')">&times;</button>
+            <h2>The Mental Bank Ledger</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A nightly journaling practice where you "pay" yourself for positive habits.</p>
+                <h3>Why use it?</h3>
+                <p>To break through financial or success "ceilings" by reprogramming your inner script.</p>
+                <h3>How to do it?</h3>
+                <p>Every night before bed, log your daily "Value Events" and calculate your fantasy deposit.</p>
+            </div>
+            <button class="primary-btn full-width" onclick="window.location.href='mental-bank/index.html'">Start Now</button>
+        </div>
+    </div>
+
+    <div id="modal-placemat" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-placemat')">&times;</button>
+            <h2>The Placemat Process</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A task management tool that splits your to-do list into two columns: things YOU will do, and things the UNIVERSE will handle.</p>
+                <h3>Why use it?</h3>
+                <p>To relieve overwhelm and anxiety by consciously delegating tasks.</p>
+                <h3>How to do it?</h3>
+                <p>List tasks you MUST do today in the "Me" column. Put everything else in the "Universe" column.</p>
+            </div>
+            <button class="primary-btn full-width" style="background-color:#8e44ad;" onclick="window.location.href='placemat/index.html'">Start Now</button>
+        </div>
+    </div>
+
+    <div id="modal-segment" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-segment')">&times;</button>
+            <h2>The Segment Intending Process</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A practice of "pre-paving" your vibrational path by setting a clear intention before entering a new segment of time.</p>
+                <h3>Why use it?</h3>
+                <p>To reduce resistance and confusion, creating smoother, more enjoyable experiences.</p>
+                <h3>How to do it?</h3>
+                <p>Identify when you are changing activities. Pause. Ask yourself: "What do I want from this period?" State it clearly, then proceed.</p>
+            </div>
+            <button class="primary-btn full-width" style="background-color:#2980b9;" onclick="window.location.href='segment-intending/index.html'">Start Now</button>
+        </div>
+    </div>
+
+    <div id="modal-focus-wheel" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-focus-wheel')">&times;</button>
+            <h2>The Focus Wheel Process</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A visual tool to bridge the gap between a negative thought and a positive desire.</p>
+                <h3>Why use it?</h3>
+                <p>When you feel resistance or negative emotion, this helps you "slow down the wheel" of negativity and spin up positive momentum.</p>
+                <h3>How to do it?</h3>
+                <p>Identify your desire in the center. Then, find 12 general, true statements that feel good to you. Place them around the wheel until you feel relief.</p>
+            </div>
+            <button class="primary-btn full-width" style="background-color:#e67e22;" onclick="window.location.href='focus-wheel/index.html'">Start Now</button>
+        </div>
+    </div>
+
+  <div id="modal-sp" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-sp')">&times;</button>
+            <h2>The Simpson Protocol</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>An advanced hypnosis method that communicates directly with your Superconscious Mind to clear deep-seated issues.</p>
+                
+                <h3>Why use it?</h3>
+                <p>To bypass the conscious mind's resistance and access deep states (like Esdaile), allowing for holistic healing that is fast, efficient, and directed by your higher mind.</p>
+                
+                <h3>How to do it?</h3>
+                <p>Lie down with your hand near the keyboard. Listen to the guided audio. When asked a Yes/No question, tap the designated key.</p>
+            </div>
+            <button class="primary-btn full-width" style="background-color:#00695c;" onclick="window.location.href='simpson-protocol/index.html'">Start Session</button>
+        </div>
+    </div>
+
+    <div id="modal-areas" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-areas')">&times;</button>
+            <h2>Areas of Life Reflection</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A structured assessment to evaluate 13 different domains of your life (Career, Health, Relationships, etc.).</p>
+                <h3>Why use it?</h3>
+                <p>To identify where you are dissatisfied and where your values might be misaligned with your effort.</p>
+                <h3>How to do it?</h3>
+                <p>Rate each area on Satisfaction, Importance, and Effort. Then, reflect on one specific change you want to make.</p>
+            </div>
+            <button class="primary-btn full-width" style="background-color:#0288d1;" onclick="window.location.href='areas-of-life/index.html'">Start Reflection</button>
+        </div>
+    </div>
+    <div id="modal-goals" class="modal-overlay hidden">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeModal('modal-goals')">&times;</button>
+            <h2>The Goal Architect</h2>
+            <div class="modal-content">
+                <h3>What is it?</h3>
+                <p>A wizard that helps you build SMART goals (Specific, Measurable, Achievable, Relevant, Time-bound).</p>
+                <h3>Why use it?</h3>
+                <p>Vague goals ("I want to save money") rarely work. Specific plans ("I will save $500 by July") do.</p>
+                <h3>How to do it?</h3>
+                <p>Enter a rough draft, then answer the questions to refine it. Identify obstacles and create a backup plan.</p>
+            </div>
+            <button class="primary-btn full-width" style="background-color:#16a34a;" onclick="window.location.href='smart-goals/index.html'">Start Planning</button>
+        </div>
+    </div>
+    <div id="modal-library" class="modal-overlay hidden">
+    <div class="modal-box">
+        <button class="close-modal" onclick="closeModal('modal-library')">&times;</button>
+        <h2>The Wisdom Vault</h2>
+        <div class="modal-content">
+            <h3>What is it?</h3>
+            <p>A dedicated reader interface containing summarized books, video lessons, and key concepts tailored for mentorship.</p>
+            <h3>Why use it?</h3>
+            <p>To digest complex ideas quickly and turn "passive reading" into "active doing."</p>
+            <h3>How to do it?</h3>
+            <p>Select a book from the sidebar. Read the chapter aloud. Use the "Create Task" button to instantly send an action item to your Smart Goals dashboard.</p>
+        </div>
+        <button class="primary-btn full-width" style="background-color:#d35400;" onclick="window.location.href='library/index.html'">Enter Vault</button>
+    </div>
+</div>
+
+    <script>
+        // --- SUPABASE CONFIG ---
+        const SUPABASE_URL = 'https://jfriwdowuwjxifeyplke.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impmcml3ZG93dXdqeGlmZXlwbGtlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4OTczMzIsImV4cCI6MjA3OTQ3MzMzMn0.AZa5GNVDRm1UXU-PiQx7KS0KxQqZ69JbV1Qn2DIlHq0';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Elements
+        const authContainer = document.getElementById('auth-container');
+        const dashboardContainer = document.getElementById('dashboard-container');
+        const authActionBtn = document.getElementById('auth-action-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const emailInput = document.getElementById('email-input');
+        const passInput = document.getElementById('password-input');
+        const authMessage = document.getElementById('auth-message');
+        
+        const toggleAuthBtn = document.getElementById('toggle-auth-btn');
+        const authTitle = document.getElementById('auth-title');
+        const authSubtitle = document.getElementById('auth-subtitle');
+        const toggleAuthPrompt = document.getElementById('toggle-auth-prompt');
+
+        let isLoginMode = true;
+
+        // --- MODAL LOGIC ---
+        window.openModal = (id) => { document.getElementById(id).classList.remove('hidden'); }
+        window.closeModal = (id) => { document.getElementById(id).classList.add('hidden'); }
+
+        // Check User
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                authContainer.classList.add('hidden');
+                dashboardContainer.classList.remove('hidden');
+            } else {
+                authContainer.classList.remove('hidden');
+                dashboardContainer.classList.add('hidden');
+            }
+        }
+        init();
+
+        // Toggle Login/Signup Mode
+        toggleAuthBtn.addEventListener('click', () => {
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                authTitle.textContent = "Welcome Back";
+                authSubtitle.textContent = "Sign in to access your wellness tools.";
+                authActionBtn.textContent = "Log In";
+                toggleAuthPrompt.textContent = "Don't have an account?";
+                toggleAuthBtn.textContent = "Sign Up";
+            } else {
+                authTitle.textContent = "Create Account";
+                authSubtitle.textContent = "Start your journey today.";
+                authActionBtn.textContent = "Sign Up";
+                toggleAuthPrompt.textContent = "Already have an account?";
+                toggleAuthBtn.textContent = "Log In";
+            }
+            authMessage.textContent = "";
+        });
+
+        // Handle Auth Action
+        authActionBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passInput.value;
+            if(!email || !password) return alert("Enter email and password");
+            
+            authMessage.textContent = isLoginMode ? "Logging in..." : "Creating account...";
+
+            if (isLoginMode) {
+                let { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) authMessage.textContent = error.message;
+                else location.reload();
+            } else {
+                let { error } = await supabase.auth.signUp({ email, password });
+                if (error) authMessage.textContent = error.message;
+                else { alert("Account created! Logging you in..."); location.reload(); }
+            }
+        });
+
+        // Logout Logic
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            location.reload();
+        });
+    </script>
+</body>
+</html>
