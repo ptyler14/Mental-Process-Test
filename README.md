@@ -1,38 +1,35 @@
-# Mental-Process-Test
-I am using this to practice creating a website that prompts a user to do different tasks. 
-# My Wellness Tools (Life Hub)
+# The Wisdom Vault & Wellness Hub
 
-**Description:** A comprehensive life-design platform ("My Life Hub") containing a suite of mental and productivity tools. It uses a "Hub & Spoke" architecture where a main landing page launches distinct micro-apps.
+A personal development platform designed to facilitate mentorship, goal tracking, and habit formation. This project serves as a "Hub" for various self-improvement tools, transitioning from simple static pages to a unified web application.
 
-## Tech Stack
-* **Frontend:** Vanilla HTML5, CSS3, JavaScript (No frameworks).
-* **Auth:** Supabase (Client-side integration).
-* **Data:** LocalStorage (Primary) + Supabase (Auth).
-* **Style:** Clean, card-based UI with CSS variables (`--primary: #2c3e50`, `--accent: #2980b9`).
+## 🌟 Key Features
+* **The Dashboard:** A central cockpit to view status across all areas of life.
+* **The Mental Bank:** A subconscious re-programming tool based on ledger accounting.
+* **Smart Goals:** A specific dashboard for tracking and achieving high-value targets.
+* **The Wisdom Vault:** A curated library of educational content and mentorship resources.
+* **Multiplayer Ready:** Built with Supabase integration in mind to allow for mentor/mentee interaction (Assigning tasks, messaging, shared goals).
 
-## File Structure
-* **`/index.html`**: Main Hub (Cards for Goals, Library, Mental Bank).
-* **`/style.css`**: Global Styles (Variables, Cards, Modals, Auth).
+## 🛠 Tech Stack
+* **Frontend:** HTML5, CSS3, JavaScript.
+* **Framework:** Bootstrap 5 (via **AdminLTE v3.2.0** Template).
+* **Backend / Auth:** Supabase (PostgreSQL).
+* **Hosting:** GitHub Pages.
+* **Development:** VS Code + GitHub Desktop.
 
-### The Tool Suite (Sub-folders)
-* **`smart-goals/`** (Goal Architect)
-    * `dashboard.html`: Main Dashboard (Grid View, Tasks, Calendar Links).
-    * `wizard.html`: S.M.A.R.T. Goal Creation Wizard.
-* **`library/`** (The Wisdom Vault)
-    * `index.html`: Reader Interface.
-    * `books.js`: Content Data (e.g., The Secret, Atomic Habits).
-* **`mental-bank/`**: Ledger for subconscious reprogramming.
-* **`placemat/`**: Task delegation process ("Me" vs "Universe").
-* **`segment-intending/`**: Intention setting tool.
-* **`focus-wheel/`**: Vibrational shifting tool.
-* **`simpson-protocol/`**: Holistic hypnosis session.
-* **`areas-of-life/`**: 13-domain assessment.
-* **`ask-processes/`**: Abraham-Hicks process library.
+## 📂 Project Structure
+* `index.html` - The Main Dashboard (Entry point).
+* `dist/` - Core CSS and JS files for the AdminLTE theme.
+* `plugins/` - Third-party assets (Charts, Icons, FontAwesome).
+* `smart-goals/` - Standalone tool for goal setting.
+* `mental-bank/` - Standalone tool for daily ledger entries.
+* `library/` - Content repository.
 
-## Key Integrations
-1.  **Library ➡️ Goals:** The Library allows creation of "Action Items" from book chapters, which are pushed to `user_goals_db` in LocalStorage.
-2.  **Auth:** The Home page handles Login/Signup via Supabase.
+## 🚀 How to Run Locally
+1.  Clone the repository using **GitHub Desktop**.
+2.  Navigate to the folder on your machine.
+3.  Open `index.html` in Chrome/Safari to view the Dashboard.
+4.  *Note:* To test Supabase logins or database features, the app must be run on a live server or configured with valid API keys.
 
-## Data Schema (LocalStorage)
-* **`user_goals_db`**: Stores goals and task lists.
-* **`user_categories_db`**: Stores custom dashboard categories.
+## 📝 Credits
+* Template: [AdminLTE 3](https://adminlte.io/) (Open Source).
+* Icons: FontAwesome Free.
